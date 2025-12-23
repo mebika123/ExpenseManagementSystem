@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Models;
+
+use App\Interfaces\HasStatus;
+use App\Traits\HasStatusTrait;
+use Illuminate\Database\Eloquent\Model;
+
+class Expense extends Model implements HasStatus
+{
+  use HasStatusTrait;
+
+  protected $fillable = ['title', 'code', 'created_by_id', 'budget_timeline_id'];
+  public function expense_items()
+  {
+    return $this->hasMany(ExpenseItem::class);
+  }
+  public function budgetTimeline()
+  {
+    return $this->belongsTo(BudgetTimeline::class);
+  }
+
+
+}

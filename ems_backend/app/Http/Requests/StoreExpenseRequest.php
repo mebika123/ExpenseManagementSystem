@@ -9,10 +9,10 @@ class StoreExpenseRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    // public function authorize(): bool
-    // {
-    //     return false;
-    // }
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -21,10 +21,11 @@ class StoreExpenseRequest extends FormRequest
      */
     public function rules(): array
     {
-        // dd("test");
         return [
-            'title' => 'required|string',
+            'title' => 'required|string|unique:expenses,title,' . $this->route('expense'),
             'budget_timeline_id' => 'required|exists:budget_timelines,id',
+
+            'transactional_attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
 
             'expense_items' => 'required|array|min:1',
 
@@ -38,6 +39,9 @@ class StoreExpenseRequest extends FormRequest
             'expense_items.*.budget_id' => 'required|exists:budgets,id',
             'expense_items.*.contact_id' => 'nullable|exists:contacts,id',
             'expense_items.*.paid_by_id' => 'nullable|exists:contacts,id',
+
+            'existingFiles' => 'nullable|array',
+            'existingFiles.*' => 'integer',
         ];
     }
 }

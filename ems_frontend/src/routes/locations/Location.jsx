@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/ui/Modal';
 import ModalForm from '../../components/ui/form/ModalForm';
 
+import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import SearchBar from '../../components/ui/SearchBar';
+
 
 const Location = () => {
-
-
     // fetch location
     const [loading, setLoading] = useState(true);
     const [locations, setLocation] = useState([]);
@@ -30,10 +31,7 @@ const Location = () => {
         fetchLocations();
     }, []);
     // modal
-    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
-    const openModal = () => setIsOpen(true);
-    const closeModal = () => setIsOpen(false);
     const [editingId, setEditingId] = useState(null);
 
 
@@ -118,36 +116,30 @@ const Location = () => {
     }
 
 
+    const safeLocations = locations ?? [];
+
+
+    const columnHelper = createColumnHelper();
+
+    const columns = [
+        columnHelper.accessor("name", { header: "Name" }),
+        columnHelper.accessor("code", { header: "Code" }),
+    ];
+    const [globalFilter, setGlobalFilter] = useState("");
+
+    const table = useReactTable({
+        data: safeLocations,
+        columns,
+        state: { globalFilter },
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
 
     return (
         <div className="w-full p-8 flex justify-center items-center mt-8">
-            {/* {isOpen && (
-                <div className="h-screen w-screen fixed bg-[#000000b8] top-0 left-0 flex justify-center items-center">
-                    <div className="bg-white p-5 w-1/3 rounded-md ">
-                        <div className="text-end"><FontAwesomeIcon icon={faXmark} onClick={closeModal} /></div>
-                        <h2 className="text-2xl font-bold uppercase mb-8 ">New Location </h2>
-                        <div className="flex justify-center items-center">
-                            <form className="w-3/4" onSubmit={handleSubmit}>
-                                <div className="mb-6 w-full">
-                                    <input type="text" className="w-full p-2 rounded-md border border-[#989898]" name='name' value={form.name} onChange={handleChange} placeholder='location Name' />
-                                    <p className="text-red-500">
-                                        {
-                                            formError.name[0]
-                                        }
-                                    </p>
-                                </div>
-                                <div className="mb-6 w-full">
-                                    <input type="submit" className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/3" />
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            )} */}
-
             <Modal isOpen={isOpen}
                 title={editingId ? "Edit Location" : "New Location"}
                 onClose={() => setIsOpen(false)}>
@@ -163,46 +155,77 @@ const Location = () => {
             <div className="w-4/5 bg-white rounded-md p-7  text-center">
 
                 <h2 className="text-4xl font-bold uppercase mb-8 ">Location List </h2>
-                <div className="flex justify-end ml-10">
+
+                <div className="flex justify-end gap-3 ml-10">
+                    <SearchBar
+                        globalFilter={globalFilter}
+                        setGlobalFilter={setGlobalFilter}
+                    />
                     <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</button>
 
                 </div>
 
-                <div className="flex justify-center items-center w-full">
-                    <table className=" w-full">
+                <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)]">
+                    <table className=" w-full min-w-[700]">
                         <thead>
-                            <tr className="mb-3 border-b">
-                                <th className="py-3">S.N</th>
-                                <th className="py-3">Name</th>
-                                <th className="py-3">Code</th>
-                                <th className="py-3 w-1/5">Action</th>
+                            <tr className="mb-3 border-b ">
+                                <th className="py-3 px-2">S.N</th>
+                                <th className="py-3 px-2">Name</th>
+                                <th className="py-3 px-2">Code</th>
+                                <th className="py-3 px-2 w-1/5">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
 
-                            {loading ? (
+                        {loading ? (
+                            <tbody>
                                 <tr>
                                     <td colSpan='4' className="text-xl font-semibold mt-5 w-full">Loading...</td>
                                 </tr>
-                            ) : (
+                            </tbody>
 
-                                locations.map((location, index) => (
-                                    <tr className="mb-3" key={location.id}>
-                                        <td className="py-3">{index + 1}</td>
-                                        <td className="py-3">{location.name}</td>
-                                        <td className="py-3">{location.code}</td>
-                                        <td className="py-3">
-                                            <div className="flex gap-4 items-center justify-center">
-                                                <button onClick={() => openEdit(location)} className='px-4 py-2 bg-[#5619fe]  rounded-lg text-white'>Edit</button>
-                                                <button onClick={() => handleDelete(location.id)} className='px-4 py-2 bg-[#fe1919]  rounded-lg text-white'>Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                        ) : (
+
+                            <tbody>
+                                {table.getRowModel().rows.map((row, index) => {
+                                    const location = row.original;
+
+                                    return (
+                                        <tr
+                                            key={location.id}
+                                            className="mb-3 even:bg-[#eff7f299] odd:bg-white"
+                                        >
+                                            <td className="py-3 px-2">
+                                                {table.getState().pagination.pageIndex *
+                                                    table.getState().pagination.pageSize +
+                                                    index +
+                                                    1}
+                                            </td>
+
+                                            <td className="py-3 px-2">{location.name}</td>
+                                            <td className="py-3 px-2">{location.code}</td>
+
+                                            <td className="py-3 px-2">
+                                                <div className="flex gap-4 items-center justify-center">
+                                                    <FontAwesomeIcon
+                                                        icon={faPen}
+                                                        onClick={() => openEdit(location)}
+                                                        className="text-[#29903B]"
+                                                    />
+                                                    <FontAwesomeIcon
+                                                        icon={faTrashCan}
+                                                        onClick={() => handleDelete(location.id)}
+                                                        className="text-[#FF0133]"
+                                                    />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
 
 
-                            )}
-                        </tbody>
+
+                        )}
 
                     </table>
                 </div>

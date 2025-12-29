@@ -61,10 +61,10 @@ const UserList = () => {
                                 contactUser?.map((user, index) => (
                                     <tr className="mb-3 border-b even:bg-[#dce0e1] odd:bg-white">
                                         <td className="py-3">{index + 1}</td>
-                                        <td className="py-3">{user?.contact?.code || 'null'}</td>
-                                        <td className="py-3">{user?.contact?.name || 'null'}</td>
+                                        <td className="py-3">{user?.contact?.code || ''}</td>
+                                        <td className="py-3">{user?.contact?.name || ''}</td>
                                         <td className="py-3">{user.email}</td>
-                                        <td className="py-3">{user?.contact?.phone_no || 'null'}</td>
+                                        <td className="py-3">{user?.contact?.phone_no || ''}</td>
                                         <td className="py-3">
                                             <div className="flex gap-4 items-center justify-center">
                                                 <Link to={`/user/edit/${user.id}`} className='px-4 py-2 bg-[#5619fe]  rounded-lg text-white'>Edit</Link>

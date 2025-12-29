@@ -1,19 +1,19 @@
+import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../axios';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
-const ExpensesList = () => {
-    const [expenses, setExpenses] = useState([]);
+const ExpensePlanList = () => {
+    const [expensesPlans, setExpensesPlan] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchExpense = async () => {
             try {
-                const res = await axiosInstance.get('/expenses');
-                setExpenses(res.data.expenses);
-                console.log(res.data.expenses);
+                const res = await axiosInstance.get('/expensesPlan');
+                setExpensesPlan(res.data.expensesPlan);   
+                console.log(res.data.expensesPlan);
             } catch (error) {
                 console.log(error);
             }
@@ -25,27 +25,26 @@ const ExpensesList = () => {
     }, [])
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this Expense?')) {
+        if (!window.confirm('Are you sure you want to delete this Expense Plan?')) {
             return;
         }
 
         try {
-            await axiosInstance.delete(`/expenses/${id}`);
-            setExpenses(expenses?.filter(expense => expense?.id !== id));
-            alert('Expenses deleted successfully!');
+            await axiosInstance.delete(`/expensesPlan/${id}`);
+            setExpensesPlan(expensesPlans?.filter(expensePlan => expensePlan?.id !== id));
+            alert('Expenses plan deleted successfully!');
         } catch (error) {
-            console.error('Failed to delete expense:', error);
-            alert('Failed to delete expense. Please try again.');
+            console.error('Failed to delete expense plan:', error);
+            alert('Failed to delete expense plan. Please try again.');
         }
     }
-
     return (
         <div className="w-full p-8 flex justify-center items-center mt-8">
             <div className="w-full bg-white rounded-md p-7  text-center">
 
-                <h2 className="text-4xl font-bold mb-8 ">Expense List </h2>
+                <h2 className="text-4xl font-bold mb-8 ">Expense Plan List </h2>
                 <div className="flex justify-end ml-10">
-                    <Link to={'/expense/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+                    <Link to={'/expense-plan/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
 
                 </div>
 
@@ -70,7 +69,7 @@ const ExpensesList = () => {
                                 </tr>
                             ) : (
 
-                                expenses.map((expense, index) => (
+                                expensesPlans?.map((expense, index) => (
                                     <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={expense.id}>
                                         <td className="py-3 px-2">{index + 1}</td>
                                         <td className="py-3 px-2">{expense.title}</td>
@@ -80,8 +79,8 @@ const ExpensesList = () => {
                                         <td className="py-3 px-2">{expense.latest_status[0].status}</td>
                                         <td className="py-3 px-2 w-2/7">
                                             <div className="flex gap-4 items-center justify-center">
-                                                <Link to={`/expense/details/${expense.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
-                                                <Link to={`/expense/edit/${expense.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
+                                                <Link to={`/expense-plan/details/${expense.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
+                                                <Link to={`/expense-plan/edit/${expense.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
                                                 <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(expense.id)} className='text-[#FF0133]' />
 
                                             </div>
@@ -97,7 +96,8 @@ const ExpensesList = () => {
                 </div>
             </div>
 
-        </div>)
+        </div>
+    )
 }
 
-export default ExpensesList
+export default ExpensePlanList

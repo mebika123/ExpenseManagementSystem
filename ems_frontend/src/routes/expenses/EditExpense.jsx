@@ -31,6 +31,8 @@ const EditExpense = () => {
         id={id}
         title={"Edit Expense"}
         data={idExpense}
+        type={'expense'}
+
       />
     }
     </>)

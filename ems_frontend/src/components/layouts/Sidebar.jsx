@@ -1,4 +1,4 @@
-import { faAddressBook, faAngleDown, faAngleUp, faBuilding, faChartPie, faHandHoldingDollar, faHouse, faList, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons'
+import { faAddressBook, faAngleDown, faAngleUp, faBuilding, faChartPie, faCoins, faFileInvoiceDollar, faHandHoldingDollar, faHouse, faList, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -36,13 +36,13 @@ const Sidebar = () => {
                             {/* <div className=' text-xs  text-gray-400'>Contacts </div> */}
                             <div className="">
                                 <ul className="  pt-2">
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium">
+                                    <li className="mb-3" >
+                                        <div className="text-base font-medium" onClick={() => toggleMenu('budget_timeline')}>
                                             <div className="flex items-center gap-5">
                                                 <FontAwesomeIcon icon={faChartPie} />
                                                 <div>
                                                     Budget Timeline
-                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' onClick={() => toggleMenu('budget_timeline')} />
+                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
                                                 </div>
                                             </div>
                                         </div>
@@ -114,22 +114,22 @@ const Sidebar = () => {
                             <div className="">
                                 <ul className="  pt-2">
                                     <li className="mb-3">
-                                        <div className="text-base font-medium">
+                                        <div className="text-base font-medium" onClick={() => toggleMenu('expense')}>
                                             <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faUser} />
+                                                <FontAwesomeIcon icon={faCoins} />
                                                 <div>
                                                     Expense
-                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' onClick={() => toggleMenu('expense')} />
+                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
                                                 </div>
                                             </div>
                                         </div>
                                         {
                                             openMenus.expense && (
                                                 <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-12">
+                                                    <li className="ml-6">
                                                         <Link to="/expenses">Expenses List</Link>
                                                     </li>
-                                                    <li className="ml-12 mt-2">
+                                                    <li className="ml-6 mt-2">
                                                         <Link to="/expense/new">New Expense</Link>
                                                     </li>
                                                 </ul>
@@ -138,25 +138,24 @@ const Sidebar = () => {
                                         }
                                     </li>
                                     <li className="mb-3">
-                                        <div className="text-base font-medium">
+                                        <div className="text-base font-medium" onClick={() => toggleMenu('expense_plan')} >
                                             <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faUser} />
+                                                <FontAwesomeIcon icon={faFileInvoiceDollar} />
                                                 <div>
                                                     Expense Plan
-                                                    <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' onClick={() => toggleMenu('expense_plan')} />
+                                                    <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
                                                 </div>
                                             </div>
                                         </div>
                                         {
                                             openMenus.expense_plan && (
                                                 <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-12">
-                                                        <Link to="">New Expense Plan</Link>
+                                                    <li className="ml-6 mt-2">
+                                                        <Link to="/expense-plan">Expense Plan List</Link>
                                                     </li>
-                                                    <li className="ml-12 mt-2">
-                                                        <Link to="">Expense Plan List</Link>
+                                                    <li className="ml-6">
+                                                        <Link to="/expense-plan/new">New Expense Plan</Link>
                                                     </li>
-
                                                 </ul>
 
                                             )
@@ -173,22 +172,22 @@ const Sidebar = () => {
                             <div className="">
                                 <ul className="  pt-2">
                                     <li className="mb-3">
-                                        <div className="text-base font-medium">
+                                        <div className="text-base font-medium" onClick={() => toggleMenu('user')} >
                                             <div className="flex items-center gap-5">
                                                 <FontAwesomeIcon icon={faUser} />
                                                 <div>
                                                     Users
-                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' onClick={() => toggleMenu('user')} />
+                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
                                                 </div>
                                             </div>
                                         </div>
                                         {
                                             openMenus.user && (
                                                 <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-12">
+                                                    <li className="ml-6">
                                                         <Link to="/users">Users</Link>
                                                     </li>
-                                                    <li className="ml-12 mt-2">
+                                                    <li className="ml-6 mt-2">
                                                         <Link to="/user/new">New Users</Link>
                                                     </li>
                                                 </ul>
@@ -197,25 +196,25 @@ const Sidebar = () => {
                                         }
                                     </li>
                                     <li className="mb-3">
-                                        <div className="text-base font-medium">
+                                        <div className="text-base font-medium" onClick={() => toggleMenu('contacts')}>
                                             <div className="flex items-center gap-5">
                                                 <FontAwesomeIcon icon={faUser} />
                                                 <div>
                                                     Contacts
-                                                    <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' onClick={() => toggleMenu('contacts')} />
+                                                    <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
                                                 </div>
                                             </div>
                                         </div>
                                         {
                                             openMenus.contacts && (
                                                 <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-12">
+                                                    <li className="ml-6">
                                                         <Link to="/contact">New Contacts</Link>
                                                     </li>
-                                                    <li className="ml-12 mt-2">
+                                                    <li className="ml-6 mt-2">
                                                         <Link to="/users/new">Employee</Link>
                                                     </li>
-                                                    <li className="ml-12 mt-2">
+                                                    <li className="ml-6 mt-2">
                                                         <Link to="/users/new">Supplier</Link>
                                                     </li>
                                                 </ul>

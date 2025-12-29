@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ExpenseItem extends Model
+class ExpensePlanItems extends Model
 {
-    protected $fillable = ['name', 'description', 'amount', 'contact_id', 'expense_category_id', 'paid_by_id', 'department_id', 'location_id', 'expense_id', 'budget_id'];
+    protected $fillable = ['name', 'description', 'amount', 'contact_id', 'expense_category_id', 'paid_by_id', 'department_id', 'location_id', 'expense_plan_id', 'budget_id'];
     public function expense()
     {
         return $this->belongsTo(Expense::class);
@@ -16,22 +16,27 @@ class ExpenseItem extends Model
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
     }
 
-    public function department() {
+    public function department()
+    {
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function location() {
+    public function location()
+    {
         return $this->belongsTo(Location::class, 'location_id');
     }
 
-    public function budget() {
+    public function budget()
+    {
         return $this->belongsTo(Budget::class, 'budget_id');
     }
 
-    public function contact() {
+    public function contact()
+    {
         return $this->belongsTo(Contact::class, 'contact_id');
     }
-    public function paidBy() {
+    public function paidBy()
+    {
         return $this->belongsTo(Contact::class, 'paid_by_id');
     }
 }

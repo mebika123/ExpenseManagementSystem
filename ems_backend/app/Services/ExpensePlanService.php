@@ -2,45 +2,49 @@
 
 namespace App\Services;
 
-use App\Models\ExpenseItem;
-use App\Repositories\ExpenseItemRepository;
-use App\Repositories\ExpenseRepository;
+use App\Models\ExpensePlanItems;
+use App\Repositories\ExpensePlanItemRepository;
+use App\Repositories\ExpensePlanRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class ExpenseService
+class ExpensePlanService
 {
 
     public function __construct(
-        protected ExpenseRepository $expense_repo,
-        protected ExpenseItemRepository $expense_item_repo,
+        protected ExpensePlanRepository $expense_plan_repo,
+        protected ExpensePlanItemRepository $expense_plan_item_repo,
         private StatusService $status_service
 
     ) {}
 
-    public function storeOrUpdateExpense($data, $id = null)
+    public function storeOrUpdateExpensePlan($data, $id = null)
     {
-
         return  DB::transaction(function () use ($data, $id) {
             $user = Auth::user();
 
-            $expenseData = [
+            $expensePlanData = [
                 'title' => $data['title'],
+                'purpose' => $data['purpose'],
                 'budget_timeline_id' => $data['budget_timeline_id'],
-                'created_by_id' => $user->id
+                'user_id' => $user->id,
+                'start_at' => $data['start_at'],
+                'end_at' => $data['end_at']
             ];
             if (!$id) {
                 $titlePrefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $data['title']), 0, 2));
                 $unique = substr(now()->timestamp, -4);
                 $code = "{$titlePrefix}_EXPE_{$unique}";
-                $expenseData['code'] = $code;
+                $expensePlanData['code'] = $code;
             }
+            Log::info('Expense plan data', $expensePlanData);
 
-            $expense = $this->expense_repo->save($id, $expenseData);
+            $expensePlan = $this->expense_plan_repo->save($id, $expensePlanData);
             $filesToKeep = $data['existingFiles'] ?? [];
 
-            $expense->transactionalAttachments()->whereNotIn('id', $filesToKeep)->each(function ($file) {
+            $expensePlan->transactionalAttachments()->whereNotIn('id', $filesToKeep)->each(function ($file) {
                 Storage::disk('public')->delete($file->path);
                 $file->delete();
             });
@@ -48,7 +52,7 @@ class ExpenseService
                 foreach ($data['attachments'] as $file) {
                     $originalName = $file->getClientOriginalName();
                     $storedName = $file->store('attachments', 'public');
-                    $expense->transactionalAttachments()->create([
+                    $expensePlan->transactionalAttachments()->create([
                         'path' => $storedName,
                         'filename' => $originalName
                     ]);
@@ -57,33 +61,33 @@ class ExpenseService
 
 
             if (!$id) {
-                $this->status_service->create($expense, 'pending', $user->id, 'Status Created');
+                $this->status_service->create($expensePlan, 'pending', $user->id, 'Status Created');
             }
 
-            foreach ($data['expense_items'] as $item) {
-                $expenseItemId = $item['id'] ?? null;
+            foreach ($data['expense_plan_items'] as $item) {
+                $expensePlanItemId = $item['id'] ?? null;
 
-                if (!$expenseItemId) {
-                    $item['expense_id'] = $expense->id;
+                if (!$expensePlanItemId) {
+                    $item['expense_plan_id'] = $expensePlan->id;
                 }
-                $this->expense_item_repo->save($expenseItemId, $item);
+                $this->expense_plan_item_repo->save($expensePlanItemId, $item);
             }
 
 
-            return $expense->load('expense_items');
+            return $expensePlan->load('expense_plan_items');
         });
     }
 
     public function bulkDeleteItems($data)
     {
-        return ExpenseItem::whereIn('id', $data['ids'])->delete();
+        return ExpensePlanItems::whereIn('id', $data['ids'])->delete();
     }
 
-    public function deleteExpenseWithItems($id)
+    public function deleteExpensePlanWithItems($id)
     {
         return DB::transaction(function () use ($id) {
-            $expenseToDelete = $this->expense_repo->find($id);
-            $expenseToDelete->expense_items()->each(function ($item) {
+            $expenseToDelete = $this->expense_plan_repo->find($id);
+            $expenseToDelete->expense_plan_items()->each(function ($item) {
                 $item->delete();
             });;
             $expenseToDelete->transactionalAttachments()->each(function ($file) {
@@ -91,7 +95,7 @@ class ExpenseService
                 Storage::disk('public')->delete($file->path);
                 $file->delete();
             });
-            $this->expense_repo->delete($id);
+            $this->expense_plan_repo->delete($id);
         });
     }
 }

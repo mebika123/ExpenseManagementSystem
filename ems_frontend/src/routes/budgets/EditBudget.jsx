@@ -41,12 +41,12 @@ const EditBudget = () => {
         const fetchBudgets = async () => {
             try {
                 const res = await axiosInstance.get(`/budgetTimelines/${id}`);
-                const budgetTimline = res.data.budget;
+                const budgetTimeline = res.data.budgetTimeline;
                 setForm({
-                    name: budgetTimline.name,
-                    start_at: budgetTimline.start_at,
-                    end_at: budgetTimline.end_at,
-                    // budget: budgetTimline.budget.map(item => ({
+                    name: budgetTimeline.name,
+                    start_at: budgetTimeline.start_at,
+                    end_at: budgetTimeline.end_at,
+                    // budget: budgetTimeline.budget.map(item => ({
                     //     id: item.id,
                     //     title: item.title,
                     //     amount: item.amount,
@@ -55,7 +55,7 @@ const EditBudget = () => {
                     // }))
                 });
                 setBudget(
-                    budgetTimline.budget.map(item => ({
+                    budgetTimeline.budget.map(item => ({
                         id: item.id,
                         title: item.title,
                         amount: item.amount,

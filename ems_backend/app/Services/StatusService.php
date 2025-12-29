@@ -16,7 +16,7 @@ class StatusService
     public function create(
         HasStatus $model,
         string $status,
-        int $userId,
+        string $userId,
         ?string $comment = null
     ): void {
         $this->statusrepo->createfor($model, [

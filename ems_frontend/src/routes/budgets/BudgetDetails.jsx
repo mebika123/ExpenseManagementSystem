@@ -5,8 +5,7 @@ import { useParams } from 'react-router-dom';
 
 const BudgetDetails = () => {
     const { id } = useParams();
-
-    const { user } = useAuth();
+    const [loading,setLoading] = useState(true)
 
     // const [departments, setDepartment] = useState([]);
     // useEffect(() => {
@@ -49,23 +48,11 @@ const BudgetDetails = () => {
             try {
                 const res = await axiosInstance.get(`/budgetTimelines/${id}`);
                 setBudgetTimeline(res.data.budget);
-                // setBudget(
-                //     budgetTimeline.budget.map(item => ({
-                //         id: item.id,
-                //         title: item.title,
-                //         amount: item.amount,
-                //         department_id: item.department_id,
-                //         location_id: item.location_id
-                //     }))
-
-                // )
-
-
             } catch (error) {
                 console.error(error);
             }
             finally {
-                // setLoading(false)
+                setLoading(false)
             }
         };
 
@@ -153,7 +140,6 @@ const BudgetDetails = () => {
                                                     <th className='py-2 border border-[#989898] w-1/8'>Amount</th>
                                                     <th className='py-2 border border-[#989898]'>Department</th>
                                                     <th className='py-2 border border-[#989898]'>Location</th>
-                                                    {/* <th className='py-2 border border-[#989898]'>Action</th> */}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -179,11 +165,7 @@ const BudgetDetails = () => {
                                                             <div className="w-full  p-2">{row.location_id}</div>
                                                         </td>
 
-                                                        {/* <td className="p-2 border border-[#989898]">
-
-                                                            
-
-                                                        </td> */}
+                                                        
                                                     </tr>
                                                 ))}
                                             </tbody>

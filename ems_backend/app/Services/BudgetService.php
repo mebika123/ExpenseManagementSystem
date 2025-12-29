@@ -24,8 +24,7 @@ class BudgetService
     public function storeOrUpdate($id, array $data)
     {
         
-        try {
-            DB::transaction(function () use ($data, $id) {
+        return DB::transaction(function () use ($data, $id) {
                 $user = Auth::user();
 
 
@@ -45,7 +44,6 @@ class BudgetService
                 }
 
 
-
                 $budgetTimeline = $this->budgetTimeline_Repo->save($id, $budgetTimelineData);
                 if (!$id) {
                     $this->status_service->create($budgetTimeline,'pending',$user->id,'Status Created');
@@ -61,12 +59,7 @@ class BudgetService
                 }
                 return  $budgetTimeline;
             });
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Failed to create budget timeline',
-                'error' => $th->getMessage()
-            ], 500);
-        }
+       
     }
 
     public function bulkDelete($data)
@@ -87,5 +80,9 @@ class BudgetService
 
     public function updateStatus(BudgetTimeline $budget,string $userId,string $status,?string $comment = null){
         $this->status_service->changeStatus($budget,$status, $userId,$comment);
+    }
+
+    public function destory($id){
+       return $this->budgetTimeline_Repo->delete($id);
     }
 }

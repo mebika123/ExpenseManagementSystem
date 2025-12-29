@@ -2,48 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreExpenseRequest;
-use App\Models\Expense;
-use App\Services\ExpenseService;
+use App\Http\Requests\StoreExpensePlanRequest;
+use App\Models\ExpensePlan;
+use App\Services\ExpensePlanService;
 use Exception;
 use Illuminate\Http\Request;
 
-class ExpenseController extends Controller
+class ExpensePlanController extends Controller
 {
-    protected ExpenseService $expense_service;
-    public function __construct(ExpenseService $expense_service)
+    protected ExpensePlanService $expense_plan_service;
+    public function __construct(ExpensePlanService $expense_plan_service)
     {
-        $this->expense_service = $expense_service;
+        $this->expense_plan_service = $expense_plan_service;
     }
 
     public function index()
     {
-        $expenses = Expense::with(['budgetTimeline:id,code', 'latestStatus'])->get();
-        return response()->json(['expenses' => $expenses]);
+        $expensesPlan = ExpensePlan::with(['budgetTimeline:id,code', 'latestStatus'])->get();
+        return response()->json(['expensesPlan' => $expensesPlan]);
     }
 
-    public function store(StoreExpenseRequest $request)
+    public function store(StoreExpensePlanRequest $request)
     {
         $files = $request->file('attachments');
         $data = $request->all();
         $data['attachments'] = $files;
 
         try {
-            $expense = $this->expense_service->storeOrUpdateExpense($data);
+            $expense = $this->expense_plan_service->storeOrUpdateExpensePlan($data);
             return response()->json(['message' => 'Your Expense has been subbmitted successfully!', 'expense' => $expense]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
-    public function update($id, StoreExpenseRequest $request)
+    public function update($id, StoreExpensePlanRequest $request)
     {
         $files = $request->file('attachments');
         $data = $request->all();
         $data['attachments'] = $files;
         try {
-            $expense = $this->expense_service->storeOrUpdateExpense($data, $id);
-            return response()->json(['message' => 'Your Expense has been updated successfully!', 'expense' => $expense]);
+            $expense = $this->expense_plan_service->storeOrUpdateExpensePlan($data, $id);
+            return response()->json(['message' => 'Your Expense Plan has been updated successfully!', 'expense' => $expense]);
         } catch (Exception $e) {
 
             return response()->json(['message' => $e->getMessage()]);
@@ -52,14 +52,14 @@ class ExpenseController extends Controller
 
     public function show($id)
     {
-        $expense = Expense::with('expense_items', 'transactionalAttachments')->find($id);
-        return response()->json(['expense' => $expense]);
+        $expensePlan = ExpensePlan::with('expense_plan_items', 'transactionalAttachments')->find($id);
+        return response()->json(['expense' => $expensePlan]);
     }
 
     public function showItemsDetails($id)
     {
-        $expense = Expense::with([
-            'expense_items' => function ($query) {
+        $expensePlan = ExpensePlan::with([
+            'expense_plan_items' => function ($query) {
                 $query->with([
                     'department:id,code',
                     'location:id,code',
@@ -72,18 +72,18 @@ class ExpenseController extends Controller
             'budgetTimeline:id,code',
             'transactionalAttachments'
         ])->find($id);
-        return response()->json(['expense' => $expense]);
+        return response()->json(['expensePlan' => $expensePlan]);
     }
 
     public function deleteExpenseItem(Request $request)
     {
         $data = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:expense_items,id',
+            'ids.*' => 'integer|exists:expense_plan_items,id',
         ]);
         try {
-            $deletExpenseItems = $this->expense_service->bulkDeleteItems($data);
-            return response()->json(['message' => 'Selected expense items deleted']);
+            $deletExpenseItems = $this->expense_plan_service->bulkDeleteItems($data);
+            return response()->json(['message' => 'Selected expense plan items deleted']);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }
@@ -92,8 +92,8 @@ class ExpenseController extends Controller
     public function destroy($id)
     {
         try {
-            $deletExpenseItems = $this->expense_service->deleteExpenseWithItems($id);
-            return response()->json(['message' => 'Expense deleted with expense items']);
+            $deletExpenseItems = $this->expense_plan_service->deleteExpensePlanWithItems($id);
+            return response()->json(['message' => 'Expense plan deleted with expense items']);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

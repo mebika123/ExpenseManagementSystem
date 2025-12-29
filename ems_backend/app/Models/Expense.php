@@ -19,6 +19,8 @@ class Expense extends Model implements HasStatus
   {
     return $this->belongsTo(BudgetTimeline::class);
   }
-
-
+  public function  transactionalAttachments()
+  {
+    return $this->morphMany( TransactionalAttachment::class, 'model');
+  }
 }

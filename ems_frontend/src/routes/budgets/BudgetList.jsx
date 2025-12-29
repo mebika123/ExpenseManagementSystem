@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 const BudgetList = () => {
     const { user } = useAuth();
@@ -10,7 +12,7 @@ const BudgetList = () => {
 
     const [budgetTimelines, setBudgetTimelines] = useState()
     useEffect(() => {
-        const fetchBudgetTimeline = async () =>{
+        const fetchBudgetTimeline = async () => {
             try {
                 const res = await axiosInstance.get('/budgetTimelines');
                 setBudgetTimelines(res.data.budgets);
@@ -18,34 +20,48 @@ const BudgetList = () => {
             } catch (error) {
                 console.log(error)
             }
-            finally{
+            finally {
                 setLoading(false)
             }
         }
         fetchBudgetTimeline();
+    }, [])
 
-    },[])
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this Budget Timeline?')) {
+            return;
+        }
+
+        try {
+            await axiosInstance.delete(`/budgetTimelines/${id}`);
+            setBudgetTimelines(budgetTimelines?.filter(budgetTimeline => budgetTimeline?.id !== id));
+            alert('Budget Timeline deleted successfully!');
+        } catch (error) {
+            console.error('Failed to delete Budget Timeline:', error);
+            alert('Failed to delete Budget Timeline. Please try again.');
+        }
+    }
     return (
         <div className="w-full p-8 flex justify-center items-center mt-8">
-            <div className="w-4/5 bg-white rounded-md p-7  text-center">
+            <div className="w-full bg-white rounded-md p-7  text-center">
 
                 <h2 className="text-4xl font-bold uppercase mb-8 ">Budget TimLine List </h2>
                 <div className="flex justify-end ml-10">
-                    <a className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</a>
+                    <a href='/budget-timeline/new' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</a>
 
                 </div>
 
-                <div className="flex justify-center items-center w-full">
-                    <table className=" w-full">
+                <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)]">
+                    <table className="w-full min-w-[700]">
                         <thead>
-                            <tr className="mb-3 border-b">
-                                <th className="py-3">S.N</th>
-                                <th className="py-3">Name</th>
-                                <th className="py-3">Code</th>
-                                <th className="py-3">Start At</th>
-                                <th className="py-3">End At</th>
-                                {/* <th className="py-3">Status</th> */}
-                                <th className="py-3 w-1/5">Action</th>
+                            <tr className="border-b ">
+                                <th className="py-3 px-2">S.N</th>
+                                <th className="py-3 px-2">Name</th>
+                                <th className="py-3 px-2">Code</th>
+                                <th className="py-3 px-2">Start At</th>
+                                <th className="py-3 px-2">End At</th>
+                                {/* <th className="py-3 px-2">Status</th> */}
+                                <th className="py-3 px-2 w-1/5">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -57,17 +73,17 @@ const BudgetList = () => {
                             ) : (
 
                                 budgetTimelines.map((budgetTimeline, index) => (
-                                    <tr className="mb-3 even:bg-[#dce0e1] odd:bg-white" key={budgetTimeline.id}>
-                                        <td className="py-3">{index + 1}</td>
-                                        <td className="py-3">{budgetTimeline.name}</td>
-                                        <td className="py-3">{budgetTimeline.code}</td>
-                                        <td className="py-3">{budgetTimeline.start_at}</td>
-                                        <td className="py-3">{budgetTimeline.end_at}</td>
-                                        <td className="py-3">
+                                    <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={budgetTimeline.id}>
+                                        <td className="py-3 px-2">{index + 1}</td>
+                                        <td className="py-3 px-2">{budgetTimeline.name}</td>
+                                        <td className="py-3 px-2">{budgetTimeline.code}</td>
+                                        <td className="py-3 px-2">{budgetTimeline.start_at}</td>
+                                        <td className="py-3 px-2">{budgetTimeline.end_at}</td>
+                                        <td className="py-3 px-2">
                                             <div className="flex gap-4 items-center justify-center">
-                                                <Link to={`/budget-timeline/details/${budgetTimeline.id}`} className='px-4 py-2 bg-[#43c07b]  rounded-lg text-white'>View</Link>
-                                                <Link to={`/budget-timeline/edit/${budgetTimeline.id}`} className='px-4 py-2 bg-[#5619fe]  rounded-lg text-white'>Edit</Link>
-                                                <button onClick={() => handleDelete(budgetTimeline.id)} className='px-4 py-2 bg-[#fe1919]  rounded-lg text-white'>Delete</button>
+                                                <Link to={`/budget-timeline/details/${budgetTimeline.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
+                                                <Link to={`/budget-timeline/edit/${budgetTimeline.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
+                                                <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(budgetTimeline.id)} className='text-[#FF0133]' />
                                             </div>
                                         </td>
                                     </tr>

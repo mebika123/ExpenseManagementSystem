@@ -7,10 +7,10 @@ use DomainException;
 class StatusTransitionValidator
 {
     protected array $allowedTransitions = [
-        'pending' => ['checked'],
+        'pending' => ['checked','rejected'],
         'checked' => ['approved','rejected'],
         'approved' => [],
-        'rejected' =>[]
+        'rejected' =>['pending']
     ];
 
     public function validate(?string $from, string $to): void

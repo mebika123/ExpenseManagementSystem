@@ -21,6 +21,11 @@ import ExpenseCategory from './routes/expenseCategory/ExpenseCategory.jsx'
 import AddExpense from './routes/expenses/AddExpense.jsx'
 import EditExpense from './routes/expenses/EditExpense.jsx'
 import ExpensesList from './routes/expenses/ExpensesList.jsx'
+import ExpenseDetails from './routes/expenses/ExpenseDetails.jsx'
+import AddExpensePlan from './routes/expensePlan/AddExpensePlan.jsx'
+import ExpensePlanList from './routes/expensePlan/ExpensePlanList.jsx'
+import EditExpensePlan from './routes/expensePlan/EditExpensePlan.jsx'
+import ExpensePlanDetails from './routes/expensePlan/ExpensePlanDetails.jsx'
 
 
 const router = createBrowserRouter([
@@ -44,7 +49,13 @@ const router = createBrowserRouter([
       { path: "/expenses", element: <ExpensesList /> },
       { path: "/expense/new", element: <AddExpense /> },
       { path: "/expense/edit/:id", element: <EditExpense /> },
-
+      { path: "/expense/details/:id", element: <ExpenseDetails /> },
+      
+      { path: "/expense-plan/new", element: <AddExpensePlan /> },
+      { path: "/expense-plan/edit/:id", element: <EditExpensePlan /> },
+      { path: "/expense-plan/details/:id", element: <ExpensePlanDetails /> },
+      { path: "/expense-plan", element: <ExpensePlanList /> },
+      
       { path: "/contact/new", element: <AddContact /> },
 
       { path: "/budget-timelines", element: <BudgetList /> },

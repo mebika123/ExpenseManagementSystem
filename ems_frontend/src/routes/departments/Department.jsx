@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
 import { useNavigate } from 'react-router-dom';
+import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
+import SearchBar from '../../components/ui/SearchBar';
 
 
 const Department = () => {
@@ -80,6 +82,28 @@ const Department = () => {
         }
     }
 
+    const safeDepartments = departments ?? [];
+
+
+    const columnHelper = createColumnHelper();
+
+    const columns = [
+        columnHelper.accessor("name", { header: "Name" }),
+        columnHelper.accessor("code", { header: "Code" }),
+    ];
+    const [globalFilter, setGlobalFilter] = useState("");
+
+    const table = useReactTable({
+        data: safeDepartments,
+        columns,
+        state: { globalFilter },
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
+
 
 
 
@@ -115,47 +139,55 @@ const Department = () => {
             <div className="w-4/5 bg-white rounded-md p-7  text-center">
 
                 <h2 className="text-4xl font-bold uppercase mb-8 ">Department List </h2>
-                <div className="flex justify-end ml-10">
+                <div className="flex justify-end gap-3  items-center ml-10">
+                    <SearchBar
+                        globalFilter={globalFilter}
+                        setGlobalFilter={setGlobalFilter} />
                     <a className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openModal}>Add New</a>
-
                 </div>
 
-                <div className="flex justify-center items-center w-full">
-                    <table className=" w-full">
+                <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)]">
+                    <table className="w-full min-w-[700] ">
                         <thead>
-                            <tr className="mb-3 border-b">
-                                <th className="py-3">S.N</th>
-                                <th className="py-3">Name</th>
-                                <th className="py-3">Code</th>
-                                <th className="py-3 w-1/5">Action</th>
+                            <tr className="  border-b">
+                                <th className="py-3 px-2">S.N</th>
+                                <th className="py-3 px-2">Name</th>
+                                <th className="py-3 px-2">Code</th>
+                                <th className="py-3 px-2 w-1/5">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
 
-                            {loading ? (
+                        {loading ? (
+                            <tbody>
                                 <tr>
                                     <td colSpan='4' className="text-xl font-semibold mt-5 w-full">Loading...</td>
                                 </tr>
-                            ) : (
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {table.getRowModel().rows.map((row, index) => {
+                                    const department = row.original;
+                                    return (
+                                        <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={department.id}>
+                                            <td className="py-3 px-2">{index + 1}</td>
+                                            <td className="py-3 px-2">{department.name}</td>
+                                            <td className="py-3 px-2">{department.code}</td>
+                                            <td className="py-3 px-2">
+                                                <div className="flex gap-4 items-center justify-center">
+                                                    <FontAwesomeIcon icon={faPen} className='text-[#29903B]' />
+                                                    <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(department.id)}
+                                                        className='text-[#FF0133]' />
+                                                </div>
+                                            </td>
+                                        </tr>
 
-                                departments.map((department, index) => (
-                                    <tr className="mb-3" key={department.id}>
-                                        <td className="py-3">{index + 1}</td>
-                                        <td className="py-3">{department.name}</td>
-                                        <td className="py-3">{department.code}</td>
-                                        <td className="py-3">
-                                            <div className="flex gap-4 items-center justify-center">
-                                                <a className='px-4 py-2 bg-[#5619fe]  rounded-lg text-white'>Edit</a>
-                                                <button onClick={() => handleDelete(department.id)}
-                                                    className='px-4 py-2 bg-[#fe1919]  rounded-lg text-white'>Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                    )
+                                }
+                                )
+                                }
 
-
-                            )}
-                        </tbody>
+                            </tbody>
+                        )}
 
                     </table>
                 </div>

@@ -98,4 +98,24 @@ class ExpenseController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
+
+    public function createFromPlan($id)
+    {
+        try {
+            $expensePlan = $this->expense_service->createExpenseFromExpensePlan($id);
+            return response()->json(['message' => 'fetching data', 'expenseplan' => [$expensePlan]]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function updateStatus(Request $request)
+    {
+        try {
+            $updatedStatus = $this->expense_service->createExpenseFromExpensePlan($request->all);
+            return response()->json(['message' => 'fetching data', 'expenseplan' => $updatedStatus]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
 }

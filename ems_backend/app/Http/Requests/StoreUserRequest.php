@@ -33,25 +33,7 @@ class StoreUserRequest extends FormRequest
             $user = $this->userRepo->find($userId);
             $contactId = $user->contact_id ?? null;
         }
-        // dd('test');
-        // return [
 
-        //     //contacts
-        //     'name' => 'required',
-        //     'email' => 'required|unique:contacts,email,' . $contactId,
-        //     'phone_no' => 'nullable|unique:contacts,phone_no,' . $contactId,
-        //     'pan_no' => 'nullable|unique:contacts,pan_no,' . $contactId,
-        //     'contact_type' => 'in:employee,supplier',
-        //     'department_id' => 'nullable|exists:departments,id',
-        //     'location_id' => 'nullable|exists:locations,id',
-
-        //     // user permission
-        //     'role' => $contactId ? 'nullable' : 'required',
-
-        //     //user
-        //     'password' => $contactId ? 'nullable|confirmed|min:8' : 'required|confirmed|min:8'
-
-        // ];
         if ($contactOnly) {
             return $this->contactRules($contactId);
         }

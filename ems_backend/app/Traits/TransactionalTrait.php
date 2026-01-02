@@ -11,4 +11,8 @@ trait TransactionalTrait
         return $this->morphMany(TransactionalLog::class, 'model');
     }
 
+    public function create(){
+        
+    }
+
 }

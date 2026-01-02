@@ -10,7 +10,7 @@ class Expense extends Model implements HasStatus
 {
   use HasStatusTrait;
 
-  protected $fillable = ['title', 'code', 'created_by_id', 'budget_timeline_id'];
+  protected $fillable = ['title', 'code', 'created_by_id', 'budget_timeline_id','expense_plan_id'];
   public function expense_items()
   {
     return $this->hasMany(ExpenseItem::class);

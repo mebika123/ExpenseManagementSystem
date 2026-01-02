@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExpenseItem extends Model
 {
-    protected $fillable = ['name', 'description', 'amount', 'contact_id', 'expense_category_id', 'paid_by_id', 'department_id', 'location_id', 'expense_id', 'budget_id'];
+    protected $fillable = ['name', 'description', 'amount', 'contact_id', 'expense_category_id', 'paid_by_id', 'department_id', 'location_id', 'expense_id', 'budget_id','expense_plan_item_id'];
     public function expense()
     {
         return $this->belongsTo(Expense::class);

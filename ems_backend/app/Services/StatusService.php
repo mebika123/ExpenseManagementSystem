@@ -25,7 +25,7 @@ class StatusService
             'updated_by_id' => $userId
         ]);
     }
-    public function changeStatus(HasStatus $model, string $status, string $userId, ?string $remarks = null)
+    public function changeStatus(HasStatus $model, string $status, int $userId, ?string $remarks = null)
     {
         $this->vaildator->validate($model->currentStatus(), $status);
 

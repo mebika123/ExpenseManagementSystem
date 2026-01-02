@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../axios';
 import { Link } from 'react-router-dom';
+import SearchBar from '../../components/ui/SearchBar';
 
 const ExpensePlanList = () => {
     const [expensesPlans, setExpensesPlan] = useState([]);
@@ -43,7 +44,8 @@ const ExpensePlanList = () => {
             <div className="w-full bg-white rounded-md p-7  text-center">
 
                 <h2 className="text-4xl font-bold mb-8 ">Expense Plan List </h2>
-                <div className="flex justify-end ml-10">
+                <div className="flex justify-end ml-10 gap-3">
+
                     <Link to={'/expense-plan/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
 
                 </div>

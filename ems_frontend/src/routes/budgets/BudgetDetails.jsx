@@ -47,7 +47,7 @@ const BudgetDetails = () => {
         const fetchBudgets = async () => {
             try {
                 const res = await axiosInstance.get(`/budgetTimelines/${id}`);
-                setBudgetTimeline(res.data.budget);
+                setBudgetTimeline(res.data.budgetTimeline);
             } catch (error) {
                 console.error(error);
             }

@@ -22,4 +22,9 @@ class ExpensePlan extends Model implements HasStatus
   {
     return $this->morphMany(TransactionalAttachment::class, 'model');
   }
+
+  public function advances()
+  {
+    return $this->hasMany(Advance::class);
+  }
 }

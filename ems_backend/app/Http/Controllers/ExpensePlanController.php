@@ -98,4 +98,21 @@ class ExpensePlanController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
+
+    public function plansWithTotals(Request $request)
+    {
+        $request->validate([
+            'contact_id' => 'required|exists:contacts,id',
+        ]);
+
+        $plans = ExpensePlan::whereHas('expense_plan_items', function ($q) use ($request) {
+            $q->where('paid_by_id', $request->contact_id);        })
+            ->withSum(['expense_plan_items as total_amount' => function ($q) use ($request) {
+                $q->where('paid_by_id', $request->contact_id);}], 'amount')
+            ->get(['id', 'name']);
+
+        return response()->json($plans);
+    }
+
+
 }

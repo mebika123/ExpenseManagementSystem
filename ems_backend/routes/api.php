@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdvanceController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DepartmentController;
@@ -37,13 +38,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get("expense/details/{id}", [ExpenseController::class, 'showItemsDetails']);
     Route::post('deleteExpenseItems', [ExpenseController::class, 'deleteExpenseItem']);
     Route::apiResource('expenses', ExpenseController::class);
+    
+    Route::post('/expense-plan/expense/{id}', [ExpenseController::class, 'createFromPlan']);
 
     Route::apiResource('expensesPlan', ExpensePlanController::class);
     Route::get("expensePlan/{id}", [ExpensePlanController::class, 'show']);
-    Route::get("expensePlan/details/{id}", [ExpensePlanController::class, 'showItemsDetails']);
     Route::post('deleteExpensePlanItems', [ExpensePlanController::class, 'deleteExpenseItem']);
+    Route::get("expensePlan/details/{id}", [ExpensePlanController::class, 'showItemsDetails']);
 
+    Route::get('/expense-plans/with-totals', [ExpensePlanController::class, 'plansWithTotals']);
 
+    Route::apiResource('advances', AdvanceController::class); 
 
     Route::apiResource('roles', RoleAndPermissionController::class);
     Route::get('permissions', [RoleAndPermissionController::class, 'showAllPermission']);

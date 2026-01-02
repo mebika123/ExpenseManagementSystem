@@ -24,6 +24,7 @@ class StoreExpenseRequest extends FormRequest
         return [
             'title' => 'required|string|unique:expenses,title,' . $this->route('expense'),
             'budget_timeline_id' => 'required|exists:budget_timelines,id',
+            'expense_plan_id' => 'nullable|exists:expense_plans,id|unique:expenses,expense_plan_id,' . $this->route('expense'),
 
             'transactional_attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
 
@@ -34,6 +35,7 @@ class StoreExpenseRequest extends FormRequest
             'expense_items.*.amount' => 'required|numeric|min:0',
 
             'expense_items.*.department_id' => 'nullable|exists:departments,id',
+            'expense_items.*.expense_plan_item_id' => 'nullable|exists:expense_plan_items,id|unique:expense_items,expense_plan_item_id,NULL,id,expense_id,' . $this->route('expense'),
             'expense_items.*.location_id' => 'nullable|exists:locations,id',
             'expense_items.*.expense_category_id' => 'required|exists:expense_categories,id',
             'expense_items.*.budget_id' => 'required|exists:budgets,id',

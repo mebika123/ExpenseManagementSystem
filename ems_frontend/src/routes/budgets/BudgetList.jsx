@@ -4,6 +4,9 @@ import axiosInstance from '../../axios';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import SearchBar from '../../components/ui/SearchBar';
+
 
 const BudgetList = () => {
     const { user } = useAuth();
@@ -16,7 +19,7 @@ const BudgetList = () => {
             try {
                 const res = await axiosInstance.get('/budgetTimelines');
                 setBudgetTimelines(res.data.budgets);
-                console.log(budgetTimelines);
+                // console.log(budgetTimelines);
             } catch (error) {
                 console.log(error)
             }
@@ -26,6 +29,30 @@ const BudgetList = () => {
         }
         fetchBudgetTimeline();
     }, [])
+
+    const safeBudgetTimelines = budgetTimelines ?? [];
+
+
+    const columnHelper = createColumnHelper();
+
+    const columns = [
+        columnHelper.accessor("name", { header: "Name" }),
+        columnHelper.accessor("code", { header: "Code" }),
+        columnHelper.accessor("start_at", { header: "Start At" }),
+        columnHelper.accessor("end_at", { header: "End At" }),
+    ];
+    const [globalFilter, setGlobalFilter] = useState("");
+
+    const table = useReactTable({
+        data: safeBudgetTimelines,
+        columns,
+        state: { globalFilter },
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
 
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this Budget Timeline?')) {
@@ -46,7 +73,11 @@ const BudgetList = () => {
             <div className="w-full bg-white rounded-md p-7  text-center">
 
                 <h2 className="text-4xl font-bold uppercase mb-8 ">Budget TimLine List </h2>
-                <div className="flex justify-end ml-10">
+                <div className="flex justify-end ml-10 gap-3">
+                    <SearchBar
+                        globalFilter={globalFilter}
+                        setGlobalFilter={setGlobalFilter}
+                    />
                     <a href='/budget-timeline/new' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</a>
 
                 </div>
@@ -64,34 +95,42 @@ const BudgetList = () => {
                                 <th className="py-3 px-2 w-1/5">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
 
-                            {loading ? (
+                        {loading ? (
+                            <tbody>
+
                                 <tr>
                                     <td colSpan='4' className="text-xl font-semibold mt-5 w-full">Loading...</td>
                                 </tr>
-                            ) : (
-
-                                budgetTimelines.map((budgetTimeline, index) => (
-                                    <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={budgetTimeline.id}>
-                                        <td className="py-3 px-2">{index + 1}</td>
-                                        <td className="py-3 px-2">{budgetTimeline.name}</td>
-                                        <td className="py-3 px-2">{budgetTimeline.code}</td>
-                                        <td className="py-3 px-2">{budgetTimeline.start_at}</td>
-                                        <td className="py-3 px-2">{budgetTimeline.end_at}</td>
-                                        <td className="py-3 px-2">
-                                            <div className="flex gap-4 items-center justify-center">
-                                                <Link to={`/budget-timeline/details/${budgetTimeline.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
-                                                <Link to={`/budget-timeline/edit/${budgetTimeline.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
-                                                <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(budgetTimeline.id)} className='text-[#FF0133]' />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                            </tbody>
+                        ) : (
+                            <tbody>
 
 
-                            )}
-                        </tbody>
+                                {table.getRowModel().rows.map((row, index) => {
+                                    const budgetTimeline = row.original;
+                                    return (
+
+                                        <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={budgetTimeline.id}>
+                                            <td className="py-3 px-2">{index + 1}</td>
+                                            <td className="py-3 px-2">{budgetTimeline.name}</td>
+                                            <td className="py-3 px-2">{budgetTimeline.code}</td>
+                                            <td className="py-3 px-2">{budgetTimeline.start_at}</td>
+                                            <td className="py-3 px-2">{budgetTimeline.end_at}</td>
+                                            <td className="py-3 px-2">
+                                                <div className="flex gap-4 items-center justify-center">
+                                                    <Link to={`/budget-timeline/details/${budgetTimeline.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
+                                                    <Link to={`/budget-timeline/edit/${budgetTimeline.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
+                                                    <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(budgetTimeline.id)} className='text-[#FF0133]' />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
+
+
+                            </tbody>
+                        )}
 
                     </table>
                 </div>

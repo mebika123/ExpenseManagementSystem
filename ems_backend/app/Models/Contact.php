@@ -31,10 +31,13 @@ class Contact extends Model
     // {
     //     return $this->hasOne(ContactUser::class);
     // }
+    public function advances()
+    {
+        return $this->hasMany(Advance::class);
+    }
 
-       public function user():HasOne
+    public function user(): HasOne
     {
         return $this->hasOne(User::class);
     }
-
 }

@@ -26,6 +26,10 @@ import AddExpensePlan from './routes/expensePlan/AddExpensePlan.jsx'
 import ExpensePlanList from './routes/expensePlan/ExpensePlanList.jsx'
 import EditExpensePlan from './routes/expensePlan/EditExpensePlan.jsx'
 import ExpensePlanDetails from './routes/expensePlan/ExpensePlanDetails.jsx'
+import AddRole from './routes/role/AddRole.jsx'
+import AddAdvance from './routes/advance/AddAdvance.jsx'
+import EditAdvance from './routes/advance/EditAdvance.jsx'
+import AdvanceList from './routes/advance/AdvanceList.jsx'
 
 
 const router = createBrowserRouter([
@@ -56,7 +60,14 @@ const router = createBrowserRouter([
       { path: "/expense-plan/details/:id", element: <ExpensePlanDetails /> },
       { path: "/expense-plan", element: <ExpensePlanList /> },
       
+      
+      { path: "/advance/new", element: <AddAdvance /> },
+      { path: "/advance/edit/:id", element: <EditAdvance /> },
+      { path: "/advances", element: <AdvanceList /> },
+      
       { path: "/contact/new", element: <AddContact /> },
+
+      { path: "/role/new", element: <AddRole /> },
 
       { path: "/budget-timelines", element: <BudgetList /> },
       { path: "/budget-timeline/new", element: <AddBudget /> },

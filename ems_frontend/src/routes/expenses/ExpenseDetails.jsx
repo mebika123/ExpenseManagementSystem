@@ -18,8 +18,21 @@ const ExpenseDetails = () => {
         }
         fetchExpense();
     }, [])
-    console.log(expense)
+    const [comment, setComment] = useState('');
 
+    const handleChange = (e) => {
+        setComment(e.target.value);
+    };
+
+    const changeStatus = async (status) => {
+        const payload = [{
+            status,
+            id: expense.id,
+            comment
+        }];
+
+        console.log(payload);
+    };
 
     return (
         <>
@@ -135,7 +148,7 @@ const ExpenseDetails = () => {
 
                                                 <li className="w-full">
                                                     <div className="relative">
-                                                        <div className="flex border border-gray-300 items-center h-10 rounded-md px-6 shadow-xs shadow-indigo-200/50">
+                                                        <div className="flex border bg-indigo-100 border-gray-300 items-center h-10 rounded-md px-6 shadow-xs shadow-indigo-200/50">
                                                             <a
                                                                 href={`http://localhost:8000/storage/${file.path}`}
                                                                 target="_blank"
@@ -154,9 +167,29 @@ const ExpenseDetails = () => {
                                     </ul></div>
 
                             </div>
-                            <div className="mb-6 w-full justify-end gap-2 flex">
-                                <button className="px-4 py-2 bg-[#6bd192]  rounded-lg text-white w-1/5" >Checked</button>
-                                <button className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-1/5" >Reject</button>
+                            <div className="">
+                                <h3 className="font-bold text-xl mb-2">Change Status</h3>
+                                <div className="items-end">
+                                    <div className="flex items-center gap-2 w-2/5 mb-3">
+                                        <label className="w-30 text-start">
+                                            Comment
+                                        </label>
+                                        <textarea row='2'
+                                            name='comment'
+                                            type="text"
+                                            className="flex-1 rounded-sm border p-2 border-[#989898]"
+                                            placeholder='comment'
+                                            onChange={handleChange}
+                                        ></textarea>
+                                    </div>
+
+                                    <div className="mb-6 w-full  gap-2 flex">
+                                        <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approved</button>
+                                        <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
+                                        <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('reject')}>Reject</button>
+                                    </div>
+
+                                </div>
                             </div>
 
                         </div>

@@ -168,6 +168,40 @@ const Sidebar = () => {
                     </li>
                     <li className='mb-3 '>
                         <div className="text-base font-medium">
+                            <div className=' text-xs  text-gray-400 mt-5'>Monetary </div>
+                            <div className="">
+                                <ul className="  pt-2">
+                                    <li className="mb-3">
+                                        <div className="text-base font-medium" onClick={() => toggleMenu('advance')}>
+                                            <div className="flex items-center gap-5">
+                                                <FontAwesomeIcon icon={faHandHoldingDollar} />                                               
+                                                 <div>
+                                                    Advances
+                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {
+                                            openMenus.advance && (
+                                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                    <li className="ml-6">
+                                                        <Link to="/advances">Advance List</Link>
+                                                    </li>
+                                                    <li className="ml-6 mt-2">
+                                                        <Link to="/advance/new">New Advance</Link>
+                                                    </li>
+                                                </ul>
+
+                                            )
+                                        }
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li className='mb-3 '>
+                        <div className="text-base font-medium">
                             <div className=' text-xs  text-gray-400 mt-5'>Contacts </div>
                             <div className="">
                                 <ul className="  pt-2">
@@ -198,7 +232,7 @@ const Sidebar = () => {
                                     <li className="mb-3">
                                         <div className="text-base font-medium" onClick={() => toggleMenu('contacts')}>
                                             <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faUser} />
+                                                <FontAwesomeIcon icon={faAddressBook} />
                                                 <div>
                                                     Contacts
                                                     <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />

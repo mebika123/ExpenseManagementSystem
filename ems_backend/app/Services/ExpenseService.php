@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Expense;
 use App\Models\ExpenseItem;
+use App\Models\ExpensePlan;
 use App\Repositories\ExpenseItemRepository;
 use App\Repositories\ExpenseRepository;
+use App\Repositories\TransactionalLogRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +18,7 @@ class ExpenseService
     public function __construct(
         protected ExpenseRepository $expense_repo,
         protected ExpenseItemRepository $expense_item_repo,
+        protected TransactionalLogRepository $transactional_log_repo,
         private StatusService $status_service
 
     ) {}
@@ -28,7 +32,8 @@ class ExpenseService
             $expenseData = [
                 'title' => $data['title'],
                 'budget_timeline_id' => $data['budget_timeline_id'],
-                'created_by_id' => $user->id
+                'created_by_id' => $user->id,
+                'expense_plan_id' => $data['expense_plan_id'] != null ? $data['expense_plan_id'] : null
             ];
             if (!$id) {
                 $titlePrefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $data['title']), 0, 2));
@@ -92,6 +97,37 @@ class ExpenseService
                 $file->delete();
             });
             $this->expense_repo->delete($id);
+        });
+    }
+
+
+    // public function updateStatus(Expense $expense, string $userId, string $status, ?string $comment = null)
+    public function updateStatus(array $data)
+    {
+        $userId = Auth::user()->id;
+        $expense = $data['id'];
+        $status = $data['status'];
+        $comment = $data['comment'];
+
+        $this->status_service->changeStatus($expense, $status, $userId, $comment);
+        if ($status == 'approved') {
+            $expenseItems = ExpenseItem::findOrfail('expese_id', $expense);
+            foreach ($expenseItems as $expenseItem) {
+                $this->transactional_log_repo->createFor($expenseItem, [
+                    'amount' => $expenseItem->amount,
+                    'payment_date' => $expenseItem->created_at,
+                    'contact_id' => $expenseItem->paid_by
+                ]);
+            }
+        }
+    }
+
+    public function createExpenseFromExpensePlan($id)
+    {
+        return DB::transaction(function () use ($id) {
+            $expensePlan = ExpensePlan::with('expense_plan_items', 'transactionalAttachments')->find($id);
+            //  $this->storeOrUpdateExpense($expensePlan);
+            $expensePlan;
         });
     }
 }

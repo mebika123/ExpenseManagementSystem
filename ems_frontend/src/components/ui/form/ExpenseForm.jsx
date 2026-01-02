@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
 import axiosInstance from '../../../axios';
-import { useAuth } from '../../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImages, faXmark } from '@fortawesome/free-solid-svg-icons';
 import AttachmentList from '../AttachmentList';
 
-const ExpenseForm = ({ id, title, data, type }) => {
+const ExpenseForm = ({ title, data, type, id }) => {
   const [loading, setLoading] = useState(true)
+
+  const location = useLocation();
+  const expense_plan_id = location.state?.expense_plan_id;
+
+
 
   const emptyExpenseItem = {
     name: '',
@@ -18,13 +22,15 @@ const ExpenseForm = ({ id, title, data, type }) => {
     paid_by_id: '',
     department_id: '',
     location_id: '',
-    budget_id: ''
+    budget_id: '',
+    expense_plan_item_id: ''
   };
 
   const [form, setForm] = useState({
     title: '',
     budget_timeline_id: '',
     purpose: '',
+    expense_plan_id: '',
     start_at: '',
     end_at: '',
     expense_items: [{ ...emptyExpenseItem }]
@@ -32,21 +38,6 @@ const ExpenseForm = ({ id, title, data, type }) => {
 
   const [existingFiles, setExistingFiles] = useState([])
 
-  // for edit expense and expense item
-  // useEffect(() => {
-  //   if (data && id) {
-  //     setForm({
-  //       ...data,
-  //       expense_items:
-  //         data.expense_items?.length > 0
-  //           ? data.expense_items
-  //           : [{ ...emptyExpenseItem }],
-  //       transactional_attachments: [{}]
-  //     });
-
-  //     setExistingFiles(data.transactional_attachments || []);
-  //   }
-  // }, [data, id]);
 
   const isExpensePlan = type === 'expensePlan';
 
@@ -55,7 +46,7 @@ const ExpenseForm = ({ id, title, data, type }) => {
     : 'expense_items';
 
   useEffect(() => {
-    if (!data || !id) return;
+    if (!data) return;
 
     const items = data[itemsKey] || [];
 
@@ -67,6 +58,42 @@ const ExpenseForm = ({ id, title, data, type }) => {
 
     setExistingFiles(data.transactional_attachments || []);
   }, [data, id, type]);
+
+
+
+  useEffect(() => {
+    if (!expense_plan_id) return
+    const fetchExpensePlan = async () => {
+      const res = await axiosInstance.get(`expensePlan/details/${expense_plan_id}`)
+      const expensePlan = res.data.expensePlan
+
+      setForm({
+        title: expensePlan.title,
+        budget_timeline_id: expensePlan.budget_timeline_id,
+        expense_plan_id: expensePlan.id,
+        expense_items: expensePlan.expense_plan_items?.map(item => ({
+          expense_plan_item_id: item.id,
+          name: item.name,
+          description: item.description,
+          amount: item.amount,
+          contact_id: item.contact_id,
+          expense_category_id: item.expense_category_id,
+          paid_by_id: item.paid_by_id,
+          department_id: item.department_id,
+          location_id: item.location_id,
+          budget_id: item.budget_id
+        })) ?? [{ ...emptyExpenseItem }]
+
+      });
+      // console.log(form)
+      setExistingFiles(expensePlan.transactional_attachments || []);
+
+    }
+    fetchExpensePlan()
+
+  }, [expense_plan_id]);
+
+
 
   const [error, setError] = useState();
   const [formError, setFormError] = useState({});
@@ -109,7 +136,6 @@ const ExpenseForm = ({ id, title, data, type }) => {
       expense_items: updatedItems
     });
   };
-  const navigate = useNavigate();
 
 
 
@@ -138,12 +164,11 @@ const ExpenseForm = ({ id, title, data, type }) => {
           axiosInstance.get('/departments'),
           axiosInstance.get('/expenseCategories'),
           axiosInstance.get('/contacts'),
-          axiosInstance.get('/employee'),
+          axiosInstance.get('/contacts'),
           axiosInstance.get('/budgetTimelines')
         ]);
 
 
-        console.log(locationsRes.data)
         setLocation(locationsRes.data);
         setDepartment(departmentsRes.data);
         setExpenseCategories(expenseCategoriesRes.data);
@@ -224,7 +249,9 @@ const ExpenseForm = ({ id, title, data, type }) => {
       const formData = new FormData();
       formData.append('title', form.title);
       formData.append('budget_timeline_id', form.budget_timeline_id);
-
+      if (form.expense_plan_id) {
+        formData.append('expense_plan_id', form.expense_plan_id);
+      }
 
       attachments.forEach((file) => {
         formData.append('attachments[]', file);
@@ -276,16 +303,14 @@ const ExpenseForm = ({ id, title, data, type }) => {
               alert("Error updating expense.");
             }
           }
-        }
-        else {
-
+        } else {
           const res = await axiosInstance.post("/expenses", formData);
           if (res) {
             alert("Expense has been created successfully")
             navigate('/expenses')
           }
 
-
+          console.log(formError)
         }
       }
       else if (type == 'expensePlan') { //expense plan
@@ -335,10 +360,16 @@ const ExpenseForm = ({ id, title, data, type }) => {
             }
           }
         } else {
-          const res = await axiosInstance.post("/expensesPlan", formData);
-          if (res) {
-            alert("Expense Plan has been created successfully")
-            navigate('/expense-plan')
+
+          try {
+
+            const res = await axiosInstance.post("/expensesPlan", formData);
+            if (res) {
+              alert("Expense Plan has been created successfully")
+              navigate('/expense-plan')
+            }
+          } catch (error) {
+
           }
 
         }
@@ -347,16 +378,34 @@ const ExpenseForm = ({ id, title, data, type }) => {
     } catch (error) {
       if (error.response?.status === 422) {
         setFormError(error.response.data.errors);
+        console.log(formError)
       }
     }
   }
-
   return (
     <div className="w-full p-8 flex justify-center items-center mt-8">
       <div className="w-full bg-white rounded-md p-7  text-center">
         <h2 className="text-4xl font-bold mb-8 ">{title}</h2>
         <div className="flex justify-center items-center">
           <form className="w-full" onSubmit={handleSubmit}>
+
+            {/* <div className="w-full md:w-1/2 lg:w-2/5 mb-2 ">
+              <div className="flex gap-2 items-center">
+                <label htmlFor="title">Create from Plan:</label>
+                <select
+                  className="w-1/3 rounded-sm border border-[#D1D1D1] p-2"
+                  name='budget_timeline_id'
+                  onChange={handleChange}
+                  value={form.expense_plan_id}>
+                  <option value="">Select</option>
+                </select>
+
+              </div>
+              <p className="text-red-500">
+                {
+                }
+              </p>
+            </div> */}
             <div className="md:flex md:gap-4 mb-6 lg:justify-between">
               <div className="w-full md:w-1/2 lg:w-2/5 mb-2 text-start">
                 <div className="flex gap-2 items-center">
@@ -459,16 +508,24 @@ const ExpenseForm = ({ id, title, data, type }) => {
                     <div className="grid lg:grid-cols-7 gap-4 w-full border-b border-gray-400 py-4 mb-3 " key={index}>
 
                       <div className="grid xl:grid-cols-3 lg:grid-cols-2  lg:col-span-6 gap-x-6 gap-y-4 pr-2">
+                        <div className="">
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">Name <span className="text-red-600">*</span></label>
+                            <input
+                              type="text"
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.name}
+                              onChange={(e) => handleItemChange(index, 'name', e.target.value)}
+                            />
+                          </div>
+                          {formError[`expense_items.${index}.name`] && (
+                            <span className="text-red-500">
+                              {formError[`expense_items.${index}.name`][0]}
+                            </span>
+                          )}
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">Name <span className="text-red-600">*</span></label>
-                          <input
-                            type="text"
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.name}
-                            onChange={(e) => handleItemChange(index, 'name', e.target.value)}
-                          />
                         </div>
+
 
                         <div className="flex items-center gap-2">
                           <label className="w-30">Amount <span className="text-red-600">*</span></label>

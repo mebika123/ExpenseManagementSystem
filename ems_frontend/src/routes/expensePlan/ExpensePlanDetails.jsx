@@ -1,25 +1,33 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../axios';
 
 const ExpensePlanDetails = () => {
     const { id } = useParams()
     const [expensePlan, setExpensePlan] = useState({});
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         const fetchExpensePlan = async () => {
             try {
                 const res = await axiosInstance.get(`expensePlan/details/${id}`)
                 setExpensePlan(res.data.expensePlan)
-                console.log(res.data.expensePlan)
             } catch (error) {
                 console.log(error)
             }
         }
         fetchExpensePlan();
     }, [])
-    console.log(expensePlan)
 
+    const generateExpense = () => {
+        navigate('/expense/new', {
+            state: { 
+                expense_plan_id: id
+            }
+        });
+
+    }
 
     return (
         <>
@@ -32,28 +40,36 @@ const ExpensePlanDetails = () => {
                     </div>
                     <div className="flex justify-center items-center">
                         <div className="w-full">
-                            <div className="mb-6 w-full text-start">
-                                <div className="w-6/7 p-2 rounded-md"><strong className='mr-5'>Title :</strong>{expensePlan?.title}</div>
-
-                            </div>
-                            <div className="flex mb-6 item-center gap-3">
-                                <div className="w-1/2">
+                            <div className="grid lg:grid-cols-2 mb-2">
+                                <div className="text-start mb-4"><strong className='mr-5'>Title :</strong>{expensePlan?.title}</div>
+                                <div className=" flex item-center gap-10 mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className='font-bold'>Start At:</div>
+                                        <div className="">{expensePlan?.start_at}</div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className='font-bold'>End At:</div>
+                                        <div className="">{expensePlan?.end_at}</div>
+                                    </div>
+                                </div>
+                                <div className=" mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className='font-bold'>Expense Code:</div>
                                         <div className="">{expensePlan?.code}</div>
                                     </div>
                                 </div>
-                                <div className="w-1/2">
+                                <div className=" mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className='font-bold'>Budget Timeline Code:</div>
                                         <div className="">{expensePlan?.budget_timeline?.code}</div>
                                     </div>
 
                                 </div>
-
                             </div>
+
+
                             <div className="shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] bg-white border border-[#989898] rounded-sm p-3 mx-auto mb-4 w-full">
-                                <h3 className="font-bold text-xl">Expense Details</h3>
+                                <h3 className="font-bold text-xl">Expense Plan Details</h3>
                                 <div className="mt-5">
 
                                     <div className="overflow-x-auto  w-full">
@@ -78,39 +94,39 @@ const ExpensePlanDetails = () => {
                                                     expensePlan?.expense_plan_items?.map((expense_plan_item, index) => (
                                                         <tr className="text-center">
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item.name}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.name}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item.amount}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.amount}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item.department.code}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.department.code}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item.location.code}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.location.code}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item.desciption ?? ''}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.desciption ?? ''}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item.expense_categories.code}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.expense_categories?.code}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item.budget.title}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.budget?.title}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item?.contact.code || ''}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.contact?.code ?? ''}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_plan_item?.paid_by.code || 'Company'}</div>
+                                                                <div className="w-full  p-2">{expense_plan_item?.paid_by?.code ?? 'Company'}</div>
                                                             </td>
 
 
@@ -157,6 +173,9 @@ const ExpensePlanDetails = () => {
                             <div className="mb-6 w-full justify-end gap-2 flex">
                                 <button className="px-4 py-2 bg-[#6bd192]  rounded-lg text-white w-1/5" >Checked</button>
                                 <button className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-1/5" >Reject</button>
+                            </div>
+                            <div className="mb-6 w-full justify-end gap-2 flex">
+                                <button className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/5" onClick={generateExpense}>Genrate Expense</button>
                             </div>
 
                         </div>

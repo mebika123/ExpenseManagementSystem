@@ -31,7 +31,7 @@ const UserList = () => {
 
             <div className="w-4/5 bg-white rounded-md p-7  text-center">
 
-                <h2 className="text-4xl font-bold uppercase mb-8 ">User List </h2>
+                <h2 className="text-4xl font-bold  mb-8 ">User List </h2>
                 <div className="flex justify-end ml-10">
                     <a href='/user/new' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" >Add New</a>
 

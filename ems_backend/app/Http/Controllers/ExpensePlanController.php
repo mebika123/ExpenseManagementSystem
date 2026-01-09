@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreExpensePlanRequest;
+use App\Models\Expense;
 use App\Models\ExpensePlan;
 use App\Services\ExpensePlanService;
 use Exception;
@@ -18,7 +19,11 @@ class ExpensePlanController extends Controller
 
     public function index()
     {
-        $expensesPlan = ExpensePlan::with(['budgetTimeline:id,code', 'latestStatus'])->get();
+        $expensesPlan = ExpensePlan::with(['budgetTimeline:id,code', 'latestStatus'])->get()
+        ->map(function ($expensesPlan) {
+                $expensesPlan->isEditable = $expensesPlan->latestStatus?->first()?->status !== 'approved';
+                return $expensesPlan;
+            });
         return response()->json(['expensesPlan' => $expensesPlan]);
     }
 
@@ -53,6 +58,8 @@ class ExpensePlanController extends Controller
     public function show($id)
     {
         $expensePlan = ExpensePlan::with('expense_plan_items', 'transactionalAttachments')->find($id);
+                $expensePlan->isEditable = $expensePlan->latestStatus?->first()?->status !== 'approved';
+
         return response()->json(['expense' => $expensePlan]);
     }
 
@@ -70,9 +77,15 @@ class ExpensePlanController extends Controller
                 ]);
             },
             'budgetTimeline:id,code',
-            'transactionalAttachments'
+            'transactionalAttachments',
+            'latestStatus'
         ])->find($id);
-        return response()->json(['expensePlan' => $expensePlan]);
+        $expenseGenerated = Expense::where('expense_plan_id', $id)->exists();
+
+        return response()->json([
+            'expensePlan' => $expensePlan,
+            'expense_generated' => $expenseGenerated
+        ]);
     }
 
     public function deleteExpenseItem(Request $request)
@@ -106,13 +119,36 @@ class ExpensePlanController extends Controller
         ]);
 
         $plans = ExpensePlan::whereHas('expense_plan_items', function ($q) use ($request) {
-            $q->where('paid_by_id', $request->contact_id);        })
+            $q->where('paid_by_id', $request->contact_id);
+        })
+            ->whereHas('statuses', function ($q) {
+                $q->latest()->where('status', 'approved');
+            })
+            ->whereDoesntHave('expenses')
             ->withSum(['expense_plan_items as total_amount' => function ($q) use ($request) {
-                $q->where('paid_by_id', $request->contact_id);}], 'amount')
+                $q->where('paid_by_id', $request->contact_id);
+            }], 'amount')
             ->get(['id', 'name']);
 
         return response()->json($plans);
     }
 
+    public function updateStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'expense_plan_id' => 'required|integer|exists:expense_plans,id',
+            'status'     => 'required|string',
+            'comment'    => 'required|string',
+        ]);
 
+        try {
+            $updatedStatus = $this->expense_plan_service->updateStatus($validated);
+            return response()->json([
+                'message' => 'Status is updated',
+                'updatedStatus' => $updatedStatus
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
 }

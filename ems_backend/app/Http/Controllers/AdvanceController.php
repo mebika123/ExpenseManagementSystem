@@ -16,9 +16,13 @@ class AdvanceController extends Controller
         $this->advance_service = $advance_service;
     }
 
-    public function index(){
-        try{
-         $advances = Advance::with('contact:id,code','expensePlan:id,title','latestStatus')->get();
+    public function index()
+    {
+        try {
+            $advances = Advance::with('contact:id,code', 'expensePlan:id,title', 'latestStatus')->get()->map(function ($advances) {
+                $advances->isEditable = $advances->latestStatus?->first()?->status !== 'approved';
+                return $advances;
+            });
             return response()->json([
                 'advances' => $advances
             ], 201);
@@ -38,10 +42,10 @@ class AdvanceController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
-    public function update(StoreAdvanceRequest $request,$id)
+    public function update(StoreAdvanceRequest $request, $id)
     {
         try {
-            $advances = $this->advance_service->storeOrUpdate($request->all(),$id);
+            $advances = $this->advance_service->storeOrUpdate($request->all(), $id);
             return response()->json([
                 'message' => 'Advance is created',
                 'advances' => $advances
@@ -62,11 +66,30 @@ class AdvanceController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
-     public function destroy($id)
+    public function destroy($id)
     {
         try {
             $delete = $this->advance_service->delete($id);
             return response()->json(['message' => 'advance deleted sucessfully']);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'advance_id' => 'required|integer|exists:advances,id',
+            'status'     => 'required|string',
+            'comment'    => 'required|string',
+        ]);
+
+        try {
+            $updatedStatus = $this->advance_service->updateStatus($validated);
+            return response()->json([
+                'message' => 'Status is updated',
+                'updatedStatus' => $updatedStatus
+            ]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

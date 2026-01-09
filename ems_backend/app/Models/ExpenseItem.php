@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ExpenseItem extends Model
 {
@@ -34,4 +36,16 @@ class ExpenseItem extends Model
     public function paidBy() {
         return $this->belongsTo(Contact::class, 'paid_by_id');
     }
+        public function transactional_logs(): MorphMany
+    {
+        return $this->morphMany(TransactionalLog::class, 'model');
+    }
+        public function getDisplayTitleAttribute()
+    {
+        return $this->name;
+    }
+    public function expensePlanItem()
+{
+    return $this->belongsTo(ExpensePlanItems::class);
+}
 }

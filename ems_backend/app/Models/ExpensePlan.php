@@ -27,4 +27,9 @@ class ExpensePlan extends Model implements HasStatus
   {
     return $this->hasMany(Advance::class);
   }
+
+  public function expenses()
+  {
+    return $this->hasOne(Expense::class);
+  }
 }

@@ -129,7 +129,11 @@ const ExpenseForm = ({ title, data, type, id }) => {
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...form.expense_items];
+    // if (['paid_by_id', 'contact_id', 'department_id', 'location_id', 'budget_id', 'expense_category_id'].includes(field) && value === '') {
+    //   updatedItems[index][field] = null;
+    // } else {
     updatedItems[index][field] = value;
+    // }
 
     setForm({
       ...form,
@@ -174,7 +178,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
         setExpenseCategories(expenseCategoriesRes.data);
         setContacts(contactsRes.data);
         setEmployees(employeesRes.data);
-        setBudgetTimelines(budgetTimelinesRes.data.budgets); //bugetTimeline
+        setBudgetTimelines(budgetTimelinesRes.data.budgetTimelines); //bugetTimeline
 
 
       } catch (error) {
@@ -264,7 +268,12 @@ const ExpenseForm = ({ title, data, type, id }) => {
 
         form.expense_items.forEach((item, index) => {
           Object.keys(item).forEach(key => {
-            formData.append(`expense_items[${index}][${key}]`, item[key]);
+            let value = item[key];
+
+            if (value !== null) {
+              formData.append(`expense_items[${index}][${key}]`, value);
+            }
+            // formData.append(`expense_items[${index}][${key}]`, item[key]);
           });
         });
 
@@ -314,10 +323,15 @@ const ExpenseForm = ({ title, data, type, id }) => {
         }
       }
       else if (type == 'expensePlan') { //expense plan
+        setFormError({});
 
         form.expense_items.forEach((item, index) => {
           Object.keys(item).forEach(key => {
-            formData.append(`expense_plan_items[${index}][${key}]`, item[key]);
+            let value = item[key];
+
+            if (value !== null) {
+              formData.append(`expense_plan_items[${index}][${key}]`, value);
+            }
           });
         });
         formData.append('purpose', form.purpose);
@@ -369,6 +383,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
               navigate('/expense-plan')
             }
           } catch (error) {
+            setFormError(error.response.data.errors);
 
           }
 
@@ -388,28 +403,105 @@ const ExpenseForm = ({ title, data, type, id }) => {
         <h2 className="text-4xl font-bold mb-8 ">{title}</h2>
         <div className="flex justify-center items-center">
           <form className="w-full" onSubmit={handleSubmit}>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="w-full mb-2 text-start">
+                <div className="flex gap-2 items-center">
+                  <label htmlFor="title">Title:<span className="text-red-600">*</span></label>
+                  <input type="text"
+                    className="md:w-1/2 lg:w-2/3 p-2 rounded-md border border-[#d5d2d2]"
+                    onChange={handleChange}
+                    name='title' placeholder='name'
+                    value={form.title}
+                  />
 
-            {/* <div className="w-full md:w-1/2 lg:w-2/5 mb-2 ">
-              <div className="flex gap-2 items-center">
-                <label htmlFor="title">Create from Plan:</label>
-                <select
-                  className="w-1/3 rounded-sm border border-[#D1D1D1] p-2"
-                  name='budget_timeline_id'
-                  onChange={handleChange}
-                  value={form.expense_plan_id}>
-                  <option value="">Select</option>
-                </select>
-
+                </div>
+                <p className="text-red-500 text-center">
+                  {
+                    formError.title
+                  }
+                </p>
               </div>
-              <p className="text-red-500">
-                {
-                }
-              </p>
-            </div> */}
-            <div className="md:flex md:gap-4 mb-6 lg:justify-between">
+              <div className="w-full mb-2 text-start">
+                <div className="flex gap-2 items-center">
+                  <label htmlFor="budget_timeline_id" className='text-nowrap'>Budget Timeline: <span className="text-red-600">*</span></label>
+
+                  <select
+                    className="md:w-2/3 rounded-sm border border-[#D1D1D1] p-2"
+                    name='budget_timeline_id'
+                    onChange={handleChange}
+                    value={form.budget_timeline_id}>
+                    <option value="">Select Budget Timeline</option>
+                    {
+
+                      budgetTimelines?.map((budgetTimeline, index) => (
+                        <option value={budgetTimeline.id}>{budgetTimeline.name}</option>
+
+                      ))
+                    }
+                  </select>
+                </div>
+                <p className="text-red-500 text-center">
+                  {
+                    formError.budget_timeline_id
+                  }
+                </p>
+              </div>
+              {
+                type == 'expensePlan' &&
+                <>
+                  <div className="flex items-center gap-2 w-2/3 mb-2">
+                    <label className="">
+                      Purpose
+                    </label>
+                    <textarea row='2'
+                      name='purpose'
+                      type="text"
+                      className="flex-1 rounded-sm border p-2 border-[#989898]"
+                      value={form.purpose}
+                      placeholder='Purpose'
+                      onChange={handleChange}></textarea>
+                    <p className="text-red-500 text-center">
+                      {
+                        formError.purpose
+                      }
+                    </p>
+                  </div>
+
+
+                  <div className="flex item-center gap-3 mb-2">
+                    <div className="w-1/2">
+                      <div className="flex gap-3 items-center">
+                        <label htmlFor="start_at" className=''>Start At <span className="text-red-600">*</span></label>
+                        <input type="date" className="w-2/3  p-2 rounded-md border border-[#D1D1D1]" name='start_at' placeholder='Start at' value={form.start_at} onChange={handleChange} />
+                      </div>
+                      <p className="text-red-500">
+                        {
+                          formError.start_at
+                        }
+                      </p>
+                    </div>
+                    <div className="w-1/2">
+                      <div className="flex gap-3 items-center">
+                        <label htmlFor="end_at" className=''>End At <span className="text-red-600">*</span></label>
+                        <input type="date" className="w-2/3 p-2 rounded-md border border-[#D1D1D1]" name='end_at' placeholder='End at' value={form.end_at} onChange={handleChange} />
+                      </div>
+                      <p className="text-red-500">
+                        {
+                          formError.end_at
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </>
+              }
+
+            </div>
+
+
+            {/* <div className="md:flex md:gap-4 mb-6 lg:justify-between">
               <div className="w-full md:w-1/2 lg:w-2/5 mb-2 text-start">
                 <div className="flex gap-2 items-center">
-                  <label htmlFor="title">Title:</label>
+                  <label htmlFor="title">Title:<span className="text-red-600">*</span></label>
                   <input type="text"
                     className="w-full p-2 rounded-md border border-[#d5d2d2]"
                     onChange={handleChange}
@@ -426,7 +518,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
               </div>
               <div className="w-full md:w-1/2 lg:w-2/5 mb-2 text-start">
                 <div className="flex gap-2 items-center">
-                  <label htmlFor="budget_timeline_id" className='text-nowrap'>Budget Timeline:</label>
+                  <label htmlFor="budget_timeline_id" className='text-nowrap'>Budget Timeline: <span className="text-red-600">*</span></label>
                   <select
                     className="w-2/3 rounded-sm border border-[#D1D1D1] p-2"
                     name='budget_timeline_id'
@@ -465,13 +557,18 @@ const ExpenseForm = ({ title, data, type, id }) => {
                     value={form.purpose}
                     placeholder='Purpose'
                     onChange={handleChange}></textarea>
+                  <p className="text-red-500">
+                    {
+                      formError.purpose
+                    }
+                  </p>
                 </div>
 
 
                 <div className="flex item-center gap-3 mb-2">
                   <div className="w-1/2">
                     <div className="flex gap-3 items-center">
-                      <label htmlFor="start_at" className=''>Start At</label>
+                      <label htmlFor="start_at" className=''>Start At <span className="text-red-600">*</span></label>
                       <input type="date" className="w-2/3  p-2 rounded-md border border-[#D1D1D1]" name='start_at' placeholder='Start at' value={form.start_at} onChange={handleChange} />
                     </div>
                     <p className="text-red-500">
@@ -482,7 +579,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
                   </div>
                   <div className="w-1/2">
                     <div className="flex gap-3 items-center">
-                      <label htmlFor="end_at" className=''>End At</label>
+                      <label htmlFor="end_at" className=''>End At <span className="text-red-600">*</span></label>
                       <input type="date" className="w-2/3 p-2 rounded-md border border-[#D1D1D1]" name='end_at' placeholder='End at' value={form.end_at} onChange={handleChange} />
                     </div>
                     <p className="text-red-500">
@@ -493,7 +590,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
                   </div>
                 </div>
               </div>
-            }
+            } */}
 
 
             <div className="shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] bg-white border border-[#989898] rounded-sm py-3 mx-auto mb-4 w-full">
@@ -632,7 +729,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
                           >
                             <option value="">Select category</option>
                             {expenseCategories.map(c => (
-                              <option key={c.id} value={c.id}>{c.title}</option>
+                              <option key={c.id} value={c.id}>{c.name}</option>
                             ))}
                           </select>
                         </div>
@@ -649,7 +746,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
                             }
                           >
                             <option value="">Company</option>
-                            {employees?.map(e => (
+                            {contacts?.map(e => (
                               <option key={e.id} value={e.id}>{e.name}</option>
                             ))}
                           </select>

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
+import { useNavigate } from 'react-router-dom';
 
 const AddBudget = () => {
-    
+
     const { user } = useAuth();
     const [budget, setBudget] = useState([{ title: '', amount: '', department_id: '', location_id: '', }]);
     const [loading, setLoading] = useState(true)
@@ -75,6 +76,7 @@ const AddBudget = () => {
         newBudget[index][field] = value;
         setBudget(newBudget);
     }
+    const { navigate } = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -84,19 +86,13 @@ const AddBudget = () => {
 
             if (res.data) {
                 alert("Budget Timeline Created!")
+                navigate('/budget-timelines')
             }
 
         } catch (err) {
             const errors = err.response?.data?.errors || {};
-            setFormError({
-                name: errors.name || [],
-                start_at: errors.start_at || [],
-                end_at: errors.end_at || [],
-                title: errors.title || [],
-                amount: errors.amount || [],
-                department_id: errors.department_id || [],
-                location_id: errors.location_id || [],
-            });
+            setFormError(err.response?.data?.errors);
+            console.log(formError)
             setError(err.response?.data?.message || 'Something went wrong');
         }
 
@@ -107,7 +103,7 @@ const AddBudget = () => {
         <>
             <div className="w-full p-8 flex justify-center items-center mt-8">
                 <div className="w-2/3 bg-white rounded-md p-7  text-center">
-                    <h2 className="text-4xl font-bold uppercase mb-8 ">New Budget Timeline </h2>
+                    <h2 className="text-4xl font-bold  mb-8 ">New Budget Timeline </h2>
                     <div className="flex justify-center items-center">
                         <form onSubmit={handleSubmit} className="w-full">
                             <div className="mb-6 w-full text-start">
@@ -150,10 +146,10 @@ const AddBudget = () => {
                                         <table className="whitespace-nowrap w-full mb-5">
                                             <thead>
                                                 <tr className=''>
-                                                    <th className='py-2 border border-[#989898]'>Title</th>
-                                                    <th className='py-2 border border-[#989898] w-1/8'>Amount</th>
-                                                    <th className='py-2 border border-[#989898]'>Department</th>
-                                                    <th className='py-2 border border-[#989898]'>Location</th>
+                                                    <th className='py-2 border border-[#989898]'>Title <span className="text-md text-red-500">*</span></th>
+                                                    <th className='py-2 border border-[#989898] w-1/8'>Amount <span className="text-md text-red-500">*</span></th>
+                                                    <th className='py-2 border border-[#989898]'>Department <span className="text-md text-red-500">*</span></th>
+                                                    <th className='py-2 border border-[#989898]'>Location <span className="text-md text-red-500">*</span></th>
                                                     <th className='py-2 border border-[#989898]'>Action</th>
                                                 </tr>
                                             </thead>
@@ -169,6 +165,11 @@ const AddBudget = () => {
                                                                     handleBudgetChange(index, 'title', e.target.value)
                                                                 }
                                                             />
+                                                            {formError[`budget.${index}.title`] && (
+                                                                <p className="text-red-500">
+                                                                    {formError[`budget.${index}.title`][0]}
+                                                                </p>
+                                                            )}
                                                         </td>
 
                                                         <td className="p-2 border border-[#989898]">
@@ -180,6 +181,11 @@ const AddBudget = () => {
                                                                     handleBudgetChange(index, 'amount', e.target.value)
                                                                 }
                                                             />
+                                                            {formError[`budget.${index}.amount`] && (
+                                                                <p className="text-red-500">
+                                                                    {formError[`budget.${index}.amount`][0]}
+                                                                </p>
+                                                            )}
                                                         </td>
 
                                                         <td className="p-2 border border-[#989898]">
@@ -200,6 +206,12 @@ const AddBudget = () => {
                                                                 }
 
                                                             </select>
+
+                                                            {formError[`budget.${index}.department_id`] && (
+                                                                <p className="text-red-500">
+                                                                    {formError[`budget.${index}.department_id`][0]}
+                                                                </p>
+                                                            )}
                                                         </td>
 
                                                         <td className="p-2 border border-[#989898]">
@@ -219,6 +231,11 @@ const AddBudget = () => {
                                                                     ))
                                                                 }
                                                             </select>
+                                                            {formError[`budget.${index}.location_id`] && (
+                                                                <p className="text-red-500">
+                                                                    {formError[`budget.${index}.location_id`][0]}
+                                                                </p>
+                                                            )}
                                                         </td>
 
                                                         <td className="p-2 border border-[#989898]">

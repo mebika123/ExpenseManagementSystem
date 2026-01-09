@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ExpensePlan;
 use App\Models\ExpensePlanItems;
 use App\Repositories\ExpensePlanItemRepository;
 use App\Repositories\ExpensePlanRepository;
@@ -99,5 +100,23 @@ class ExpensePlanService
         });
     }
 
+    public function updateStatus(array $data)
+    {
+        return DB::transaction(function () use ($data) {
 
+            $userId  = Auth::id();
+            $expense = ExpensePlan::findOrFail($data['expense_plan_id']);
+            $status  = $data['status'];
+            $comment = $data['comment'] ?? null;
+
+
+            $res = $this->status_service->changeStatus($expense, $status, $userId, $comment);
+
+
+
+
+
+            return $res;
+        });
+    }
 }

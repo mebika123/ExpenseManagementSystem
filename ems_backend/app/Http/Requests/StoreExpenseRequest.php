@@ -46,4 +46,17 @@ class StoreExpenseRequest extends FormRequest
             'existingFiles.*' => 'integer',
         ];
     }
+     public function messages(): array
+    {
+        return[];
+        // return [
+        //     'budget.*.title.required_with' => 'This field is required',
+        //     'budget.*.amount.required_with' => 'This field is required',
+        //     'budget.*.department_id.required_with' => 'This field is required',
+        //     'budget.*.location_id.required_with' => 'This field is required',
+
+        //     'budget.*.amount.numeric' => 'Amount must be a number',
+        //     'budget.*.amount.min' => 'Amount must be 0 or greater',
+        // ];
+    }
 }

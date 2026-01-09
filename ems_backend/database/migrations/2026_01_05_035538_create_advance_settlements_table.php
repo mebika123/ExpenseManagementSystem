@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contact_users', function (Blueprint $table) {
+        Schema::create('advance_settlements', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->float('amount');
+            $table->date('settlement_date')->nullable();
             $table->unsignedBigInteger('contact_id');
-            $table->foreign('contact_id')->references('id')->on('contacts')->onDelete('cascade');
+            $table->foreign('contact_id')->references('id')->on('contacts');
+            $table->unsignedBigInteger('advance_id')->nullable();
+            $table->foreign('advance_id')->references('id')->on('advances');
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contact_users');
+        Schema::dropIfExists('advance_settlements');
     }
 };

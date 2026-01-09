@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const EditBudget = () => {
     const { id } = useParams();
 
-    const { user } = useAuth();
     const [budget, setBudget] = useState([{ title: '', amount: '', department_id: '', location_id: '', }]);
+    const emptyBudget = { title: '', amount: '', department_id: '', location_id: '', };
 
     const [form, setForm] = useState({
         name: '',
@@ -46,14 +46,7 @@ const EditBudget = () => {
                     name: budgetTimeline.name,
                     start_at: budgetTimeline.start_at,
                     end_at: budgetTimeline.end_at,
-                    // budget: budgetTimeline.budget.map(item => ({
-                    //     id: item.id,
-                    //     title: item.title,
-                    //     amount: item.amount,
-                    //     department_id: item.department_id,
-                    //     location_id: item.location_id
-                    // }))
-                });
+                } || null);
                 setBudget(
                     budgetTimeline.budget.map(item => ({
                         id: item.id,
@@ -61,13 +54,16 @@ const EditBudget = () => {
                         amount: item.amount,
                         department_id: item.department_id,
                         location_id: item.location_id
-                    }))
+                    })) || null
 
                 )
 
 
             } catch (error) {
                 console.error(error);
+                setForm(null);
+                setBudget(null)
+
             }
             finally {
                 setLoading(false)
@@ -122,25 +118,26 @@ const EditBudget = () => {
     //delete removed budgets
     const [deleteBudgetId, setDeleteBudgetId] = useState([]);
 
-    const deleteRow = (id) => {
-        setDeleteBudgetId(prev => [...prev, id]);
-
-        const updatedRows = budget.filter(row => row.id !== id);
-
-        if (updatedRows.length === 0) {
-            setBudget([{ title: '', amount: '', department_id: '', location_id: '' }]);
-        } else {
-            setBudget(updatedRows);
+    const deleteRow = (index, id = null) => {
+        if (id) {
+            setDeleteBudgetId(prev => [...prev, id]);
         }
+
+        setBudget(prev => {
+            const updated = prev.filter((_, i) => i !== index);
+
+            // ensure at least one row exists
+            return updated.length === 0 ? [emptyBudget] : updated;
+        });
     };
-    console.log(deleteBudgetId)
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const payload = { ...form, budget };
             const res = await axiosInstance.put(`/budgetTimelines/${id}`, payload);
-            if(deleteBudgetId>0){
+            if (deleteBudgetId > 0) {
                 const budgetDeleteRes = await axiosInstance.post('/deleteBudgets', {
                     ids: deleteBudgetId
                 });
@@ -167,11 +164,26 @@ const EditBudget = () => {
 
     }
 
+    const navigate = useNavigate()
+    useEffect(() => {
+        if (form && form.isEditable === false) {
+            alert("Can't edit approved item!");
+            navigate('/budget-timelines', { replace: true });
+        }
+    }, [form, navigate]);
+
+    if (loading) return <div>Loading...</div>;
+
+    // Expense not found
+    if (!form) {
+        alert("Can't find editable item!");
+        navigate('/budget-timelines', { replace: true });
+    }
     return (
         <>
             <div className="w-full p-8 flex justify-center items-center mt-8">
                 <div className=" bg-white rounded-md p-7  text-center w-full">
-                    <h2 className="text-4xl font-bold uppercase mb-8 ">Edit Budget Timeline </h2>
+                    <h2 className="text-4xl font-bold  mb-8 ">Edit Budget Timeline </h2>
                     <div className="flex justify-center items-center">
                         <form onSubmit={handleSubmit} className="w-full">
                             <div className="mb-6 w-full text-start">
@@ -289,7 +301,7 @@ const EditBudget = () => {
                                                         <td className="p-2 border border-[#989898]">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => deleteRow(row.id)}
+                                                                onClick={() => deleteRow(index, row.id)}
                                                                 className="py-1 rounded-lg px-4 bg-red-600 text-white"
                                                             >
                                                                 Remove

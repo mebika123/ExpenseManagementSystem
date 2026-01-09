@@ -6,14 +6,15 @@ import axiosInstance from '../../axios';
 import { useNavigate } from 'react-router-dom';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import SearchBar from '../../components/ui/SearchBar';
+import Modal from '../../components/ui/Modal';
+import ModalForm from '../../components/ui/form/ModalForm';
 
 
 const Department = () => {
     // modal
-    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
-    const openModal = () => setIsOpen(true);
-    const closeModal = () => setIsOpen(false);
+    const [editingId, setEditingId] = useState(null);
+
 
     //create new department
     const [form, setForm] = useState({ name: '' });
@@ -24,24 +25,51 @@ const Department = () => {
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
+    const openAdd = () => {
+        setForm({ name: "" });
+        setEditingId(null);
+        setError({});
+        setIsOpen(true);
+    };
+    const openEdit = (department) => {
+        setForm({ name: department.name });
+        setEditingId(department.id);
+        setError({});
+        setIsOpen(true);
+    };
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axiosInstance.post("/departments", form);
-            if (res.data) {
-                alert("Department Created Successfully!");
-                setIsOpen(false)
+            setError({})
+            if (editingId) {
+                const res = await axiosInstance.put(`/departments/${editingId}`, form);
+                if (res) {
+                    alert("Department edited successfully!")
+                    setDepartment(prev =>
+                        prev.map(doc =>
+                            doc.id === editingId
+                                ? { ...doc, ...form }
+                                : doc
+                        )
+                    );
+                }
 
+            } else {
+                const res = await axiosInstance.post("/departments", form);
+                if (res.data) {
+                    alert("Department Created Successfully!");
+                    setDepartment(prev => [...prev, res.data]);
+
+                }
             }
+            setIsOpen(false)
+
+
         } catch (err) {
-            const errors = err.response?.data?.errors || {};
-            setFormError({
-                name: errors.name || []
-            });
-            setError(err.response?.data?.message || 'Something went wrong');
+            setError(err.response?.data?.errors || 'Something went wrong');
         }
     }
 
@@ -109,41 +137,27 @@ const Department = () => {
 
     return (
         <div className="w-full p-8 flex justify-center items-center mt-8">
-            {isOpen && (
-                <div className="h-screen w-screen fixed bg-[#000000b8] top-0 left-0 flex justify-center items-center">
-                    <div className="bg-white p-5 w-1/3 rounded-md ">
-                        <div className="text-end"><FontAwesomeIcon icon={faXmark} onClick={closeModal} /></div>
-                        <h2 className="text-2xl font-bold uppercase mb-8 ">New Department </h2>
-                        <div className="flex justify-center items-center">
-                            <form className="w-3/4" onSubmit={handleSubmit}>
-                                <div className="mb-6 w-full">
-                                    <input type="text" className="w-full p-2 rounded-md border border-[#989898]" name='name' value={form.name} onChange={handleChange} placeholder='Department Name' />
-                                    <p className="text-red-500">
-                                        {
-                                            formError.name[0]
-                                        }
-                                    </p>
-                                </div>
-                                <div className="mb-6 w-full">
-                                    <input type="submit" className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/3" />
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            )}
+            
+            <Modal isOpen={isOpen}
+                title={editingId ? "Edit Department" : "New Department"}
+                onClose={() => setIsOpen(false)}>
+                <ModalForm
+                    form={form}
+                    errors={error}
+                    onChange={handleChange}
+                    onSubmit={handleSubmit}
+                    submitText={editingId ? "Update" : "Save"}
+                />
+            </Modal>
 
             <div className="w-4/5 bg-white rounded-md p-7  text-center">
 
-                <h2 className="text-4xl font-bold uppercase mb-8 ">Department List </h2>
+                <h2 className="text-4xl font-bold  mb-8 ">Department List </h2>
                 <div className="flex justify-end gap-3  items-center ml-10">
                     <SearchBar
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter} />
-                    <a className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openModal}>Add New</a>
+                    <a className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</a>
                 </div>
 
                 <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)]">
@@ -174,7 +188,8 @@ const Department = () => {
                                             <td className="py-3 px-2">{department.code}</td>
                                             <td className="py-3 px-2">
                                                 <div className="flex gap-4 items-center justify-center">
-                                                    <FontAwesomeIcon icon={faPen} className='text-[#29903B]' />
+                                                    <FontAwesomeIcon icon={faPen} className='text-[#29903B]'
+                                                        onClick={() => openEdit(department)} />
                                                     <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(department.id)}
                                                         className='text-[#FF0133]' />
                                                 </div>

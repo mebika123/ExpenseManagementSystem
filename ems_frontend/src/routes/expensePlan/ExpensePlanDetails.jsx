@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import CommentModal from '../../components/ui/CommentModal';
 import axiosInstance from '../../axios';
 
 const ExpensePlanDetails = () => {
     const { id } = useParams()
     const [expensePlan, setExpensePlan] = useState({});
     const navigate = useNavigate();
+    const [expenseGenerated, setExpenseGenerated] = useState(false);
+
 
 
     useEffect(() => {
@@ -13,6 +16,8 @@ const ExpensePlanDetails = () => {
             try {
                 const res = await axiosInstance.get(`expensePlan/details/${id}`)
                 setExpensePlan(res.data.expensePlan)
+                setExpenseGenerated(res.data.expense_generated);
+
             } catch (error) {
                 console.log(error)
             }
@@ -20,24 +25,91 @@ const ExpensePlanDetails = () => {
         fetchExpensePlan();
     }, [])
 
+
+
+
     const generateExpense = () => {
         navigate('/expense/new', {
-            state: { 
+            state: {
                 expense_plan_id: id
             }
         });
 
     }
 
+    //update status
+
+    const [isOpen, setIsOpen] = useState(false)
+
+    const [pendingStatus, setPendingStatus] = useState()
+    const [commentError, setCommentError] = useState('');
+
+    const changeStatus = (status) => {
+        setIsOpen(true);
+        setPendingStatus(status);
+    }
+    const handelCommentModal = async (data) => {
+        const payload = {
+            status: pendingStatus,
+            expense_plan_id: expensePlan.id,
+            comment: data
+        };
+
+        try {
+            setCommentError({});
+            const res = await axiosInstance.post('/expense-plan/updatedStatus', payload);
+            setIsOpen(false);
+
+            if (res) {
+                alert(res.data.message)
+            }
+        } catch (error) {
+            if (error.response?.status === 422) {
+                setCommentError(error.response.data.errors);
+                console.log(error.response.data.errors)
+            }
+        }
+    };
     return (
         <>
+            <CommentModal isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                onSendData={handelCommentModal}
+                commentError={commentError}
+
+            />
             <div className="w-full p-8 flex justify-center items-center mt-8">
                 <div className="w-full bg-white rounded-md p-7  text-center">
-                    <h2 className="text-4xl font-bold uppercase mb-8 ">Expense Details</h2>
-                    <div className="flex justify-end ml-10">
-                        <Link to={`/expense-plan/edit/${id}`} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Edit</Link>
+                    <h2 className="text-4xl font-bold  mb-8 ">Expense Details</h2>
+                    {
+                        expensePlan.latest_status?.[0]?.status !== 'approved' &&
+                        <div className="mb-6 w-full  gap-2 flex justify-end">
+                            {
+                                expensePlan?.latest_status?.[0]?.status == 'pending' &&
+                                <>
+                                    <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
+                                    <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
+                                </>
+                            }
+                            {
+                                expensePlan?.latest_status?.[0]?.status == 'checked' &&
+                                <>
+                                    <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approved</button>
+                                    <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
+                                </>
+                            }
 
-                    </div>
+                            {
+                                expensePlan?.latest_status?.[0]?.status == 'rejected' &&
+                                <button type='button' className="px-4 py-2 bg-[#492ef7]  rounded-lg text-white w-28" onClick={() => changeStatus('pending')}>ReSubmit</button>
+
+                            }
+
+                        </div>
+                    }
+                    {/* <div className="flex justify-end ml-10">
+                        <Link to={`/expense-plan/edit/${id}`} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Edit</Link>
+                    </div> */}
                     <div className="flex justify-center items-center">
                         <div className="w-full">
                             <div className="grid lg:grid-cols-2 mb-2">
@@ -170,13 +242,26 @@ const ExpensePlanDetails = () => {
                                     </ul></div>
 
                             </div>
-                            <div className="mb-6 w-full justify-end gap-2 flex">
-                                <button className="px-4 py-2 bg-[#6bd192]  rounded-lg text-white w-1/5" >Checked</button>
-                                <button className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-1/5" >Reject</button>
-                            </div>
-                            <div className="mb-6 w-full justify-end gap-2 flex">
-                                <button className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/5" onClick={generateExpense}>Genrate Expense</button>
-                            </div>
+
+
+
+                            {expensePlan.latest_status?.[0]?.status == 'approved' &&
+                                (
+                                    !expenseGenerated ? (
+                                        <div className="mb-6 w-full justify-end gap-2 flex">
+                                            <button className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/5" onClick={generateExpense}>Genrate Expense</button>
+
+                                        </div>
+                                    ) : (
+
+                                        <div className="mb-6 w-full justify-center gap-2 flex">
+                                            <div className="text-xl font-semibold">Expense Already Generate</div>
+                                        </div>
+                                    )
+                                )
+                            }
+
+
 
                         </div>
 
@@ -184,7 +269,7 @@ const ExpensePlanDetails = () => {
 
                 </div>
 
-            </div>
+            </div >
         </>)
 }
 

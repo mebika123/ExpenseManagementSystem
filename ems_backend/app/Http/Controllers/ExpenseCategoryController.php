@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExpenseCategory;
 use App\Repositories\ExpenseCategoryRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ExpenseCategoryController extends Controller
 {
@@ -22,12 +23,13 @@ class ExpenseCategoryController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:expense_categories,name',
         ]);
         $latest = ExpenseCategory::latest('id')->first();
         $nextId = $latest ? $latest->id + 1 : 1;
         $code =  'EXP_CATEGORY' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
         $data['code'] = $code;
+        Log::info($data);
         return $this->expense_category_repo->create($data);
     }
 
@@ -38,7 +40,10 @@ class ExpenseCategoryController extends Controller
 
     public function update(Request $request, $id)
     {
-        return $this->expense_category_repo->update($id, $request->all());
+         $data = $request->validate([
+            'name' => 'required|string|max:255|unique:expense_categories,name,'.$id,
+        ]);
+        return $this->expense_category_repo->update($id, $data);
     }
 
     public function destroy($id)

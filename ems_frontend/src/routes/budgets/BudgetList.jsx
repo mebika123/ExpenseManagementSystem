@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import SearchBar from '../../components/ui/SearchBar';
+import Pagination from '../../components/ui/Pagination';
 
 
 const BudgetList = () => {
@@ -18,8 +19,8 @@ const BudgetList = () => {
         const fetchBudgetTimeline = async () => {
             try {
                 const res = await axiosInstance.get('/budgetTimelines');
-                setBudgetTimelines(res.data.budgets);
-                // console.log(budgetTimelines);
+                setBudgetTimelines(res.data.budgetTimelines);
+                console.log(budgetTimelines);
             } catch (error) {
                 console.log(error)
             }
@@ -40,14 +41,19 @@ const BudgetList = () => {
         columnHelper.accessor("code", { header: "Code" }),
         columnHelper.accessor("start_at", { header: "Start At" }),
         columnHelper.accessor("end_at", { header: "End At" }),
+        columnHelper.accessor("status", { header: "Status" }),
     ];
     const [globalFilter, setGlobalFilter] = useState("");
-
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10,
+    });
     const table = useReactTable({
         data: safeBudgetTimelines,
         columns,
-        state: { globalFilter },
+        state: { globalFilter, pagination },
         onGlobalFilterChange: setGlobalFilter,
+        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -72,13 +78,13 @@ const BudgetList = () => {
         <div className="w-full p-8 flex justify-center items-center mt-8">
             <div className="w-full bg-white rounded-md p-7  text-center">
 
-                <h2 className="text-4xl font-bold uppercase mb-8 ">Budget TimLine List </h2>
+                <h2 className="text-4xl font-bold  mb-8 ">Budget Timeline List </h2>
                 <div className="flex justify-end ml-10 gap-3">
                     <SearchBar
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter}
                     />
-                    <a href='/budget-timeline/new' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</a>
+                    <Link to={'/budget-timeline/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
 
                 </div>
 
@@ -91,7 +97,7 @@ const BudgetList = () => {
                                 <th className="py-3 px-2">Code</th>
                                 <th className="py-3 px-2">Start At</th>
                                 <th className="py-3 px-2">End At</th>
-                                {/* <th className="py-3 px-2">Status</th> */}
+                                <th className="py-3 px-2">Status</th>
                                 <th className="py-3 px-2 w-1/5">Action</th>
                             </tr>
                         </thead>
@@ -118,10 +124,50 @@ const BudgetList = () => {
                                             <td className="py-3 px-2">{budgetTimeline.start_at}</td>
                                             <td className="py-3 px-2">{budgetTimeline.end_at}</td>
                                             <td className="py-3 px-2">
+                                                <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
+                                                 ${budgetTimeline.latest_status[0].status === 'pending'
+                                                        ? 'text-yellow-600 bg-yellow-50 ring-yellow-500/10'
+                                                        : budgetTimeline.latest_status[0].status === 'approved'
+                                                            ? 'text-green-600 bg-green-50 ring-green-500/10'
+                                                            : budgetTimeline.latest_status[0].status === 'rejected'
+                                                                ? 'text-red-600 bg-red-50 ring-red-500/10'
+                                                                : 'text-[#3F51B6] bg-gray-50 ring-[#626daa]'
+                                                    }`} >
+
+                                                    {budgetTimeline.latest_status[0].status === 'pending'
+                                                        ? 'Pending'
+                                                        : budgetTimeline.latest_status[0].status === 'approved'
+                                                            ? 'Approved'
+                                                        : budgetTimeline.latest_status[0].status === 'checked'
+                                                            ? 'Checked'
+                                                            : budgetTimeline.latest_status[0].status === 'rejected'
+                                                                ? 'Rejected' : '-'}
+
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-2">
                                                 <div className="flex gap-4 items-center justify-center">
-                                                    <Link to={`/budget-timeline/details/${budgetTimeline.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
-                                                    <Link to={`/budget-timeline/edit/${budgetTimeline.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
-                                                    <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(budgetTimeline.id)} className='text-[#FF0133]' />
+                                                    <Link to={`/budget-timeline/details/${budgetTimeline.id}`} >
+                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#3F51B6]">
+                                                            <FontAwesomeIcon icon={faEye} />
+                                                        </div>
+                                                    </Link>
+                                                    {budgetTimeline?.isEditable &&
+                                                        <div className="flex gap-4 items-center justify-center">
+                                                            <Link to={`/budget-timeline/edit/${budgetTimeline.id}`}>
+                                                                <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]">
+                                                                    <FontAwesomeIcon icon={faPen} />
+
+                                                                </div>
+
+                                                            </Link>
+                                                            <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF3641]">
+                                                                <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(budgetTimeline.id)} />
+
+                                                            </div>
+                                                        </div>
+                                                    }
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -133,6 +179,9 @@ const BudgetList = () => {
                         )}
 
                     </table>
+                    {/* {table.getPageCount() > 1 && */}
+                    <Pagination table={table} />
+                    {/* } */}
                 </div>
             </div>
 

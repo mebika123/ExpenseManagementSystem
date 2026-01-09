@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../../axios';
+import { useNavigate } from 'react-router-dom';
 
 const AdvanceForm = ({ id, title, data }) => {
     const [loading, setLoading] = useState(false);
@@ -61,6 +62,7 @@ const AdvanceForm = ({ id, title, data }) => {
     const selectedPlan = expensePlans.find(
         (plan) => plan.id === Number(form.expense_plan_id)
     );
+    const {navigate} = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -72,11 +74,14 @@ const AdvanceForm = ({ id, title, data }) => {
             if (id) {
                 await axiosInstance.put(`/advances/${id}`, form);
                 alert("Advance updated successfully");
+                navigate('/advances')
             }
             else {
 
                 await axiosInstance.post("/advances", form);
                 alert("Advance created successfully");
+                navigate('/advances')
+
             }
         } catch (error) {
             if (error.response?.status === 422) {
@@ -127,9 +132,15 @@ const AdvanceForm = ({ id, title, data }) => {
                                         className="w-full p-2 border rounded-md"
                                     >
                                         <option value="">Select</option>
-                                        {expensePlans?.map(plans => (
-                                            <option key={plans.id} value={plans.id}>{plans.title}</option>
-                                        ))}
+                                        {expensePlans && expensePlans.length > 0 ? (
+                                            expensePlans.map((plan) => (
+                                                <option key={plan.id} value={plan.id}>
+                                                    {plan.code}
+                                                </option>
+                                            ))
+                                        ) : (
+                                            <option value="">No plans available</option>
+                                        )}
                                     </select>
                                     {selectedPlan && (
                                         <p className="text-base text-start text-gray-600 whitespace-nowrap mt-2">

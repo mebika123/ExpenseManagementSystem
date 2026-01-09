@@ -30,6 +30,13 @@ import AddRole from './routes/role/AddRole.jsx'
 import AddAdvance from './routes/advance/AddAdvance.jsx'
 import EditAdvance from './routes/advance/EditAdvance.jsx'
 import AdvanceList from './routes/advance/AdvanceList.jsx'
+// import TransactionaList from './routes/transactionalLog/TransactionaList.jsx'
+import UnSettledTransactions from './routes/transactionalLog/UnSettledTransactions.jsx'
+import TransactionalLogs from './routes/transactionalLog/TransactionalLogs.jsx'
+import AdvanceSetteled from './routes/advanceSettlement/AdvanceSetteled.jsx'
+import Reimbursement from './routes/reimbursement/Reimbursement.jsx'
+import UnsettledAdvanceSettlement from './routes/advanceSettlement/UnsettledAdvanceSettlement.jsx'
+import UnsettledReimbursement from './routes/reimbursement/UnsettledReimbursement.jsx'
 
 
 const router = createBrowserRouter([
@@ -73,6 +80,16 @@ const router = createBrowserRouter([
       { path: "/budget-timeline/new", element: <AddBudget /> },
       { path: "/budget-timeline/edit/:id", element: <EditBudget /> },
       { path: "/budget-timeline/details/:id", element: <BudgetDetails /> },
+
+      { path: "/unsettled/transactional-logs", element: <UnSettledTransactions /> },
+      { path: "/transactional-logs", element: <TransactionalLogs /> },
+      
+      { path: "/advance-settlements", element: <AdvanceSetteled /> },
+      { path: "/advance-settlements/unsettled", element: <UnsettledAdvanceSettlement /> },
+
+      { path: "/reimbursements", element: <Reimbursement /> },
+      { path: "/reimbursements/unsettled", element: <UnsettledReimbursement /> },
+
     ]
   },
 ]);

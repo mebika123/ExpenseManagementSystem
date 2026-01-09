@@ -1,44 +1,65 @@
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from '@fortawesome/free-solid-svg-icons'
-import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
-import { useNavigate } from 'react-router-dom';
+import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
+import SearchBar from '../../components/ui/SearchBar';
+import Pagination from '../../components/ui/Pagination';
+import Modal from '../../components/ui/Modal';
+import ModalForm from '../../components/ui/form/ModalForm';
+import { faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 
 const ExpenseCategory = () => {
     // modal
-    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+
     const openModal = () => setIsOpen(true);
-    const closeModal = () => setIsOpen(false);
 
     //create new expense category
-    const [form, setForm] = useState({ title: '' });
+    const [form, setForm] = useState({ name: '' });
 
     const [error, setError] = useState(null)
-    const [formError, setFormError] = useState({ title: [] })
+    const [formError, setFormError] = useState({ name: [] })
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
+    const openAdd = () => {
+        setForm({ name: "" });
+        setEditingId(null);
+        setError({});
+        setIsOpen(true);
+    };
+    const openEdit = (expense_category) => {
+        setForm({ name: expense_category.name });
+        setEditingId(expense_category.id);
+        setError({});
+        setIsOpen(true);
+    };
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axiosInstance.post("/expenseCategories", form);
-            if (res.data) {
-                alert("Expense Category Created Successfully!");
-                setIsOpen(false)
+            setError({})
+            if (editingId) {
+                const res = await axiosInstance.put(`/expenseCategories/${editingId}`, form);
+                if (res.data) {
+                    alert("Expense Category Edited Successfully!");
+                    setExpenseCategories(prev => prev.map(expCategory => expCategory.id == editingId ? { ...expCategory, ...form } : expCategory))
+                }
 
+            } else {
+                const res = await axiosInstance.post("/expenseCategories", form);
+                if (res.data) {
+                    alert("Expense Category Created Successfully!");
+                    setExpenseCategories(prev => [...prev, res.data])
+                }
             }
-        } catch (err) {
-            const errors = err.response?.data?.errors || {};
-            setFormError({
-                title: errors.title || []
-            });
-            setError(err.response?.data?.message || 'Something went wrong');
+            setIsOpen(false)
+        } catch (err) {            
+            setError(err.response?.data?.errors || 'Something went wrong');
         }
     }
 
@@ -79,16 +100,47 @@ const ExpenseCategory = () => {
         }
     }
 
+    const safeExpenseCategories = expenseCategories ?? [];
+
+
+    const columnHelper = createColumnHelper();
+
+    const columns = [
+        columnHelper.accessor("name", { header: "Name" }),
+        columnHelper.accessor("code", { header: "Code" }),
+    ];
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+    const [globalFilter, setGlobalFilter] = useState("");
+
+    const table = useReactTable({
+        data: safeExpenseCategories,
+        columns,
+        state: {
+            globalFilter,
+            pagination,
+
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        onPaginationChange: setPagination,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
+
 
 
 
     return (
         <div className="w-full p-8 flex justify-center items-center mt-8">
-            {isOpen && (
+            {/* {isOpen && (
                 <div className="h-screen w-screen fixed bg-[#000000b8] top-0 left-0 flex justify-center items-center">
                     <div className="bg-white p-5 w-1/3 rounded-md text-center">
                         <div className="text-end"><FontAwesomeIcon icon={faXmark} onClick={closeModal} /></div>
-                        <h2 className="text-2xl font-bold uppercase mb-8 ">New Expense Category </h2>
+                        <h2 className="text-2xl font-bold  mb-8 ">New Expense Category </h2>
                         <div className="flex justify-center items-center">
                             <form className="w-3/4" onSubmit={handleSubmit}>
                                 <div className="mb-6 w-full">
@@ -109,13 +161,28 @@ const ExpenseCategory = () => {
 
                 </div>
 
-            )}
+            )} */}
+            <Modal isOpen={isOpen}
+                title={editingId ? "Edit Expense Category" : "New Expense Category"}
+                onClose={() => setIsOpen(false)}>
+                <ModalForm
+                    form={form}
+                    errors={error}
+                    onChange={handleChange}
+                    onSubmit={handleSubmit}
+                    submitText={editingId ? "Update" : "Save"}
+                />
+            </Modal>
 
             <div className="w-4/5 bg-white rounded-md p-7  text-center">
 
-                <h2 className="text-4xl font-bold uppercase mb-8 ">Expense Categories List </h2>
-                <div className="flex justify-end ml-10">
-                    <a className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openModal}>Add New</a>
+                <h2 className="text-4xl font-bold  mb-8 ">Expense Categories List </h2>
+                <div className="flex justify-end ml-10 gap-4">
+                    <SearchBar
+                        globalFilter={globalFilter}
+                        setGlobalFilter={setGlobalFilter}
+                    />
+                    <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</button>
 
                 </div>
 
@@ -140,13 +207,20 @@ const ExpenseCategory = () => {
                                 expenseCategories.map((expenseCategory, index) => (
                                     <tr className="mb-3" key={expenseCategory.id}>
                                         <td className="py-3">{index + 1}</td>
-                                        <td className="py-3">{expenseCategory.title}</td>
+                                        <td className="py-3">{expenseCategory.name}</td>
                                         <td className="py-3">{expenseCategory.code}</td>
-                                        <td className="py-3">
+                                        <td className="py-3 px-2">
                                             <div className="flex gap-4 items-center justify-center">
-                                                <a className='px-4 py-2 bg-[#5619fe]  rounded-lg text-white'>Edit</a>
-                                                <button onClick={() => handleDelete(expenseCategory.id)}
-                                                    className='px-4 py-2 bg-[#fe1919]  rounded-lg text-white'>Delete</button>
+                                                <FontAwesomeIcon
+                                                    icon={faPen}
+                                                    onClick={() => openEdit(expenseCategory)}
+                                                    className="text-[#29903B]"
+                                                />
+                                                <FontAwesomeIcon
+                                                    icon={faTrashCan}
+                                                    onClick={() => handleDelete(expenseCategory.id)}
+                                                    className="text-[#FF0133]"
+                                                />
                                             </div>
                                         </td>
                                     </tr>
@@ -158,6 +232,7 @@ const ExpenseCategory = () => {
 
                     </table>
                 </div>
+                    <Pagination table={table} />
             </div>
 
         </div>

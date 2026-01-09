@@ -50,7 +50,7 @@ const Login = () => {
   return (<>
     <div className="flex justify-center items-center h-screen w-full">
       <div className="text-center p-4 rounded-lg w-1/3 bg-white shadow-lg shadow-indigo-500/50">
-        <h2 className="text-4xl font-bold uppercase mb-8 ">Welcome </h2>
+        <h2 className="text-4xl font-bold  mb-8 ">Welcome </h2>
         {/* <h6 className="">EMS</h6> */}
         <div className="flex justify-center items-center">
           <form onSubmit={handleSubmit} className="w-5/6">

@@ -6,6 +6,8 @@ use App\Http\Requests\StoreAdvanceRequest;
 use App\Models\Advance;
 use App\Repositories\AdvanceRepository;
 use App\Repositories\TransactionalLogRepository;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -50,11 +52,24 @@ class AdvanceService
         });
     }
 
+    // public function show($id)
+    // {
+    //     try {
+    //         $advance = Advance::with('contact:id,code', 'expensePlan:id,code', 'latestStatus')->find($id);
+    //         return $advance;
+    //     } catch (Exception $e) {
+    //         return response()->json(['message' => $e->getMessage()]);
+    //     }
+    // }
     public function show($id)
     {
-        $advance = Advance::with('latestStatus')->find($id);
-        return $advance;
-    }
+        $advance = Advance::with('contact:id,code', 'expensePlan:id,code', 'latestStatus')->find($id);
+        $advance->isEditable = $advance->latestStatus?->first()?->status !== 'approved';
+
+        return  $advance;
+        }
+
+
 
     public function delete($id)
     {
@@ -63,6 +78,32 @@ class AdvanceService
 
             $advance->statuses()->delete();
             $this->advance_repo->delete($id);
+        });
+    }
+    public function updateStatus(array $data)
+    {
+        return DB::transaction(function () use ($data) {
+
+            $userId  = Auth::id();
+            $advance = Advance::findOrFail($data['advance_id']);
+            $status  = $data['status'];
+            $comment = $data['comment'] ?? null;
+
+
+            $res = $this->status_service->changeStatus($advance, $status, $userId, $comment);
+
+
+            if ($status === 'approved') {
+
+                $this->transactional_log_repo->createFor($advance, [
+                    'amount' => $advance->amount,
+                    'payment_date' => Carbon::now(),
+                    'contact_id' => $advance->contact_id
+                ]);
+            }
+
+
+            return $res;
         });
     }
 }

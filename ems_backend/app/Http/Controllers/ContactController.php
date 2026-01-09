@@ -26,7 +26,7 @@ class ContactController extends Controller
 
     public function store(StoreUserRequest $request)
     {
-        $data = $request->all();
+        $data = $request->validated();
         return $this->contactRepo->create($data);
     }
 

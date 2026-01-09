@@ -13,7 +13,7 @@ const ExpensePlanList = () => {
         const fetchExpense = async () => {
             try {
                 const res = await axiosInstance.get('/expensesPlan');
-                setExpensesPlan(res.data.expensesPlan);   
+                setExpensesPlan(res.data.expensesPlan);
                 console.log(res.data.expensesPlan);
             } catch (error) {
                 console.log(error);
@@ -78,12 +78,25 @@ const ExpensePlanList = () => {
                                         <td className="py-3 px-2">{expense.code}</td>
                                         <td className="py-3 px-2">{expense.budget_timeline.code}</td>
                                         <td className="py-3 px-2">{expense.created_by_id}</td>
-                                        <td className="py-3 px-2">{expense.latest_status[0].status}</td>
+                                        <td className="py-3 px-2">
+                                            <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
+                                                 ${expense.latest_status[0].status === 'pending'
+                                                    ? 'text-yellow-600 bg-yellow-50 ring-yellow-500/10'
+                                                    : expense.latest_status[0].status === 'approved'
+                                                        ? 'text-green-600 bg-green-50 ring-green-500/10'
+                                                        : expense.latest_status[0].status === 'rejected'
+                                                            ? 'text-red-600 bg-red-50 ring-red-500/10'
+                                                            : 'text-gray-600 bg-gray-50 ring-gray-500/10'
+                                                }`} >{expense.latest_status[0].status}</span></td>
                                         <td className="py-3 px-2 w-2/7">
                                             <div className="flex gap-4 items-center justify-center">
                                                 <Link to={`/expense-plan/details/${expense.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
-                                                <Link to={`/expense-plan/edit/${expense.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
-                                                <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(expense.id)} className='text-[#FF0133]' />
+                                                {expense?.isEditable &&
+                                                    <div className="flex gap-4 items-center justify-center">
+                                                        <Link to={`/expense-plan/edit/${expense.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
+                                                        <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(expense.id)} className='text-[#FF0133]' />
+                                                    </div>
+                                                }
 
                                             </div>
                                         </td>

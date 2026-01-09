@@ -7,9 +7,10 @@ const ModalForm = ({
     onSubmit,
     submitText = "Save"
 }) => {
+    console.log("from form",errors)
     
     return (
-        <form className="w-3/4 mx-auto" onSubmit={onSubmit}>
+        <form className="w-3/4 mx-auto text-center" onSubmit={onSubmit}>
             <div className="mb-4">
                 <input
                     type="text"

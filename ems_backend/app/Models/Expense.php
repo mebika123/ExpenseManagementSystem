@@ -10,7 +10,7 @@ class Expense extends Model implements HasStatus
 {
   use HasStatusTrait;
 
-  protected $fillable = ['title', 'code', 'created_by_id', 'budget_timeline_id','expense_plan_id'];
+  protected $fillable = ['title', 'code', 'created_by_id', 'budget_timeline_id', 'expense_plan_id'];
   public function expense_items()
   {
     return $this->hasMany(ExpenseItem::class);
@@ -21,6 +21,10 @@ class Expense extends Model implements HasStatus
   }
   public function  transactionalAttachments()
   {
-    return $this->morphMany( TransactionalAttachment::class, 'model');
+    return $this->morphMany(TransactionalAttachment::class, 'model');
   }
+  public function expensePlan()
+{
+    return $this->belongsTo(ExpensePlan::class);
+}
 }

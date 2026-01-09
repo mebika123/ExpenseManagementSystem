@@ -22,7 +22,7 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:departments,name',
         ]);
         $latest = Department::latest('id')->first();
         $nextId = $latest ? $latest->id + 1 : 1;
@@ -38,7 +38,10 @@ class DepartmentController extends Controller
 
     public function update(Request $request, $id)
     {
-        return $this->department->update($id, $request->all());
+         $data = $request->validate([
+            'name' => 'required|string|max:255|unique:departments,name,'.$id,
+        ]);
+        return $this->department->update($id, $data);
     }
 
     public function destroy($id)

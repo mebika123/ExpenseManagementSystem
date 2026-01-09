@@ -69,8 +69,7 @@ const AddContact = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log("inside");
-            const res = await axiosInstance.post("/users", form);
+            const res = await axiosInstance.post("/contacts", form);
             // if (res.data) {
 
             // }
@@ -89,80 +88,81 @@ const AddContact = () => {
 
 
     }
-    return (<>
-        <div className="w-full p-8 flex justify-center items-center mt-8">
-            <div className="w-2/3 bg-white rounded-md p-7  text-center">
-                <h2 className="text-4xl font-bold uppercase mb-8 ">New Contact </h2>
-                <div className="flex justify-center items-center">
-                    <form onSubmit={handleSubmit} className="w-3/4">
-                        <div className="mb-6 w-full">
-                            <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='name' placeholder='name' value={form.name} onChange={handleChange} />
-                            <p className="text-red-500">
-                                {
-                                    formError.name[0]
-                                }
-                            </p>
-                        </div>
-                        <div className="mb-6 w-full">
-                            <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='email' placeholder='Email' value={form.email} onChange={handleChange} />
-                            <p className="text-red-500">
-                                {
-                                    formError.email[0]
-                                }
-                            </p>
-                        </div>
-                        <div className="mb-6 w-full">
-                            <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='phone_no' placeholder='Contact' value={form.phone_no} onChange={handleChange} />
-                            <p className="text-red-500">
-                                {
-                                    formError.phone_no[0]
-                                }
-                            </p>
-                        </div>
-                        <div className="mb-6 w-full">
-                            <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='pan_no' placeholder='PAN' value={form.pan_no} onChange={handleChange} />
-                            <p className="text-red-500">
-                                {
-                                    formError.pan_no[0]
-                                }
-                            </p>
-                        </div>
-                        <div className="flex gap-3">
+    return (
+        <>
+            <div className="w-full p-8 flex justify-center items-center mt-8">
+                <div className="w-2/3 bg-white rounded-md p-7  text-center">
+                    <h2 className="text-4xl font-bold  mb-8 ">New Contact </h2>
+                    <div className="flex justify-center items-center">
+                        <form onSubmit={handleSubmit} className="w-3/4">
                             <div className="mb-6 w-full">
-                                <select name="department_id" className="w-full p-2 rounded-md border border-[#D1D1D1]" value={form.department_id} onChange={handleChange} >
-                                    <option value="">Select department</option>
-                                    {
-                                        departments.map((department, index) => (
-                                            <option value={department.id}>{department.name}</option>
-
-                                        ))
-                                    }
-                                </select>
+                                <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='name' placeholder='name' value={form.name} onChange={handleChange} />
                                 <p className="text-red-500">
                                     {
-                                        formError.department_id[0]
+                                        formError.name[0]
                                     }
                                 </p>
                             </div>
                             <div className="mb-6 w-full">
-                                <select name="location_id" className="w-full p-2 rounded-md border border-[#D1D1D1]" value={form.location_id} onChange={handleChange}>
-                                    <option value="">Select location</option>
-                                    {
-                                        locations.map((location, index) => (
-                                            <option value={location.id}>{location.name}</option>
-
-                                        ))
-                                    }
-                                </select>
+                                <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='email' placeholder='Email' value={form.email} onChange={handleChange} />
                                 <p className="text-red-500">
                                     {
-                                        formError.location_id[0]
+                                        formError.email[0]
                                     }
                                 </p>
                             </div>
-                        </div>
-                        <div className="flex gap-3 items-center mb-6 ">
-                            <label htmlFor="">Contact Type:</label>
+                            <div className="mb-6 w-full">
+                                <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='phone_no' placeholder='Contact' value={form.phone_no} onChange={handleChange} />
+                                <p className="text-red-500">
+                                    {
+                                        formError.phone_no[0]
+                                    }
+                                </p>
+                            </div>
+                            <div className="mb-6 w-full">
+                                <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='pan_no' placeholder='PAN' value={form.pan_no} onChange={handleChange} />
+                                <p className="text-red-500">
+                                    {
+                                        formError.pan_no[0]
+                                    }
+                                </p>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="mb-6 w-full">
+                                    <select name="department_id" className="w-full p-2 rounded-md border border-[#D1D1D1]" value={form.department_id} onChange={handleChange} >
+                                        <option value="">Select department</option>
+                                        {
+                                            departments.map((department, index) => (
+                                                <option value={department.id}>{department.name}</option>
+
+                                            ))
+                                        }
+                                    </select>
+                                    <p className="text-red-500">
+                                        {
+                                            formError.department_id[0]
+                                        }
+                                    </p>
+                                </div>
+                                <div className="mb-6 w-full">
+                                    <select name="location_id" className="w-full p-2 rounded-md border border-[#D1D1D1]" value={form.location_id} onChange={handleChange}>
+                                        <option value="">Select location</option>
+                                        {
+                                            locations.map((location, index) => (
+                                                <option value={location.id}>{location.name}</option>
+
+                                            ))
+                                        }
+                                    </select>
+                                    <p className="text-red-500">
+                                        {
+                                            formError.location_id[0]
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3 items-center mb-6 ">
+                                <label htmlFor="">Contact Type:</label>
                                 <select name="location_id" className="w-1/3 p-2 rounded-md border border-[#D1D1D1]" value={form.location_id} onChange={handleChange}>
                                     <option value="employee">Employee</option>
                                     <option value="supplier">Supplier</option>
@@ -172,15 +172,15 @@ const AddContact = () => {
                                         formError.location_id[0]
                                     } */}
                                 </p>
-                        </div>
-                        <div className="mb-6 w-full">
-                            <input type="submit" className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/3" />
-                        </div>
-                    </form>
+                            </div>
+                            <div className="mb-6 w-full">
+                                <input type="submit" className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/3" />
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </>
+        </>
     )
 }
 

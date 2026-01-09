@@ -117,7 +117,7 @@ const AddUser = () => {
     return (<>
         <div className="w-full p-8 flex justify-center items-center mt-8">
             <div className="w-2/3 bg-white rounded-md p-7  text-center">
-                <h2 className="text-4xl font-bold uppercase mb-8 ">New User </h2>
+                <h2 className="text-4xl font-bold  mb-8 ">New User </h2>
                 <div className="flex justify-center items-center">
                     <form onSubmit={handleSubmit} className="w-3/4">
                         <div className="mb-6 w-full">

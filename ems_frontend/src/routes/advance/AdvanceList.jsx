@@ -4,7 +4,8 @@ import SearchBar from '../../components/ui/SearchBar';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faL, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faL, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import ModalAdvanceDetails from '../../components/ui/ModalAdvanceDetails';
 
 
 const AdvanceList = () => {
@@ -33,12 +34,13 @@ const AdvanceList = () => {
   const columnHelper = createColumnHelper();
 
   const columns = [
-    columnHelper.accessor("name", { header: "Contact" }),
+    columnHelper.accessor(row => row.contact?.code, { header: "Contact" }),
     columnHelper.accessor("purpose", { header: "Purpose" }),
     columnHelper.accessor("amount", { header: "Amount" }),
-    columnHelper.accessor("expense plan", { header: "Expense plan" }),
-    columnHelper.accessor("status", { header: "Status" }),
+    columnHelper.accessor(row => row.expense_plan?.title, { header: "Expense Plan" }),
+    columnHelper.accessor(row => row.latest_status?.[0]?.status, { header: "Status" }),
   ];
+
   const [globalFilter, setGlobalFilter] = useState("");
 
   console.log(safeAdvances)
@@ -61,11 +63,30 @@ const AdvanceList = () => {
       console.error(error);
     }
   };
+
+  const [isOpenDetail, setIsOpenDetail] = useState(false)
+  const [viewId, setViewId] = useState('')
+
+  const openViewModal = (id) => {
+    setViewId(id)
+    setIsOpenDetail(true)
+
+  }
+
   return (
     <div className="w-full p-8 flex justify-center items-center mt-8">
+      <ModalAdvanceDetails
+        isOpenDetail={isOpenDetail}
+        onCloseDetail={() => {
+          setIsOpenDetail(false);
+          setViewId('');
+        }}
+        id={viewId}
+      />
+
       <div className="w-full bg-white rounded-md p-7  text-center">
 
-        <h2 className="text-4xl font-bold uppercase mb-8 ">Advance List </h2>
+        <h2 className="text-4xl font-bold  mb-8 ">Advance List </h2>
 
         <div className="flex justify-end gap-3 ml-10">
           <SearchBar
@@ -119,21 +140,37 @@ const AdvanceList = () => {
                       <td className="py-3 px-2">{advance?.purpose}</td>
                       <td className="py-3 px-2">{advance?.amount}</td>
                       <td className="py-3 px-2">{advance?.expense_plan?.title}</td>
-                      <td className="py-3 px-2">{advance?.latest_status?.[0]?.status}</td>
+                      <td className="py-3 px-2">
+                        <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
+                                                 ${advance?.latest_status[0]?.status === 'pending'
+                            ? 'text-yellow-600 bg-yellow-50 ring-yellow-500/10'
+                            : advance?.latest_status[0]?.status === 'approved'
+                              ? 'text-green-600 bg-green-50 ring-green-500/10'
+                              : advance?.latest_status[0]?.status === 'rejected'
+                                ? 'text-red-600 bg-red-50 ring-red-500/10'
+                                : 'text-gray-600 bg-gray-50 ring-gray-500/10'
+                          }`} >{advance?.latest_status?.[0]?.status}
+                        </span></td>
 
                       <td className="py-3 px-2">
                         <div className="flex gap-4 items-center justify-center">
-                          <Link to={`/advance/edit/${advance.id}`}>
-                            <FontAwesomeIcon
-                              icon={faPen}
-                              className="text-[#29903B]"
-                            />
-                          </Link>
-                          <FontAwesomeIcon
-                            icon={faTrashCan}
-                            onClick={() => handleDelete(advance.id)}
-                            className="text-[#FF0133]"
-                          />
+                          <FontAwesomeIcon icon={faEye} onClick={() => openViewModal(advance.id)} />
+
+                          {advance?.isEditable &&
+                            <div className="flex gap-4 items-center justify-center">
+                              <Link to={`/advance/edit/${advance.id}`}>
+                                <FontAwesomeIcon
+                                  icon={faPen}
+                                  className="text-[#29903B]"
+                                />
+                              </Link>
+                              <FontAwesomeIcon
+                                icon={faTrashCan}
+                                onClick={() => handleDelete(advance.id)}
+                                className="text-[#FF0133]"
+                              />
+                            </div>}
+
                         </div>
                       </td>
                     </tr>

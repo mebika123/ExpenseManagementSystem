@@ -34,20 +34,16 @@ class UserService
     {
         try {
 
-            $parts = explode(' ', $data['name']);
-            $initials = count($parts) >= 2
-                ? strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1))
-                : strtoupper(substr($data['name'], 0, 2));
+            return DB::transaction(function () use ($data) {
+                $parts = explode(' ', $data['name']);
+                $initials = count($parts) >= 2
+                    ? strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1))
+                    : strtoupper(substr($data['name'], 0, 2));
 
-            $latest = Contact::latest('id')->first();
-            $nextId = $latest ? $latest->id + 1 : 1;
-            $contact_code =  $initials . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+                $latest = Contact::latest('id')->first();
+                $nextId = $latest ? $latest->id + 1 : 1;
+                $contact_code =  $initials . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
-            $latestEmp = Employee::latest('id')->first();
-            $nextIdEmp = $latestEmp ? $latestEmp->id + 1 : 1;
-            $employee_code =  $initials . str_pad($nextIdEmp, 4, '0', STR_PAD_LEFT);
-
-            return DB::transaction(function () use ($data, $contact_code, $employee_code) {
                 $contact = $this->contactRepo->create([
                     'name' => $data['name'],
                     'email' => $data['email'],
@@ -67,6 +63,9 @@ class UserService
                 ]);
 
                 if ($data['contact_type'] === 'employee' || $data['contact_type'] === '') {
+                    $latestEmp = Employee::latest('id')->first();
+                    $nextIdEmp = $latestEmp ? $latestEmp->id + 1 : 1;
+                    $employee_code =  $initials . str_pad($nextIdEmp, 4, '0', STR_PAD_LEFT);
 
                     $employee = $this->employeeRepo->create([
                         'contact_id' => $contact->id,
@@ -76,17 +75,14 @@ class UserService
                 $user->assignRole($data['role']);
                 return $user;
             });
-        } catch (\Exception $e) {
-            // Log error for debugging
-            \Log::error('User creation failed: ' . $e->getMessage());
-            throw $e; // or return json with error
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()]);
         }
     }
     public function updateUser($id, array $data)
     {
         try {
             return DB::transaction(function () use ($id, $data) {
-                // dd('test');
                 $user = $this->userRepo->find($id);
                 if (!$user) {
                     throw new \Exception("user not found");
@@ -115,20 +111,14 @@ class UserService
 
                 return $user->fresh();
             });
-        } catch (\Exception $e) {
-            // Log error for debugging
-            \Log::error('User update failed: ' . $e->getMessage());
-            throw $e; // or return json with error
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()]);
         }
     }
 
-    // public function showContactUser($id){
-    //     $user = User::with('contacts')->find($id);
-    //     return $user;
-    // }
     public function showContactUser($id)
     {
-            $user = User::with('contact')->find($id);
+        $user = User::with('contact')->find($id);
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);

@@ -1,4 +1,4 @@
-import { faAddressBook, faAngleDown, faAngleUp, faBuilding, faChartPie, faCoins, faFileInvoiceDollar, faHandHoldingDollar, faHouse, faList, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons'
+import { faAddressBook, faAngleDown, faAngleUp, faBuilding, faChartPie, faCoins, faFileInvoiceDollar, faHandHoldingDollar, faHouse, faList, faMoneyBillTransfer, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -25,10 +25,12 @@ const Sidebar = () => {
                 </div>
                 <ul className='mt-6 px-4 flex-1 overflow-y-auto  sidebar-scroll'>
                     <li className='mb-3 '>
-                        <div className="text-base font-medium flex items-center gap-5">
-                            <FontAwesomeIcon icon={faHouse} />
-                            <a className='' href="">Dashboard </a>
-                        </div>
+                        <Link to={'/dashboard'}>
+                            <div className="text-base font-medium flex items-center gap-5">
+                                <FontAwesomeIcon icon={faHouse} />
+                                <span>Dashboard</span>
+                            </div>
+                        </Link>
                     </li>
 
                     <li className='mb-3 '>
@@ -174,8 +176,8 @@ const Sidebar = () => {
                                     <li className="mb-3">
                                         <div className="text-base font-medium" onClick={() => toggleMenu('advance')}>
                                             <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faHandHoldingDollar} />                                               
-                                                 <div>
+                                                <FontAwesomeIcon icon={faHandHoldingDollar} />
+                                                <div>
                                                     Advances
                                                     <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
                                                 </div>
@@ -199,6 +201,36 @@ const Sidebar = () => {
                                 </ul>
                             </div>
                         </div>
+                    </li>
+                    <li className="mb-3">
+                        <div className="text-base font-medium" onClick={() => toggleMenu('transactions')}>
+                            <div className="flex items-center gap-5">
+                                <FontAwesomeIcon icon={faMoneyBillTransfer} />
+                                <div>
+                                    Transactions
+                                    <FontAwesomeIcon icon={openMenus.transactions ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                </div>
+                            </div>
+                        </div>
+                        {
+                            openMenus.transactions && (
+                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                    <li className="ml-6">
+                                        <Link to="/transactional-logs">Transactional Logs</Link>
+                                    </li>
+                                    <li className="ml-6 mt-2">
+                                        <Link to="/unsettled/transactional-logs">Unsetteled Transactions</Link>
+                                    </li>
+                                    <li className="ml-6 mt-2">
+                                        <Link to="/reimbursements">Reimbursment</Link>
+                                    </li>
+                                    <li className="ml-6 mt-2">
+                                        <Link to="/advance-settlements">Advance Settelment</Link>
+                                    </li>
+                                </ul>
+
+                            )
+                        }
                     </li>
                     <li className='mb-3 '>
                         <div className="text-base font-medium">
@@ -243,7 +275,7 @@ const Sidebar = () => {
                                             openMenus.contacts && (
                                                 <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
                                                     <li className="ml-6">
-                                                        <Link to="/contact">New Contacts</Link>
+                                                        <Link to="/contact/new">New Contacts</Link>
                                                     </li>
                                                     <li className="ml-6 mt-2">
                                                         <Link to="/users/new">Employee</Link>

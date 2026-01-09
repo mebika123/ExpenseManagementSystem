@@ -8,8 +8,10 @@ use App\Models\ExpensePlan;
 use App\Repositories\ExpenseItemRepository;
 use App\Repositories\ExpenseRepository;
 use App\Repositories\TransactionalLogRepository;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ExpenseService
@@ -33,7 +35,7 @@ class ExpenseService
                 'title' => $data['title'],
                 'budget_timeline_id' => $data['budget_timeline_id'],
                 'created_by_id' => $user->id,
-                'expense_plan_id' => $data['expense_plan_id'] != null ? $data['expense_plan_id'] : null
+                'expense_plan_id' => $data['expense_plan_id'] ?? null
             ];
             if (!$id) {
                 $titlePrefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $data['title']), 0, 2));
@@ -102,25 +104,68 @@ class ExpenseService
 
 
     // public function updateStatus(Expense $expense, string $userId, string $status, ?string $comment = null)
+    // public function updateStatus($data)
+    // {
+
+    //     return DB::transaction(function () use ($data) {
+    //         $userId = Auth::user()->id;
+    //         $expense = Expense::findOrFail($data->expense_id);
+    //         $status = $data->status;
+    //         $comment = $data->comment ?? null;
+    //         logger('Before status create');
+
+    //         $res = $this->status_service->changeStatus($expense, $status, $userId, $comment);
+    //         logger('After status create', ['res' => $res]);
+
+    //         if ($status == 'approved') {
+    //             $expenseItems = ExpenseItem::where('expense_id', $expense->id)->get();
+    //             foreach ($expenseItems as $expenseItem) {
+    //                 $this->transactional_log_repo->createFor($expenseItem, [
+    //                     'amount' => $expenseItem->amount,
+    //                     'payment_date' => $expenseItem->created_at,
+    //                     'contact_id' => $expenseItem->paid_by
+    //                 ]);
+    //             }
+    //         }
+    //         return $res;
+    //     });
+    // }
+
     public function updateStatus(array $data)
     {
-        $userId = Auth::user()->id;
-        $expense = $data['id'];
-        $status = $data['status'];
-        $comment = $data['comment'];
+        return DB::transaction(function () use ($data) {
 
-        $this->status_service->changeStatus($expense, $status, $userId, $comment);
-        if ($status == 'approved') {
-            $expenseItems = ExpenseItem::findOrfail('expese_id', $expense);
-            foreach ($expenseItems as $expenseItem) {
-                $this->transactional_log_repo->createFor($expenseItem, [
-                    'amount' => $expenseItem->amount,
-                    'payment_date' => $expenseItem->created_at,
-                    'contact_id' => $expenseItem->paid_by
-                ]);
+            $userId  = Auth::id();
+            $expense = Expense::findOrFail($data['expense_id']);
+            $status  = $data['status'];
+            $comment = $data['comment'] ?? null;
+
+
+            $res = $this->status_service->changeStatus($expense, $status, $userId, $comment);
+
+
+            if ($status === 'approved') {
+                $expenseItems = ExpenseItem::where('expense_id', $expense->id)->get();
+
+                foreach ($expenseItems as $expenseItem) {
+
+                    $isettle =$expenseItem->paid_by_id === null;
+                    // Log::info($isettle);                    
+                    
+                    $this->transactional_log_repo->createFor($expenseItem,[
+                        'amount' => $expenseItem->amount,
+                        'isSettled' => $isettle,
+                        'payment_date' => Carbon::now(),
+                        'contact_id' => $expenseItem->paid_by_id
+                    ]);
+                }
             }
-        }
+
+
+            return $res;
+        });
     }
+
 
     public function createExpenseFromExpensePlan($id)
     {

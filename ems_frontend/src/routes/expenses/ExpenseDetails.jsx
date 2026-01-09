@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import AttachmentList from '../../components/ui/AttachmentList'
 import { Link, useParams } from 'react-router-dom'
 import axiosInstance from '../../axios'
+import CommentModal from '../../components/ui/CommentModal'
 
 const ExpenseDetails = () => {
     const { id } = useParams()
@@ -17,32 +18,82 @@ const ExpenseDetails = () => {
             }
         }
         fetchExpense();
-    }, [])
-    const [comment, setComment] = useState('');
+    }, [id])
 
-    const handleChange = (e) => {
-        setComment(e.target.value);
-    };
+    const [isOpen, setIsOpen] = useState(false)
 
-    const changeStatus = async (status) => {
-        const payload = [{
-            status,
-            id: expense.id,
-            comment
-        }];
+    const [pendingStatus, setPendingStatus] = useState()
+    const [commentError, setCommentError] = useState('');
 
-        console.log(payload);
+    const changeStatus = (status) => {
+        setIsOpen(true);
+        setPendingStatus(status);
+    }
+    const handelCommentModal = async (data) => {
+        const payload = {
+            status: pendingStatus,
+            expense_id: expense.id,
+            comment: data
+        };
+
+        try {
+            setCommentError({});
+            const res = await axiosInstance.post('/expense/updatedStatus', payload);
+            setIsOpen(false);
+
+            if (res) {
+                alert(res.data.message)
+            }
+
+        } catch (error) {
+            if (error.response?.status === 422) {
+                setCommentError(error.response.data.errors);
+                console.log(error.response.data.errors)
+            }
+        }
     };
 
     return (
         <>
+            <CommentModal isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                onSendData={handelCommentModal}
+                commentError={commentError}
+            />
             <div className="w-full p-8 flex justify-center items-center mt-8">
                 <div className="w-full bg-white rounded-md p-7  text-center">
-                    <h2 className="text-4xl font-bold uppercase mb-8 ">Expense Details</h2>
-                    <div className="flex justify-end ml-10">
-                        <Link to={`/expense/edit/${id}`} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Edit</Link>
+                    <h2 className="text-4xl font-bold  mb-8 ">Expense Details</h2>
 
-                    </div>
+                    {
+                        expense.latest_status?.[0]?.status !== 'approved' &&
+
+                        <div className="mb-6 w-full  gap-2 flex justify-end">
+                            {
+                                expense?.latest_status?.[0]?.status == 'pending' &&
+                                <>
+                                    <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
+                                    <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
+                                </>
+                            }
+                            {
+                                expense?.latest_status?.[0]?.status == 'checked' &&
+                                <>
+                                    <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approved</button>
+                                    <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
+                                </>
+                            }
+
+                            {
+                                expense?.latest_status?.status == 'rejected' &&
+                                <button type='button' className="px-4 py-2 bg-[#492ef7]  rounded-lg text-white w-28" onClick={() => changeStatus('pending')}>ReSubmit</button>
+
+                            }
+
+                        </div>
+                    }
+                    {/* <div className="flex justify-end ml-10">
+                        <Link to={`/expense/edit/${id}`} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Edit</Link>
+                    </div> */}
                     <div className="flex justify-center items-center">
                         <div className="w-full">
                             <div className="mb-6 w-full text-start">
@@ -91,39 +142,39 @@ const ExpenseDetails = () => {
                                                     expense?.expense_items?.map((expense_item, index) => (
                                                         <tr className="text-center">
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item.name}</div>
+                                                                <div className="w-full  p-2">{expense_item?.name}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item.amount}</div>
+                                                                <div className="w-full  p-2">{expense_item?.amount}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item.department.code}</div>
+                                                                <div className="w-full  p-2">{expense_item?.department?.code}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item.location.code}</div>
+                                                                <div className="w-full  p-2">{expense_item?.location?.code}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item.desciption || ''}</div>
+                                                                <div className="w-full  p-2">{expense_item?.desciption || ''}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item.expense_categories.code}</div>
+                                                                <div className="w-full  p-2">{expense_item?.expense_categories?.code}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item.budget.title}</div>
+                                                                <div className="w-full  p-2">{expense_item?.budget?.title}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item?.contact.code || ''}</div>
+                                                                <div className="w-full  p-2">{expense_item?.contact?.code || ''}</div>
                                                             </td>
 
                                                             <td className="p-2 border border-[#989898]">
-                                                                <div className="w-full  p-2">{expense_item?.paid_by.code || 'Company'}</div>
+                                                                <div className="w-full  p-2">{expense_item?.paid_by?.code || 'Company'}</div>
                                                             </td>
 
 
@@ -167,30 +218,8 @@ const ExpenseDetails = () => {
                                     </ul></div>
 
                             </div>
-                            <div className="">
-                                <h3 className="font-bold text-xl mb-2">Change Status</h3>
-                                <div className="items-end">
-                                    <div className="flex items-center gap-2 w-2/5 mb-3">
-                                        <label className="w-30 text-start">
-                                            Comment
-                                        </label>
-                                        <textarea row='2'
-                                            name='comment'
-                                            type="text"
-                                            className="flex-1 rounded-sm border p-2 border-[#989898]"
-                                            placeholder='comment'
-                                            onChange={handleChange}
-                                        ></textarea>
-                                    </div>
 
-                                    <div className="mb-6 w-full  gap-2 flex">
-                                        <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approved</button>
-                                        <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
-                                        <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('reject')}>Reject</button>
-                                    </div>
 
-                                </div>
-                            </div>
 
                         </div>
 

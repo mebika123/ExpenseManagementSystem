@@ -18,7 +18,13 @@ class ExpenseController extends Controller
 
     public function index()
     {
-        $expenses = Expense::with(['budgetTimeline:id,code', 'latestStatus'])->get();
+        // $expenses = Expense::with(['budgetTimeline:id,code', 'latestStatus'])->get();
+        $expenses = Expense::with(['budgetTimeline:id,code', 'latestStatus'])
+            ->get()
+            ->map(function ($expense) {
+                $expense->isEditable = $expense->latestStatus?->first()?->status !== 'approved';
+                return $expense;
+            });
         return response()->json(['expenses' => $expenses]);
     }
 
@@ -39,7 +45,7 @@ class ExpenseController extends Controller
     public function update($id, StoreExpenseRequest $request)
     {
         $files = $request->file('attachments');
-        $data = $request->all();
+        $data = $request->validate();
         $data['attachments'] = $files;
         try {
             $expense = $this->expense_service->storeOrUpdateExpense($data, $id);
@@ -52,7 +58,12 @@ class ExpenseController extends Controller
 
     public function show($id)
     {
-        $expense = Expense::with('expense_items', 'transactionalAttachments')->find($id);
+        $expense = Expense::with(
+            'expense_items',
+            'transactionalAttachments',
+            'latestStatus'
+        )->find($id);
+        $expense->isEditable = $expense->latestStatus?->first()?->status !== 'approved';
         return response()->json(['expense' => $expense]);
     }
 
@@ -70,7 +81,8 @@ class ExpenseController extends Controller
                 ]);
             },
             'budgetTimeline:id,code',
-            'transactionalAttachments'
+            'transactionalAttachments',
+            'latestStatus'
         ])->find($id);
         return response()->json(['expense' => $expense]);
     }
@@ -99,21 +111,21 @@ class ExpenseController extends Controller
         }
     }
 
-    public function createFromPlan($id)
-    {
-        try {
-            $expensePlan = $this->expense_service->createExpenseFromExpensePlan($id);
-            return response()->json(['message' => 'fetching data', 'expenseplan' => [$expensePlan]]);
-        } catch (Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
-    }
 
     public function updateStatus(Request $request)
     {
+        $validated = $request->validate([
+            'expense_id' => 'required|integer|exists:expenses,id',
+            'status'     => 'required|string',
+            'comment'    => 'required|string',
+        ]);
+
         try {
-            $updatedStatus = $this->expense_service->createExpenseFromExpensePlan($request->all);
-            return response()->json(['message' => 'fetching data', 'expenseplan' => $updatedStatus]);
+            $updatedStatus = $this->expense_service->updateStatus($validated);
+            return response()->json([
+                'message' => 'Status is updated',
+                'updatedStatus' => $updatedStatus
+            ]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

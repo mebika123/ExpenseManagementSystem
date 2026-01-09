@@ -22,7 +22,7 @@ class LocationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:locations,name',
         ]);
         $latest = Location::latest('id')->first();
         $nextId = $latest ? $latest->id + 1 : 1;
@@ -38,7 +38,10 @@ class LocationController extends Controller
 
     public function update(Request $request, $id)
     {
-        return $this->location->update($id, $request->all());
+        $data = $request->validate([
+            'name' => 'required|string|max:255|unique:locations,name,'.$id,
+        ]);
+        return $this->location->update($id, $data);
     }
 
     public function destroy($id)

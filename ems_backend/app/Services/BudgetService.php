@@ -23,43 +23,52 @@ class BudgetService
 
     public function storeOrUpdate($id, array $data)
     {
-        
+
         return DB::transaction(function () use ($data, $id) {
-                $user = Auth::user();
+            $user = Auth::user();
 
 
-                $budgetTimelineData = [
-                    'name' => $data['name'],
-                    'start_at' => $data['start_at'],
-                    'end_at' => $data['end_at']
-                ];
-                if (!$id) {
-                    $titlePrefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $data['name']), 0, 2));
-                    $startYear = Carbon::parse($data['start_at'])->format('y');
-                    $endYear = Carbon::parse($data['end_at'])->format('y');
-                    $unique = substr(now()->timestamp, -4);
+            $budgetTimelineData = [
+                'name' => $data['name'],
+                'start_at' => $data['start_at'],
+                'end_at' => $data['end_at']
+            ];
+            if (!$id) {
+                $titlePrefix = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $data['name']), 0, 2));
+                $startYear = Carbon::parse($data['start_at'])->format('y');
+                $endYear = Carbon::parse($data['end_at'])->format('y');
+                $unique = substr(now()->timestamp, -4);
 
-                    $code = "{$titlePrefix}_BUD_{$startYear}/{$endYear}_{$unique}";
-                    $budgetTimelineData['code'] = $code;
-                }
+                $code = "{$titlePrefix}_BUD_{$startYear}/{$endYear}_{$unique}";
+                $budgetTimelineData['code'] = $code;
+            }
 
 
-                $budgetTimeline = $this->budgetTimeline_Repo->save($id, $budgetTimelineData);
-                if (!$id) {
-                    $this->status_service->create($budgetTimeline,'pending',$user->id,'Status Created');
-                }
+            $budgetTimeline = $this->budgetTimeline_Repo->save($id, $budgetTimelineData);
+            if (!$id) {
+                $this->status_service->create($budgetTimeline, 'pending', $user->id, 'Status Created');
+            }
 
-                foreach ($data['budget'] as $item) {
-                    $budgetId = $item['id'] ?? null;
+            foreach ($data['budget'] as $item) {
+                $budgetId = $item['id'] ?? null;
+                unset($item['id']); // <-- remove 'id' from data
 
-                    if (!$budgetId) {
-                        $item['budget_timeline_id'] = $budgetTimeline->id;
+                // if (!$budgetId) {
+                //     $item['budget_timeline_id'] = $budgetTimeline->id;
+                // }
+
+                if ($budgetId) {
+                    $existingBudget = $this->budget_Repo->find($budgetId); // <-- call a find method
+                    if (!$existingBudget) {
+                        throw new \Exception("Budget ID {$budgetId} not found"); // rollback will work
                     }
-                    $this->budget_Repo->save($budgetId, $item);
+                } else {
+                    $item['budget_timeline_id'] = $budgetTimeline->id;
                 }
-                return  $budgetTimeline;
-            });
-       
+                $this->budget_Repo->save($budgetId, $item);
+            }
+            return  $budgetTimeline;
+        });
     }
 
     public function bulkDelete($data)
@@ -80,12 +89,22 @@ class BudgetService
 
 
 
-    public function updateStatus(BudgetTimeline $budget,string $userId,string $status,?string $comment = null){
+    public function updateStatus(array $data)
+    {
+        return DB::transaction(function () use ($data) {
 
-        $this->status_service->changeStatus($budget,$status, $userId,$comment);
+            $userId  = Auth::id();
+            $budget = BudgetTimeline::findOrFail($data['budgetTimeline_id']);
+            $status  = $data['status'];
+            $comment = $data['comment'] ?? null;
+
+            $res = $this->status_service->changeStatus($budget, $status, $userId, $comment);
+            return $res;
+        });
     }
 
-    public function destory($id){
-       return $this->budgetTimeline_Repo->delete($id);
+    public function destory($id)
+    {
+        return $this->budgetTimeline_Repo->delete($id);
     }
 }

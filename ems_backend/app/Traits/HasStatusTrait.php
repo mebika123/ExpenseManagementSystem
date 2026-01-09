@@ -16,10 +16,9 @@ trait HasStatusTrait
         return $this->statuses()->latest('created_at')->value('status');
     }
     public function latestStatus(): MorphMany
-    
     {
         return $this->morphMany(Statuses::class, 'model')
-            ->latest('created_at')  // order by newest first
-            ->limit(1);             // only latest
+            ->latest('created_at')  
+            ->limit(1);             
     }
 }

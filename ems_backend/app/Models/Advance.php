@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Interfaces\HasStatus;
 use App\Traits\HasStatusTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Advance extends Model implements HasStatus
 {
@@ -18,5 +19,14 @@ class Advance extends Model implements HasStatus
     public function expensePlan()
     {
         return $this->belongsTo(ExpensePlan::class);
+    }
+
+    public function transactional_logs(): MorphMany
+    {
+        return $this->morphMany(TransactionalLog::class, 'model');
+    }
+        public function getDisplayTitleAttribute()
+    {
+        return $this->purpose;
     }
 }

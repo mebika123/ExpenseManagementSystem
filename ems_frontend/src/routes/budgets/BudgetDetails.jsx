@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
 import { useParams } from 'react-router-dom';
+import CommentModal from '../../components/ui/CommentModal';
 
 const BudgetDetails = () => {
     const { id } = useParams();
-    const [loading,setLoading] = useState(true)
+    const [loading, setLoading] = useState(true)
 
     // const [departments, setDepartment] = useState([]);
     // useEffect(() => {
@@ -58,6 +58,7 @@ const BudgetDetails = () => {
 
         fetchBudgets();
     }, []);
+    // console.log(budgetTimeline);
 
     //delete removed budgets
 
@@ -75,7 +76,7 @@ const BudgetDetails = () => {
         }
     };
 
-    
+
     const deleteSelectedBudget = async (e) => {
         if (!window.confirm('Are you sure you want to delete this department?')) {
             return;
@@ -93,11 +94,87 @@ const BudgetDetails = () => {
         }
     }
 
+    const [isOpen, setIsOpen] = useState(false)
+
+    const [recievedComment, setRecievedComment] = useState()
+    const [pendingStatus, setPendingStatus] = useState()
+    const [commentError, setCommentError] = useState('');
+
+    const changeStatus = (status) => {
+        setIsOpen(true);
+        setPendingStatus(status);
+    }
+    const handelCommentModal = async (data) => {
+
+        const payload = {
+            status: pendingStatus,
+            budgetTimeline_id: id,
+            comment: data,
+        };
+
+        try {
+            setCommentError({});
+            const res = await axiosInstance.post('/budgetTimline/updatedStatus', payload);
+            setIsOpen(false);
+            // again fetching
+            const response = await axiosInstance.get(`/budgetTimelines/${id}`);
+            setBudgetTimeline(response.data.budgetTimeline);
+            if (res) {
+                alert(res.data.message)
+            }
+
+
+        } catch (error) {
+            if (error.response?.status === 422) {
+                setCommentError(error.response.data.errors);
+                console.log(error.response.data.errors)
+            }
+
+        }
+    };
+
+
+
     return (
         <>
+            <CommentModal isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                onSendData={handelCommentModal}
+                commentError={commentError}
+
+            />
             <div className="w-full p-8 flex justify-center items-center mt-8">
                 <div className="w-2/3 bg-white rounded-md p-7  text-center">
-                    <h2 className="text-4xl font-bold uppercase mb-8 ">Budget Timeline Details</h2>
+                    <h2 className="text-4xl font-bold  mb-8 ">Budget Timeline Details</h2>
+                    {
+                        budgetTimeline?.latest_status[0]?.status !== 'approved' &&
+
+                        <div className="mb-6 w-full  gap-2 flex justify-end">
+                            {
+                                budgetTimeline?.latest_status?.[0]?.status == 'pending' &&
+                                <>
+                                    <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
+                                    <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
+                                </>
+                            }
+                            {
+                                budgetTimeline?.latest_status?.[0]?.status == 'checked' &&
+                                <>
+                                    <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approved</button>
+                                    <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
+                                </>
+                            }
+
+                            {
+                                budgetTimeline?.latest_status?.[0]?.status == 'rejected' &&
+                                <button type='button' className="px-4 py-2 bg-[#492ef7]  rounded-lg text-white w-28" onClick={() => changeStatus('pending')}>ReSubmit</button>
+
+                            }
+
+                        </div>
+
+                    }
+
                     <div className="flex justify-center items-center">
                         <div className="w-full">
                             <div className="mb-6 w-full text-start">
@@ -165,7 +242,7 @@ const BudgetDetails = () => {
                                                             <div className="w-full  p-2">{row.location_id}</div>
                                                         </td>
 
-                                                        
+
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -178,10 +255,34 @@ const BudgetDetails = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mb-6 w-full justify-end gap-2 flex">
-                                <button className="px-4 py-2 bg-[#6bd192]  rounded-lg text-white w-1/5" >Checked</button>
-                                <button className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-1/5" >Reject</button>
-                            </div>
+                            {/* {
+                                budgetTimeline?.latest_status[0]?.status !== 'approved' &&
+
+                                <div className="">
+                                    <h3 className="font-bold text-xl mb-2">Change Status</h3>
+                                    <div className="items-end">
+                                        <div className="w-2/5 mb-3">
+                                            <div className="flex items-center gap-2 ">
+                                                <label className="w-30 text-start">
+                                                    Comment <span className="text-sm text-red-500">*</span>
+                                                </label>
+                                                <textarea row='2'
+                                                    name='comment'
+                                                    type="text"
+                                                    className="flex-1 rounded-sm border p-2 border-[#989898]"
+                                                    placeholder='comment'
+                                                    onChange={handleCommentChange}
+                                                ></textarea>
+                                            </div>
+                                            <p className="text-sm text-red-700">
+                                                {
+                                                    commentError?.comment?.[0]
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            } */}
 
                         </div>
 

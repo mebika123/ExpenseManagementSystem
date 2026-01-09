@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExpenseCategory extends Model
 {
-    protected $fillable = ['title', 'code'];
+    protected $fillable = ['name', 'code'];
     public function expense_items()
     {
         return $this->hasMany(ExpenseItem::class);

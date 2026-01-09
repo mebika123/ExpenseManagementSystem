@@ -3,14 +3,18 @@
 namespace App\Repositories;
 
 use App\Models\TransactionalLog;
+use Illuminate\Database\Eloquent\Model;
 
-class TransactionalLogRepository
+class TransactionalLogRepository extends BaseRepository
 {
 
-    public function createFor(
-         $model,
-        array $data
-    ): TransactionalLog {
-        return $model->transactional_log()->create($data);
+
+    public function __construct(TransactionalLog $model)
+    {
+        parent::__construct($model);
+    }
+    public function createFor(Model $model, array $data)
+    {
+        return $model->transactional_logs()->create($data);
     }
 }

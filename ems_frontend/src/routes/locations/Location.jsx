@@ -9,6 +9,7 @@ import ModalForm from '../../components/ui/form/ModalForm';
 
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import SearchBar from '../../components/ui/SearchBar';
+import Pagination from '../../components/ui/Pagination';
 
 
 const Location = () => {
@@ -62,6 +63,7 @@ const Location = () => {
         e.preventDefault();
 
         try {
+            setError({})
             if (editingId) {
                 const res = await axiosInstance.put(`/locations/${editingId}`, form);
                 if (res) {
@@ -74,7 +76,6 @@ const Location = () => {
                         )
                     );
 
-                    console.log(res.data);
 
                 }
             } else {
@@ -125,13 +126,22 @@ const Location = () => {
         columnHelper.accessor("name", { header: "Name" }),
         columnHelper.accessor("code", { header: "Code" }),
     ];
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10,
+    });
     const [globalFilter, setGlobalFilter] = useState("");
 
     const table = useReactTable({
         data: safeLocations,
         columns,
-        state: { globalFilter },
+        state: {
+            globalFilter,
+            pagination,
+
+        },
         onGlobalFilterChange: setGlobalFilter,
+        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -195,10 +205,7 @@ const Location = () => {
                                             className="mb-3 even:bg-[#eff7f299] odd:bg-white"
                                         >
                                             <td className="py-3 px-2">
-                                                {table.getState().pagination.pageIndex *
-                                                    table.getState().pagination.pageSize +
-                                                    index +
-                                                    1}
+                                                {index + 1}
                                             </td>
 
                                             <td className="py-3 px-2">{location.name}</td>
@@ -228,6 +235,8 @@ const Location = () => {
                         )}
 
                     </table>
+                        <Pagination table={table}
+                        />
                 </div>
             </div>
 

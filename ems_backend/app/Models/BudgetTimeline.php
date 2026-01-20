@@ -15,4 +15,5 @@ class BudgetTimeline extends Model implements HasStatus
     {
         return $this->hasMany(Budget::class);
     }
+    
 }

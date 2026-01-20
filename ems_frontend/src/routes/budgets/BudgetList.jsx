@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import SearchBar from '../../components/ui/SearchBar';
 import Pagination from '../../components/ui/Pagination';
+import { can } from '../../utils/permission';
+
 
 
 const BudgetList = () => {
-    const { user } = useAuth();
+    const { permissions, loading } = useAuth();
 
-    const [loading, setLoading] = useState(true);
+    if (loading) {
+        return <div>Loading...</div>; // or spinner
+    }
+
+    if (!can('budgetTimeline.view', permissions)) return <Navigate to="/403" replace />;
+
+
+    // const [loading, setLoading] = useState(true);
 
     const [budgetTimelines, setBudgetTimelines] = useState()
     useEffect(() => {
@@ -25,7 +34,7 @@ const BudgetList = () => {
                 console.log(error)
             }
             finally {
-                setLoading(false)
+                // setLoading(false)
             }
         }
         fetchBudgetTimeline();
@@ -41,7 +50,7 @@ const BudgetList = () => {
         columnHelper.accessor("code", { header: "Code" }),
         columnHelper.accessor("start_at", { header: "Start At" }),
         columnHelper.accessor("end_at", { header: "End At" }),
-        columnHelper.accessor("status", { header: "Status" }),
+        columnHelper.accessor(row => row.latest_status?.[0]?.status, { header: "Status" }),
     ];
     const [globalFilter, setGlobalFilter] = useState("");
     const [pagination, setPagination] = useState({
@@ -84,11 +93,16 @@ const BudgetList = () => {
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter}
                     />
-                    <Link to={'/budget-timeline/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+
+                    {
+                        can('budgetTimeline.create', permissions) &&
+
+                        <Link to={'/budget-timeline/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+                    }
 
                 </div>
 
-                <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)]">
+                <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)] ">
                     <table className="w-full min-w-[700]">
                         <thead>
                             <tr className="border-b ">
@@ -138,33 +152,42 @@ const BudgetList = () => {
                                                         ? 'Pending'
                                                         : budgetTimeline.latest_status[0].status === 'approved'
                                                             ? 'Approved'
-                                                        : budgetTimeline.latest_status[0].status === 'checked'
-                                                            ? 'Checked'
-                                                            : budgetTimeline.latest_status[0].status === 'rejected'
-                                                                ? 'Rejected' : '-'}
+                                                            : budgetTimeline.latest_status[0].status === 'checked'
+                                                                ? 'Checked'
+                                                                : budgetTimeline.latest_status[0].status === 'rejected'
+                                                                    ? 'Rejected' : '-'}
 
                                                 </span>
                                             </td>
                                             <td className="py-3 px-2">
                                                 <div className="flex gap-4 items-center justify-center">
-                                                    <Link to={`/budget-timeline/details/${budgetTimeline.id}`} >
-                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#3F51B6]">
-                                                            <FontAwesomeIcon icon={faEye} />
-                                                        </div>
-                                                    </Link>
+                                                    {
+                                                        can('budgetTimeline.show', permissions) &&
+                                                        <Link to={`/budget-timeline/details/${budgetTimeline.id}`} >
+                                                            <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#3F51B6]">
+                                                                <FontAwesomeIcon icon={faEye} />
+                                                            </div>
+                                                        </Link>
+                                                    }
+
                                                     {budgetTimeline?.isEditable &&
                                                         <div className="flex gap-4 items-center justify-center">
-                                                            <Link to={`/budget-timeline/edit/${budgetTimeline.id}`}>
-                                                                <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]">
-                                                                    <FontAwesomeIcon icon={faPen} />
+                                                            {
+                                                                can('budgetTimeline.update', permissions) &&
+                                                                <Link to={`/budget-timeline/edit/${budgetTimeline.id}`}>
+                                                                    <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]">
+                                                                        <FontAwesomeIcon icon={faPen} />
+                                                                    </div>
+                                                                </Link>
+                                                            }
+                                                            {
+                                                                can('budgetTimeline.create', permissions) &&
+
+                                                                <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF3641]">
+                                                                    <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(budgetTimeline.id)} />
 
                                                                 </div>
-
-                                                            </Link>
-                                                            <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF3641]">
-                                                                <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(budgetTimeline.id)} />
-
-                                                            </div>
+                                                            }
                                                         </div>
                                                     }
 

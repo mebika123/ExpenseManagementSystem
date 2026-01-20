@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Employee extends Model
 {
-      protected $fillable = ['contact_id', 'code'];
+    protected $fillable = ['contact_id', 'code'];
 
-      public function contact(): BelongsTo
+    public function contact(): BelongsTo
     {
-        return $this->belongsTo(Contact::class);
+        return $this->belongsTo(Contact::class, 'contact_id', 'id');
     }
 }

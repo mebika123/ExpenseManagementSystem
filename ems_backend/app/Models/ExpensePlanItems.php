@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ExpensePlanItems extends Model
 {
     protected $fillable = ['name', 'description', 'amount', 'contact_id', 'expense_category_id', 'paid_by_id', 'department_id', 'location_id', 'expense_plan_id', 'budget_id'];
-    public function expense()
+    public function expensePlan()
     {
-        return $this->belongsTo(Expense::class);
+        return $this->belongsTo(expensePlan::class,'expense_plan_id');
     }
     public function expense_categories()
     {

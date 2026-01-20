@@ -6,6 +6,7 @@ const AddRole = () => {
     <div>
         <CustomRole
         title = {'Create New Role'}
+        id={null}
         />
     </div>
 

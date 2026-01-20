@@ -38,14 +38,20 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
+            $userData['id']= $user->id;
+            $userData['email']= $user->email;
+
+
             $token = $user->createToken('api-token')->plainTextToken;
 
             // dd($user);
             // dd($token);
             return response()->json([
                 'message' => 'Login Successful',
-                'user' => $user,
-                'token' => $token
+                'user' => $userData,
+                'token' => $token,
+                // 'roles' => $user->getRoleNames(),
+                'permissions' => $user->getAllPermissions()->pluck('name'),
             ]);
         }
 

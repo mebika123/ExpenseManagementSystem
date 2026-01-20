@@ -40,7 +40,7 @@ class ExpensePlanService
                 $code = "{$titlePrefix}_EXPE_{$unique}";
                 $expensePlanData['code'] = $code;
             }
-            Log::info('Expense plan data', $expensePlanData);
+            // Log::info('Expense plan data', $expensePlanData);
 
             $expensePlan = $this->expense_plan_repo->save($id, $expensePlanData);
             $filesToKeep = $data['existingFiles'] ?? [];
@@ -64,14 +64,29 @@ class ExpensePlanService
             if (!$id) {
                 $this->status_service->create($expensePlan, 'pending', $user->id, 'Status Created');
             }
+            Log::info($data);
 
             foreach ($data['expense_plan_items'] as $item) {
                 $expensePlanItemId = $item['id'] ?? null;
+                $payload = [
+                    'name' => $item['name'],
+                    'amount' => $item['amount'],
+                    'contact_id' => $item['contact_id'],
+                    'expense_category_id' => $item['expense_category_id'],
+                    'paid_by_id' => $item['paid_by_id'],
+                    'department_id' => $item['department_id'],
+                    'location_id' => $item['location_id'],
+                    'budget_id' => $item['budget_id'] ?? null,
+                ];
 
-                if (!$expensePlanItemId) {
-                    $item['expense_plan_id'] = $expensePlan->id;
+                if (!empty($item['id'])) {
+                    // Log::info("Updating Expense Item", $payload);
+                    $this->expense_plan_item_repo->save($item['id'], $payload);
+                } else {
+                    $payload['expense_plan_id'] = $expensePlan->id;
+                    // Log::info("Creating Expense Item", $payload);
+                    $this->expense_plan_item_repo->save(null, $payload);
                 }
-                $this->expense_plan_item_repo->save($expensePlanItemId, $item);
             }
 
 
@@ -81,6 +96,8 @@ class ExpensePlanService
 
     public function bulkDeleteItems($data)
     {
+        // Log::info($data);
+
         return ExpensePlanItems::whereIn('id', $data['ids'])->delete();
     }
 

@@ -7,6 +7,7 @@ use App\Models\Advance;
 use App\Services\AdvanceService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
 
 class AdvanceController extends Controller
 {
@@ -14,6 +15,17 @@ class AdvanceController extends Controller
     public function __construct(AdvanceService $advance_service)
     {
         $this->advance_service = $advance_service;
+    }
+        public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:advance.view', only:['index']),
+            new Middleware('permission:advance.create', only:['store']),
+            new Middleware('permission:advance.update',only:['update']),
+            new Middleware('permission:advance.show',only:['show']),
+            new Middleware('permission:advance.delete',only:['destroy']),
+            new Middleware('permission:advance.status.check|advance.status.approve',only:['updateStatus']),
+        ];
     }
 
     public function index()
@@ -33,7 +45,7 @@ class AdvanceController extends Controller
     public function store(StoreAdvanceRequest $request)
     {
         try {
-            $advances = $this->advance_service->storeOrUpdate($request->all());
+            $advances = $this->advance_service->storeOrUpdate($request->validate());
             return response()->json([
                 'message' => 'Advance is created',
                 'advances' => $advances

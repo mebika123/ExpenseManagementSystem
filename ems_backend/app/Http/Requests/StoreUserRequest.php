@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Repositories\UserRepository;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\Mime\Email;
 
 class StoreUserRequest extends FormRequest
 {
@@ -26,8 +27,9 @@ class StoreUserRequest extends FormRequest
     {
 
         $contactOnly = $this->routeIs('contacts.store');
+        $contactUpdate = $this->routeIs('contacts.update');
         $userId = $this->route('user') ?? null;
-        $contactId = null;
+        $contactId = $this->route('contacts') ?? null;
 
         if ($userId) {
             $user = $this->userRepo->find($userId);
@@ -35,8 +37,12 @@ class StoreUserRequest extends FormRequest
         }
 
         if ($contactOnly) {
+            return $this->contactRules();
+        } elseif ($contactUpdate) {
+            $contactId = $this->route('contact');
             return $this->contactRules($contactId);
         }
+
         return array_merge(
             $this->contactRules($contactId),
             $this->userRules($contactId)
@@ -46,7 +52,7 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'email' => 'required|unique:contacts,email,' . $contactId,
+            'email' => 'required|email|unique:contacts,email,' . $contactId,
             'phone_no' => 'nullable|unique:contacts,phone_no,' . $contactId,
             'pan_no' => 'nullable|unique:contacts,pan_no,' . $contactId,
             'contact_type' => 'in:employee,supplier',

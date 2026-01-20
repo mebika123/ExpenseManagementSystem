@@ -31,8 +31,8 @@ const Login = () => {
     try {
       const res = await axios.post("http://localhost:8000/api/login", form);
       if (res.data) {
-        const { user, token } = res.data;
-        login(user, token);
+        const { user, token,permissions } = res.data;
+        login(user, token,permissions);
         navigate("/dashboard")
       }
     } catch (err) {
@@ -71,7 +71,7 @@ const Login = () => {
               </p>
             </div>
             <div className="mb-6 w-full">
-              <input type="submit" className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/3" />
+              <button type="submit" className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/3" >Login</button>
             </div>
           </form>
 

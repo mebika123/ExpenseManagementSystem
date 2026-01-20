@@ -9,6 +9,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
   const [loading, setLoading] = useState(true)
 
   const location = useLocation();
+  const navigate = useNavigate();
   const expense_plan_id = location.state?.expense_plan_id;
 
 
@@ -45,6 +46,8 @@ const ExpenseForm = ({ title, data, type, id }) => {
     ? 'expense_plan_items'
     : 'expense_items';
 
+
+  //for update expense
   useEffect(() => {
     if (!data) return;
 
@@ -52,14 +55,31 @@ const ExpenseForm = ({ title, data, type, id }) => {
 
     setForm({
       ...data,
-      expense_items: items.length ? items : [{ ...emptyExpenseItem }],
-      transactional_attachments: [{}],
+      expense_items: items.length
+        ? items.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          amount: item.amount,
+          contact_id: item.contact_id,
+          expense_category_id: item.expense_category_id,
+          paid_by_id: item.paid_by_id,
+          department_id: item.department_id,
+          location_id: item.location_id,
+          budget_id: item.budget_id,
+          // for expensePlan items
+          expense_plan_item_id: item.expense_plan_item_id ?? null,
+        }))
+        : [{ ...emptyExpenseItem }],
+      transactional_attachments: data.transactional_attachments || [],
     });
 
     setExistingFiles(data.transactional_attachments || []);
   }, [data, id, type]);
 
 
+
+  // forExpensePlan
 
   useEffect(() => {
     if (!expense_plan_id) return
@@ -129,12 +149,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...form.expense_items];
-    // if (['paid_by_id', 'contact_id', 'department_id', 'location_id', 'budget_id', 'expense_category_id'].includes(field) && value === '') {
-    //   updatedItems[index][field] = null;
-    // } else {
     updatedItems[index][field] = value;
-    // }
-
     setForm({
       ...form,
       expense_items: updatedItems
@@ -161,14 +176,14 @@ const ExpenseForm = ({ title, data, type, id }) => {
           departmentsRes,
           expenseCategoriesRes,
           contactsRes,
-          employeesRes,
+          // employeesRes,
           budgetTimelinesRes,
         ] = await Promise.all([
           axiosInstance.get('/locations'),
           axiosInstance.get('/departments'),
           axiosInstance.get('/expenseCategories'),
           axiosInstance.get('/contacts'),
-          axiosInstance.get('/contacts'),
+          // axiosInstance.get('/contacts'),
           axiosInstance.get('/budgetTimelines')
         ]);
 
@@ -176,8 +191,8 @@ const ExpenseForm = ({ title, data, type, id }) => {
         setLocation(locationsRes.data);
         setDepartment(departmentsRes.data);
         setExpenseCategories(expenseCategoriesRes.data);
-        setContacts(contactsRes.data);
-        setEmployees(employeesRes.data);
+        setContacts(contactsRes.data.contacts);
+        // setEmployees(employeesRes.data);
         setBudgetTimelines(budgetTimelinesRes.data.budgetTimelines); //bugetTimeline
 
 
@@ -188,6 +203,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
     fetchData();
   }, []);
 
+  //fetch budget from selected budgetTimeline
   const [budgets, setBudgets] = useState([])
   useEffect(() => {
     const id = form.budget_timeline_id
@@ -219,7 +235,7 @@ const ExpenseForm = ({ title, data, type, id }) => {
   const deleteRow = (id) => {
     setDeleteExpenseId(prev => [...prev, id]);
   };
-
+  // console.log(deleteExpenseId);
   //attachment js
   const hiddenFileInput = useRef(null);
 
@@ -242,161 +258,140 @@ const ExpenseForm = ({ title, data, type, id }) => {
     setAttachments(attachments.filter((_, i) => i !== index));
     setPreviews(previews.filter((_, i) => i !== index));
   };
+  // handle submit
 
-  //handle form submit
+  const buildBaseFormData = () => {
+    const formData = new FormData();
+    formData.append('title', form.title);
+    formData.append('budget_timeline_id', form.budget_timeline_id);
+
+    if (form.expense_plan_id) {
+      formData.append('expense_plan_id', form.expense_plan_id);
+    }
+
+    attachments.forEach(file =>
+      formData.append('attachments[]', file)
+    );
+
+    existingFiles.forEach(file =>
+      formData.append('existingFiles[]', file.id)
+    );
+
+    return formData;
+  };
+
+  const appendExpenseItems = (formData) => {
+    form.expense_items.forEach((item, index) => {
+      const base = `expense_items[${index}]`;
+
+      if (item.id) formData.append(`${base}[id]`, item.id);
+      if (item.expense_plan_item_id) {
+        formData.append(`${base}[expense_plan_item_id]`, item.expense_plan_item_id);
+      }
+
+      [
+        'name',
+        'description',
+        'amount',
+        'contact_id',
+        'expense_category_id',
+        'paid_by_id',
+        'budget_id',
+        'department_id',
+        'location_id'
+      ].forEach(key => {
+        formData.append(`${base}[${key}]`, item[key]);
+      });
+    });
+  };
+
+  const appendExpensePlanItems = (formData) => {
+    form.expense_items.forEach((item, index) => {
+      const base = `expense_plan_items[${index}]`;
+
+      if (item.id) formData.append(`${base}[id]`, item.id);
+
+      [
+        'name',
+        'amount',
+        'contact_id',
+        'expense_category_id',
+        'paid_by_id',
+        'budget_id',
+        'department_id',
+        'location_id'
+      ].forEach(key => {
+        formData.append(`${base}[${key}]`, item[key]);
+      });
+    });
+
+    formData.append('purpose', form.purpose);
+    formData.append('start_at', form.start_at);
+    formData.append('end_at', form.end_at);
+  };
+
+  const deleteItems = async (url, ids) => {
+    if (!ids.length) return;
+
+    const res = await axiosInstance.post(url, { ids });
+
+    if (res.status !== 200) {
+      throw new Error('Delete failed');
+    }
+  };
+
+
+  const submitExpense = async (formData) => {
+    appendExpenseItems(formData);
+
+    if (id) {
+      await deleteItems('/deleteExpenseItems', deleteExpenseId);
+      formData.append('_method', 'PUT');
+      return axiosInstance.post(`/expenses/${id}`, formData);
+    }
+
+    return axiosInstance.post('/expenses', formData);
+  };
+
+  console.log(deleteExpenseId);
+
+  const submitExpensePlan = async (formData) => {
+    appendExpensePlanItems(formData);
+
+    if (id) {
+      await deleteItems('/deleteExpensePlanItems', deleteExpenseId);
+      formData.append('_method', 'PUT');
+      return axiosInstance.post(`/expensesPlan/${id}`, formData);
+    }
+
+    return axiosInstance.post('/expensesPlan', formData);
+  };
+
+
   const handleSubmit = async (e) => {
-
-    console.log(type)
     e.preventDefault();
+    setFormError({});
+
     try {
-      setFormError({});
-      const formData = new FormData();
-      formData.append('title', form.title);
-      formData.append('budget_timeline_id', form.budget_timeline_id);
-      if (form.expense_plan_id) {
-        formData.append('expense_plan_id', form.expense_plan_id);
-      }
+      const formData = buildBaseFormData();
 
-      attachments.forEach((file) => {
-        formData.append('attachments[]', file);
-      })
-      existingFiles.forEach(file => formData.append("existingFiles[]", file.id));
+      const res =
+        type === 'expense'
+          ? await submitExpense(formData)
+          : await submitExpensePlan(formData);
 
-      //expense
-
-      if (type == 'expense') {
-
-        form.expense_items.forEach((item, index) => {
-          Object.keys(item).forEach(key => {
-            let value = item[key];
-
-            if (value !== null) {
-              formData.append(`expense_items[${index}][${key}]`, value);
-            }
-            // formData.append(`expense_items[${index}][${key}]`, item[key]);
-          });
-        });
-
-        if (id) {
-          formData.append('_method', 'PUT');
-
-          if (deleteExpenseId.length > 0) {
-            try {
-              const deleteExpenseItemsRes = await axiosInstance.post('/deleteExpenseItems', {
-                ids: deleteExpenseId
-              });
-
-              if (deleteExpenseItemsRes.status !== 200) {
-                alert("Failed to delete selected expense items.");
-                return;
-              }
-            } catch (err) {
-              alert("Error deleting expense items.");
-              return;
-            }
-          }
-
-          try {
-            const res = await axiosInstance.post(`/expenses/${id}`, formData, {
-              headers: { 'Content-Type': 'multipart/form-data' }
-            });
-
-            if (res.status === 200) {
-              alert("Expense has been updated successfully");
-              navigate('/expenses');
-            }
-          } catch (error) {
-            if (error.response?.status === 422) {
-              setFormError(error.response.data.errors);
-            } else {
-              alert("Error updating expense.");
-            }
-          }
-        } else {
-          const res = await axiosInstance.post("/expenses", formData);
-          if (res) {
-            alert("Expense has been created successfully")
-            navigate('/expenses')
-          }
-
-          console.log(formError)
-        }
-      }
-      else if (type == 'expensePlan') { //expense plan
-        setFormError({});
-
-        form.expense_items.forEach((item, index) => {
-          Object.keys(item).forEach(key => {
-            let value = item[key];
-
-            if (value !== null) {
-              formData.append(`expense_plan_items[${index}][${key}]`, value);
-            }
-          });
-        });
-        formData.append('purpose', form.purpose);
-        formData.append('start_at', form.start_at);
-        formData.append('end_at', form.end_at);
-
-        if (id) {
-          formData.append('_method', 'PUT');
-
-          if (deleteExpenseId.length > 0) {
-            try {
-              const deleteExpenseItemsRes = await axiosInstance.post('/deleteExpensePlanItems', {
-                ids: deleteExpenseId
-              });
-
-              if (deleteExpenseItemsRes.status !== 200) {
-                alert("Failed to delete selected expense plan items.");
-                return;
-              }
-            } catch (err) {
-              alert("Error deleting expense plan items.");
-              return;
-            }
-          }
-
-          try {
-            const res = await axiosInstance.post(`/expensesPlan/${id}`, formData, {
-              headers: { 'Content-Type': 'multipart/form-data' }
-            });
-
-            if (res.status === 200) {
-              alert("Expense plan has been updated successfully");
-              navigate('/expenses');
-            }
-          } catch (error) {
-            if (error.response?.status === 422) {
-              setFormError(error.response.data.errors);
-            } else {
-              alert("Error updating expense.");
-            }
-          }
-        } else {
-
-          try {
-
-            const res = await axiosInstance.post("/expensesPlan", formData);
-            if (res) {
-              alert("Expense Plan has been created successfully")
-              navigate('/expense-plan')
-            }
-          } catch (error) {
-            setFormError(error.response.data.errors);
-
-          }
-
-        }
-      }
+      alert(`${type === 'expense' ? 'Expense' : 'Expense Plan'} saved successfully`);
+      navigate(type === 'expense' ? '/expenses' : '/expense-plan');
 
     } catch (error) {
       if (error.response?.status === 422) {
         setFormError(error.response.data.errors);
-        console.log(formError)
+      } else {
+        alert('Something went wrong. Please try again.');
       }
     }
-  }
+  };
+
   return (
     <div className="w-full p-8 flex justify-center items-center mt-8">
       <div className="w-full bg-white rounded-md p-7  text-center">

@@ -7,40 +7,6 @@ const BudgetDetails = () => {
     const { id } = useParams();
     const [loading, setLoading] = useState(true)
 
-    // const [departments, setDepartment] = useState([]);
-    // useEffect(() => {
-    //     const fetchDepartments = async () => {
-    //         try {
-    //             const res = await axiosInstance.get('/departments');
-    //             setDepartment(res.data);
-    //         } catch (error) {
-    //             console.error(error);
-    //         }
-    //         finally {
-    //             setLoading(false)
-    //         }
-    //     };
-
-    //     fetchDepartments();
-    // }, []);
-
-    // const [locations, setLocation] = useState([]);
-    // useEffect(() => {
-    //     const fetchLocations = async () => {
-    //         try {
-    //             const res = await axiosInstance.get('/locations');
-    //             setLocation(res.data);
-    //         } catch (error) {
-    //             console.error(error);
-    //         }
-    //         finally {
-    //             setLoading(false)
-    //         }
-    //     };
-
-    //     fetchLocations();
-    // }, []);
-
     const [budgetTimeline, setBudgetTimeline] = useState()
 
     useEffect(() => {
@@ -77,22 +43,22 @@ const BudgetDetails = () => {
     };
 
 
-    const deleteSelectedBudget = async (e) => {
-        if (!window.confirm('Are you sure you want to delete this department?')) {
-            return;
-        }
+    // const deleteSelectedBudget = async (e) => {
+    //     if (!window.confirm('Are you sure you want to delete this department?')) {
+    //         return;
+    //     }
 
-        try {
-            const budgetDeleteRes = await axiosInstance.post('/deleteBudgets', {
-                ids: deleteBudgetId
-            });
-            if (budgetDeleteRes) {
-                alert('Selected budgets deleted successfully!');
-            }
-        } catch (error) {
+    //     try {
+    //         const budgetDeleteRes = await axiosInstance.post('/deleteBudgets', {
+    //             ids: deleteBudgetId
+    //         });
+    //         if (budgetDeleteRes) {
+    //             alert('Selected budgets deleted successfully!');
+    //         }
+    //     } catch (error) {
 
-        }
-    }
+    //     }
+    // }
 
     const [isOpen, setIsOpen] = useState(false)
 
@@ -177,9 +143,31 @@ const BudgetDetails = () => {
 
                     <div className="flex justify-center items-center">
                         <div className="w-full">
-                            <div className="mb-6 w-full text-start">
-                                <div className="w-6/7 p-2 rounded-md"><strong className='mr-5'>Title :</strong> {budgetTimeline?.name}</div>
+                            <div className="mb-6 w-full text-start flex items-center">
+                                <div className="w-2/3 p-2 rounded-md"><strong className='mr-5'>Title :</strong> {budgetTimeline?.name}</div>
+                                <div className="flex gap-2 justify-between items-center">
+                                    <div className='font-semibold'>Status:</div >
+                                    <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
+                                                 ${budgetTimeline?.latest_status[0]?.status === 'pending'
+                                            ? 'text-yellow-600 bg-yellow-50 ring-yellow-500/10'
+                                            : budgetTimeline?.latest_status[0]?.status === 'approved'
+                                                ? 'text-green-600 bg-green-50 ring-green-500/10'
+                                                : budgetTimeline?.latest_status[0]?.status === 'rejected'
+                                                    ? 'text-red-600 bg-red-50 ring-red-500/10'
+                                                    : 'text-[#3F51B6] bg-gray-50 ring-[#626daa]'
+                                        }`} >
 
+                                        {budgetTimeline?.latest_status[0]?.status === 'pending'
+                                            ? 'Pending'
+                                            : budgetTimeline?.latest_status[0]?.status === 'approved'
+                                                ? 'Approved'
+                                                : budgetTimeline?.latest_status[0]?.status === 'checked'
+                                                    ? 'Checked'
+                                                    : budgetTimeline?.latest_status[0]?.status === 'rejected'
+                                                        ? 'Rejected' : '-'}
+
+                                    </span>
+                                </div>
                             </div>
                             <div className="flex mb-6 item-center gap-3">
                                 <div className="w-1/2">
@@ -212,7 +200,7 @@ const BudgetDetails = () => {
                                             <thead>
                                                 <tr className=''>
 
-                                                    <th className='py-2 border border-[#989898]'>Select</th>
+                                                    {/* <th className='py-2 border border-[#989898]'>Select</th> */}
                                                     <th className='py-2 border border-[#989898]'>Title</th>
                                                     <th className='py-2 border border-[#989898] w-1/8'>Amount</th>
                                                     <th className='py-2 border border-[#989898]'>Department</th>
@@ -222,9 +210,9 @@ const BudgetDetails = () => {
                                             <tbody>
                                                 {budgetTimeline?.budget?.map((row, index) => (
                                                     <tr className="text-center" key={index}>
-                                                        <td className="p-2 border border-[#989898]">
+                                                        {/* <td className="p-2 border border-[#989898]">
                                                             <input type="checkbox" value={row.id} onChange={handleChange} />
-                                                        </td>
+                                                        </td> */}
 
                                                         <td className="p-2 border border-[#989898]">
                                                             <div className="w-full  p-2">{row.title}</div>
@@ -248,41 +236,13 @@ const BudgetDetails = () => {
                                             </tbody>
 
                                         </table>
-                                        <div className="w-full flex justify-end">
+                                        {/* <div className="w-full flex justify-end">
                                             <button type="button" onClick={deleteSelectedBudget} className="py-1 rounded-lg px-4 bg-red-600 text-white mt-4 text-end">Delete Selected Budgets</button>
 
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>
-                            {/* {
-                                budgetTimeline?.latest_status[0]?.status !== 'approved' &&
-
-                                <div className="">
-                                    <h3 className="font-bold text-xl mb-2">Change Status</h3>
-                                    <div className="items-end">
-                                        <div className="w-2/5 mb-3">
-                                            <div className="flex items-center gap-2 ">
-                                                <label className="w-30 text-start">
-                                                    Comment <span className="text-sm text-red-500">*</span>
-                                                </label>
-                                                <textarea row='2'
-                                                    name='comment'
-                                                    type="text"
-                                                    className="flex-1 rounded-sm border p-2 border-[#989898]"
-                                                    placeholder='comment'
-                                                    onChange={handleCommentChange}
-                                                ></textarea>
-                                            </div>
-                                            <p className="text-sm text-red-700">
-                                                {
-                                                    commentError?.comment?.[0]
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            } */}
 
                         </div>
 

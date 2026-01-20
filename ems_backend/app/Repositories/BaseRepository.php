@@ -60,11 +60,6 @@ class BaseRepository implements BaseInterface
     public function save(?int $id, array $data)
 {
     return $this->model->updateOrCreate(['id' => $id],$data);
-    // if ($id) {
-    //     return $this->model->updateOrCreate(['id' => $id], $data);
-    // }
-    // return $this->model->create($data);
-    // return $this->model->upsert($data,$id,$col);
     
 }
 

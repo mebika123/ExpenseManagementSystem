@@ -8,29 +8,66 @@ use App\Models\ExpensePlan;
 use App\Services\ExpensePlanService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ExpensePlanController extends Controller
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:expense_plan.view|expense_plan.view.all', only: ['index']),
+            new Middleware('permission:expense_plan.create', only: ['store']),
+            new Middleware('permission:expense_plan.update', only: ['update', 'deleteExpenseItem']),
+            new Middleware('permission:expense_plan.show', only: ['show']),
+            new Middleware('permission:expense_plan.delete', only: ['destroy']),
+            new Middleware('permission:expense_plan.showItemsDetails', only: ['showItemsDetails']),
+            new Middleware('permission:expense_plan.status.check|expense_plan.status.approve', only: ['updateStatus']),
+        ];
+    }
     protected ExpensePlanService $expense_plan_service;
     public function __construct(ExpensePlanService $expense_plan_service)
     {
         $this->expense_plan_service = $expense_plan_service;
     }
 
+    // public function index()
+    // {
+    //     $expensesPlan = ExpensePlan::with(['budgetTimeline:id,code', 'latestStatus'])->get()
+    //     ->map(function ($expensesPlan) {
+    //             $expensesPlan->isEditable = $expensesPlan->latestStatus?->first()?->status !== 'approved';
+    //             return $expensesPlan;
+    //         });
+    //     return response()->json(['expensesPlan' => $expensesPlan]);
+    // }
     public function index()
     {
-        $expensesPlan = ExpensePlan::with(['budgetTimeline:id,code', 'latestStatus'])->get()
-        ->map(function ($expensesPlan) {
-                $expensesPlan->isEditable = $expensesPlan->latestStatus?->first()?->status !== 'approved';
-                return $expensesPlan;
-            });
+        $user = Auth::user();
+
+        if ($user->hasPermissionTo('expense_plan.view.all')) {
+            $expensesPlan = ExpensePlan::with(['budgetTimeline:id,code', 'latestStatus'])->get()
+                ->map(function ($expensesPlan) {
+                    $expensesPlan->isEditable = $expensesPlan->latestStatus?->first()?->status !== 'approved';
+                    return $expensesPlan;
+                });
+        } else {
+            $expensesPlan = ExpensePlan::with(['budgetTimeline:id,code', 'latestStatus'])
+                ->where('user_id', $user->id)
+                ->get()
+                ->map(function ($expensesPlan) {
+                    $expensesPlan->isEditable = $expensesPlan->latestStatus?->first()?->status !== 'approved';
+                    return $expensesPlan;
+                });
+        }
+
         return response()->json(['expensesPlan' => $expensesPlan]);
     }
 
     public function store(StoreExpensePlanRequest $request)
     {
         $files = $request->file('attachments');
-        $data = $request->all();
+        $data = $request->validated();
         $data['attachments'] = $files;
 
         try {
@@ -43,12 +80,19 @@ class ExpensePlanController extends Controller
 
     public function update($id, StoreExpensePlanRequest $request)
     {
+        $user = Auth::user();
+
         $files = $request->file('attachments');
-        $data = $request->all();
+        $data = $request->validated();
         $data['attachments'] = $files;
         try {
-            $expense = $this->expense_plan_service->storeOrUpdateExpensePlan($data, $id);
-            return response()->json(['message' => 'Your Expense Plan has been updated successfully!', 'expense' => $expense]);
+            $expense = Expense::findOrFail($id);
+
+            if ($expense->created_by_id !== $user->id) {
+                return response()->json(['message' => 'Forbidden'], 403);
+            }
+            $updatedExpense = $this->expense_plan_service->storeOrUpdateExpensePlan($data, $id);
+            return response()->json(['message' => 'Your Expense Plan has been updated successfully!', 'expense' => $updatedExpense]);
         } catch (Exception $e) {
 
             return response()->json(['message' => $e->getMessage()]);
@@ -58,7 +102,7 @@ class ExpensePlanController extends Controller
     public function show($id)
     {
         $expensePlan = ExpensePlan::with('expense_plan_items', 'transactionalAttachments')->find($id);
-                $expensePlan->isEditable = $expensePlan->latestStatus?->first()?->status !== 'approved';
+        $expensePlan->isEditable = $expensePlan->latestStatus?->first()?->status !== 'approved';
 
         return response()->json(['expense' => $expensePlan]);
     }
@@ -94,9 +138,10 @@ class ExpensePlanController extends Controller
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:expense_plan_items,id',
         ]);
+
         try {
             $deletExpenseItems = $this->expense_plan_service->bulkDeleteItems($data);
-            return response()->json(['message' => 'Selected expense plan items deleted']);
+            return response()->json(['message' => 'Selected expense plan items deleted', 'data' => $deletExpenseItems]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

@@ -23,106 +23,177 @@ class DatabaseSeeder extends Seeder
         // ]);
 
 
-        $superAdminRole = Role::firstOrCreate(['name' => 'superadmin']);
-        $employeeRole = Role::firstOrCreate(['name' => 'employee']);
-        $managerRole = Role::firstOrCreate(['name' => 'manager']);
-        $financeRole = Role::firstOrCreate(['name' => 'finance']);
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        // $superAdminRole = Role::firstOrCreate(['name' => 'superadmin']);
+        // $employeeRole = Role::firstOrCreate(['name' => 'employee']);
+        // $managerRole = Role::firstOrCreate(['name' => 'manager']);
+        // $financeRole = Role::firstOrCreate(['name' => 'finance']);
+        // $adminRole = Role::firstOrCreate(['name' => 'admin']);
 
-        $permissions = [
-            'user-create',
-            'user-view',
-            'user-edit',
-            'user-delete',
+        // $permissions = [
+        //     'advance.view',
+        //     'advance.create',
+        //     'advance.update',
+        //     'advance.show',
+        //     'advance.delete',
+        //     'advance.status.check',
+        //     'advance.status.approve',
 
-            'contact-create',
-            'contact-view',
-            'contact-edit',
-            'contact-delete',
+        //     'budgetTimeline.view',
+        //     'budgetTimeline.create',
+        //     'budgetTimeline.update',
+        //     'budgetTimeline.show',
+        //     'budgetTimeline.delete',
+        //     'budgetTimeline.delete.budgets',
+        //     'budgetTimeline.status.check',
+        //     'budgetTimeline.status.approve',
 
-            'department-create',
-            'department-view',
-            'department-edit',
-            'department-delete',
+        //     'contact.view',
+        //     'contact.create',
+        //     'contact.update',
+        //     'contact.show',
+        //     'contact.delete',
+        //     'contact.view',
 
-            'location-create',
-            'location-view',
-            'location-edit',
-            'location-delete',
+        //     'department.view',
+        //     'department.create',
+        //     'department.update',
+        //     'department.show',
+        //     'department.delete',
 
-            'budget-create',
-            'budget-view',
-            'budget-edit',
-            'budget-delete',
-            'budget-change-status',
+        //     'location.view',
+        //     'location.create',
+        //     'location.update',
+        //     'location.show',
+        //     'location.delete',
 
-            'expense-create',
-            'expense-view',
-            'expense-edit',
-            'expense-delete',
-            'expense-change-status',
+        //     'expense_category.view',
+        //     'expense_category.create',
+        //     'expense_category.update',
+        //     'expense_category.show',
+        //     'expense_category.delete',
 
-            'remibursment-change-status'
+        //     'expense.view',
+        //     'expense.view.all',
+        //     'expense.create',
+        //     'expense.update',
+        //     'expense.show',
+        //     'expense.delete',
+        //     'expense.showItemsDetails',
+        //     'expense.status.check',
+        //     'expense.status.approve',
 
-        ];
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
-        }
+        //     'expense_plan.view',
+        //     'expense_plan.view.all',
+        //     'expense_plan.create',
+        //     'expense_plan.update',
+        //     'expense_plan.show',
+        //     'expense_plan.delete',
+        //     'expense_plan.showItemsDetails',
+        //     'expense_plan.status.check',
+        //     'expense_plan.status.approve',
 
+        //     'reimbursement.view',
+        //     'reimbursement.update',
+
+        //     'advanceSettlement.view',
+        //     'advanceSettlement.update',
+
+        //     'transactional_log.view',
+        //     'transactional_log.unsettled.view',
+        //     'transactional_log.settle',
+
+        //     'role.view',
+        //     'role.create',
+        //     'role.update',
+        //     'role.show',
+        //     'role.delete',
+
+        //     'user.view',
+        //     'user.create',
+        //     'user.update',
+        //     'user.show',
+        //     'user.delete',
+        // ];
+        // $permissions = [
+        //     // 'expense.view.all',
+        //     // 'expense_plan.view.all',
+        //     'dashboard.view.all',
+        // ];
+        // foreach ($permissions as $permission) {
+        //     Permission::firstOrCreate(['name' => $permission]);
+        // }
+        $superAdminRole = Role::findByName('superadmin');
         $superAdminRole->syncPermissions(Permission::all());
-        $adminRole->syncPermissions(Permission::all());
+        //     $adminRole->syncPermissions(Permission::all());
 
-        $employeeRole->givePermissionTo([
-            'contact-create',
-            'contact-view',
-            'department-view',
-            'location-view',
-            'budget-view',
-            'expense-create',
-            'expense-view',
-            'expense-edit',
-            'expense-delete'
-        ]);
+        //     $employeeRole->givePermissionTo([
+        //         'contact.create',
+        //         'contact.view',
+        //         'department.view',
+        //         'location.view',
 
-        $managerRole->givePermissionTo([
-            'user-create',
-            'user-view',
-            'user-edit',
-            'user-delete',
+        //         'expense.view',
+        //         'expense.create',
+        //         'expense.update',
+        //         'expense.show',
+        //         'expense.delete',
+        //         'expense.showItemsDetails',
 
-            'contact-create',
-            'contact-view',
-            'contact-edit',
-            'contact-delete',
+        //         'expense_plan.view',
+        //         'expense_plan.create',
+        //         'expense_plan.update',
+        //         'expense_plan.show',
+        //         'expense_plan.delete',
+        //         'expense_plan.showItemsDetails',
+        //     ]);
 
-            'department-create',
-            'department-view',
-            'department-edit',
-            'department-delete',
+        //     $managerRole->givePermissionTo([
+        //         'user.create',
+        //         'user.view',
+        //         'user.update',
+        //         'user.delete',
 
-            'location-create',
-            'location-view',
-            'location-edit',
-            'location-delete',
+        //         'contact.create',
+        //         'contact.view',
+        //         'contact.update',
+        //         'contact.delete',
 
-            'budget-change-status',
-            'expense-change-status',
-            'remibursment-change-status',
-        ]);
+        //         'department.create',
+        //         'department.view',
+        //         'department.update',
+        //         'department.delete',
 
-        $financeRole->givePermissionTo([
-            'budget-create',
-            'budget-view',
-            'budget-edit',
-            'budget-delete',
-            'remibursment-change-status'
-        ]);
+        //         'location.create',
+        //         'location.view',
+        //         'location.update',
+        //         'location.delete',
 
-        $user = User::create([
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-        ]);
 
-        $user->assignRole('superadmin');
+        //     ]);
+
+        //     $financeRole->givePermissionTo([
+        //         'budgetTimeline.view',
+        //         'budgetTimeline.create',
+        //         'budgetTimeline.update',
+        //         'budgetTimeline.show',
+        //         'budgetTimeline.delete',
+        //         'budgetTimeline.delete.budgets',
+
+        //         'reimbursement.view',
+        //         'reimbursement.update',
+
+        //         'advanceSettlement.view',
+        //         'advanceSettlement.update',
+
+        //         'transactional_log.view',
+        //         'transactional_log.unsettled.view',
+        //         'transactional_log.settle',
+        //     ]);
+
+        //     $user = User::updateOrCreate(['email' => 'admin@example.com'], [
+        //         'password' => bcrypt('password'),
+        //     ]);
+
+        //     $user->assignRole('superadmin');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Location;
 use App\Repositories\LocationRepository;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
 
 class LocationController extends Controller
 {
@@ -13,6 +14,17 @@ class LocationController extends Controller
     public function __construct(LocationRepository $location)
     {
         $this->location = $location;
+    }
+
+      public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:location.view', only: ['index']),
+            new Middleware('permission:location.create', only: ['store']),
+            new Middleware('permission:location.update', only: ['update']),
+            new Middleware('permission:location.show', only: ['show']),
+            new Middleware('permission:location.delete', only: ['destroy']),
+        ];
     }
     public function index()
     {

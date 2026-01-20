@@ -1,28 +1,58 @@
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../../axios';
 
-const CustomRole = ({ title }) => {
+const CustomRole = ({ title, id }) => {
 
     const [loading, setLoading] = useState(true)
     const [permissions, setPermissions] = useState([]);
 
     const [form, setForm] = useState({
         name: '',
-        permission: []
+        permissions: []
     })
+    useEffect(() => {
+        if (!id) return;
 
+        const fetchFormData = async () => {
+            try {
+                const res = await axiosInstance.get(`/roles/${id}`);
+
+                setForm({
+                    name: res.data.role.name,
+                    permissions: res.data.permissions.map(p => p.id)
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchFormData();
+    }, [id]);
+
+
+    // const handleChecked = (e) => {
+    //     const permissionId = e.target.value;
+
+    //     setForm(prevForm => {
+    //         const newPermissions = prevForm.permission.includes(permissionId)
+    //             ? prevForm.permission.filter(id => id !== permissionId)
+    //             : [...prevForm.permission, permissionId];
+    //         return {
+    //             ...prevForm,
+    //             permission: newPermissions
+    //         };
+    //     });
+
+    // };
     const handleChecked = (e) => {
-        const permissionId = e.target.value;
+        const permissionId = Number(e.target.value);
 
-        setForm(prevForm => {
-            const newPermissions = prevForm.permission.includes(permissionId)
-                ? prevForm.permission.filter(id => id !== permissionId) 
-                : [...prevForm.permission, permissionId]; 
-            return {
-                ...prevForm,
-                permission: newPermissions
-            };
-        });
+        setForm(prev => ({
+            ...prev,
+            permissions: e.target.checked
+                ? [...prev.permissions, permissionId]
+                : prev.permissions.filter(id => id !== permissionId)
+        }));
     };
 
 
@@ -43,21 +73,22 @@ const CustomRole = ({ title }) => {
             }
         }
         fetchPermission();
-    },[])
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
-
-            const res = await axiosInstance.post('/roles',form);
-
-
-            console.log(res)
-
+            if (id) {
+                await axiosInstance.put(`/roles/${id}`, form);
+            } else {
+                await axiosInstance.post('/roles', form);
+            }
         } catch (error) {
-            console.log(error)
+            console.error(error);
         }
-    }
+    };
+
 
 
     return (
@@ -90,7 +121,9 @@ const CustomRole = ({ title }) => {
                                         {
                                             permissions?.map((permission, index) => (
                                                 <div className="flex gap-2 mb-2" key={index}>
-                                                    <input type="checkbox" value={permission.id} onChange={handleChecked} />
+                                                    <input type="checkbox" value={permission.id}
+                                                        checked={form.permissions.includes(permission.id)}
+                                                        onChange={handleChecked} />
                                                     <span>{permission.name}</span>
 
                                                 </div>

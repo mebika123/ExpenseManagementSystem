@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../axios';
-import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { can } from '../../utils/permission';
+import { useAuth } from '../../context/AuthContext';
 
 const UserList = () => {
-    const { user } = useAuth();
+    const { permissions, loading } = useAuth();
 
-    const [loading, setLoading] = useState(true);
+    // const [loading, setLoading] = useState(true);
     const [contactUser, setContactUser] = useState();
     useEffect(() => {
         const fetchContactUsers = async () => {
@@ -19,13 +22,24 @@ const UserList = () => {
                 console.log(error)
             }
             finally {
-                setLoading(false);
+                // setLoading(false);
             }
         }
         fetchContactUsers();
     }, [])
-    console.log(contactUser)
+    const handleDelete = async (userId) => {
+        if (!window.confirm('Are you sure you want to delete this user?')) return;
 
+        try {
+            await axiosInstance.delete(`/users/${userId}`);
+            alert('User deleted successfully');
+            // Optional: remove from state to update UI
+            setContactUser((prev) => prev.filter(c => c.id !== userId));
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete user');
+        }
+    };
     return (<>
         <div className="w-full p-8 flex justify-center items-center mt-8">
 
@@ -67,11 +81,24 @@ const UserList = () => {
                                         <td className="py-3">{user?.contact?.phone_no || ''}</td>
                                         <td className="py-3">
                                             <div className="flex gap-4 items-center justify-center">
-                                                <Link to={`/user/edit/${user.id}`} className='px-4 py-2 bg-[#5619fe]  rounded-lg text-white'>Edit</Link>
-                                                <button className='px-4 py-2 bg-[#fe1919]  rounded-lg text-white'>Delete</button>
+                                                {
+                                                    can('user.update', permissions) &&
+                                                    <Link to={`/user/edit/${user.id}`}>
+                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]">
+                                                            <FontAwesomeIcon icon={faPen} />
+                                                        </div>
+                                                    </Link>
+                                                }
+                                                {
+                                                    can('user.delete', permissions) &&
+
+                                                    <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF3641]">
+                                                        <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(user.id)} />
+
+                                                    </div>
+                                                }
                                             </div>
                                         </td>
-                                        {/* <td className="py-3">{user?.contacts[0]?.department||''}</td> */}
                                     </tr>
                                 ))
 

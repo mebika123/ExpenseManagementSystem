@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { can } from '../../utils/permission';
+
 
 const AddBudget = () => {
-
-    const { user } = useAuth();
-    const [budget, setBudget] = useState([{ title: '', amount: '', department_id: '', location_id: '', }]);
     const [loading, setLoading] = useState(true)
+
+
+    const [budget, setBudget] = useState([{ title: '', amount: '', department_id: '', location_id: '', }]);
 
     const [form, setForm] = useState({
         name: '',
@@ -17,6 +19,14 @@ const AddBudget = () => {
             { title: '', amount: '', department_id: '', location_id: '' }
         ]
     });
+
+        const { permissions} = useAuth();
+
+    // if (loading) {
+    //     return <div>Loading...</div>; // or spinner
+    // }
+
+    if (!can('budgetTimeline.create', permissions)) return <Navigate to="/403" replace />;
 
     const [departments, setDepartment] = useState([]);
     useEffect(() => {

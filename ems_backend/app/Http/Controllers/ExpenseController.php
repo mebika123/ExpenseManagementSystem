@@ -7,6 +7,9 @@ use App\Models\Expense;
 use App\Services\ExpenseService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ExpenseController extends Controller
 {
@@ -15,18 +18,64 @@ class ExpenseController extends Controller
     {
         $this->expense_service = $expense_service;
     }
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:expense.view|expense.view.all', only: ['index']),
+            new Middleware('permission:expense.create', only: ['store']),
+            new Middleware('permission:expense.update', only: ['update', 'deleteExpenseItem']),
+            new Middleware('permission:expense.show', only: ['show']),
+            new Middleware('permission:expense.delete', only: ['destroy']),
+            new Middleware('permission:expense.showItemsDetails', only: ['showItemsDetails']),
+            new Middleware('permission:expense.status.check|expense.status.approve', only: ['updateStatus']),
+        ];
+    }
+
 
     public function index()
     {
-        // $expenses = Expense::with(['budgetTimeline:id,code', 'latestStatus'])->get();
-        $expenses = Expense::with(['budgetTimeline:id,code', 'latestStatus'])
-            ->get()
-            ->map(function ($expense) {
-                $expense->isEditable = $expense->latestStatus?->first()?->status !== 'approved';
-                return $expense;
-            });
+        $user = Auth::user();
+
+        if ($user->hasPermissionTo('expense.view.all')) {
+            $expenses = Expense::orderBy('created_at', 'desc')->with(['budgetTimeline:id,code', 'latestStatus', 'createdBy:id,email'])->get()
+                ->map(function ($expense) {
+                    $expense->isEditable = $expense->latestStatus?->first()?->status !== 'approved';
+                    return $expense;
+                });
+        } else {
+            $expenses = Expense::orderBy('created_at', 'desc')->with(['budgetTimeline', 'latestStatus', 'createdBy:id,email'])
+                ->where('created_by_id', $user->id)
+                ->get()
+                ->map(function ($expense) {
+                    $expense->isEditable = $expense->latestStatus?->first()?->status !== 'approved';
+                    return $expense;
+                });
+        }
+
         return response()->json(['expenses' => $expenses]);
     }
+
+
+    // public function index()
+    // {
+    //     $user = Auth::user();
+
+
+    //     $expenses = Expense::orderBy('created_at', 'desc')
+    //         ->with(
+    //         'budgetTimeline:id,code',
+    //         'latestStatus',
+    //         'createdBy:id,code'
+    //     )->get()
+    //         ->map(function ($expenses) {
+    //             $expenses->isEditable = $expenses->latestStatus?->first()?->status !== 'approved';
+    //             return $expenses;
+    //         });
+
+    //     return response()->json(['expenses' => $expenses]);
+    // }
+
+
 
     public function store(StoreExpenseRequest $request)
     {
@@ -42,17 +91,46 @@ class ExpenseController extends Controller
         }
     }
 
+    // public function update($id, StoreExpenseRequest $request)
+    // {
+    //     $files = $request->file('attachments');
+    //     $data = $request->validated();
+    //     $data['attachments'] = $files;
+
+    //     try {
+    //         $expense = $this->expense_service->storeOrUpdateExpense($data, $id);
+    //         return response()->json([
+    //             'message' => 'Your Expense has been updated successfully!',
+    //             'expense' => $expense->load('expense_items', 'transactionalAttachments')
+    //         ], 200);
+    //     } catch (Exception $e) {
+
+    //         return response()->json(['message' => $e->getMessage()]);
+    //     }
+    // }
     public function update($id, StoreExpenseRequest $request)
     {
         $files = $request->file('attachments');
-        $data = $request->validate();
+        $data = $request->validated();
         $data['attachments'] = $files;
+
         try {
             $expense = $this->expense_service->storeOrUpdateExpense($data, $id);
-            return response()->json(['message' => 'Your Expense has been updated successfully!', 'expense' => $expense]);
-        } catch (Exception $e) {
 
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Your Expense has been updated successfully!',
+                'expense' => $expense->load('expense_items', 'transactionalAttachments')
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            log::error($e);
+            return response()->json([
+                'message' => 'Error updating expense: ' . $e->getMessage()
+            ], 500);
         }
     }
 

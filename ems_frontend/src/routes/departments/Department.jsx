@@ -3,14 +3,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import SearchBar from '../../components/ui/SearchBar';
 import Modal from '../../components/ui/Modal';
 import ModalForm from '../../components/ui/form/ModalForm';
+import { can } from '../../utils/permission';
+import Pagination from '../../components/ui/Pagination';
 
 
 const Department = () => {
+    const { permissions } = useAuth();
+    if (!can('department.view', permissions)) return <Navigate to="/403" replace />;
+
     // modal
     const [isOpen, setIsOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -114,6 +119,10 @@ const Department = () => {
 
 
     const columnHelper = createColumnHelper();
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10,
+    });
 
     const columns = [
         columnHelper.accessor("name", { header: "Name" }),
@@ -124,8 +133,13 @@ const Department = () => {
     const table = useReactTable({
         data: safeDepartments,
         columns,
-        state: { globalFilter },
+        state: {
+            globalFilter,
+            pagination,
+
+        },
         onGlobalFilterChange: setGlobalFilter,
+        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -137,7 +151,7 @@ const Department = () => {
 
     return (
         <div className="w-full p-8 flex justify-center items-center mt-8">
-            
+
             <Modal isOpen={isOpen}
                 title={editingId ? "Edit Department" : "New Department"}
                 onClose={() => setIsOpen(false)}>
@@ -205,6 +219,8 @@ const Department = () => {
                         )}
 
                     </table>
+
+                    <Pagination table={table}/>
                 </div>
             </div>
 

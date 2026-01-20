@@ -11,6 +11,7 @@ use App\Services\TransactionalService;
 use Exception;
 use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
 
 class TransactionaLogController extends Controller
 {
@@ -21,6 +22,14 @@ class TransactionaLogController extends Controller
     {
         $this->transactional_repo = $transactional_repo;
         $this->transactional_service = $transactional_service;
+    }
+      public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:transactional_log.view', only: ['index']),
+            new Middleware('permission:transactional_log.unsettled.view', only: ['showUnsettledTransaction']),
+            new Middleware('permission:transactional_log.settle', only: ['transactional_settlement']),
+        ];
     }
 
 
@@ -37,7 +46,8 @@ class TransactionaLogController extends Controller
     {
         try {
             $transactions = TransactionalLog::with('contacts:id,code', 'model')
-                ->where('isSettled', false)->whereNotNull('contact_id')
+                ->where('isSettled', false)->whereNotNull('contact_id')->where('model_type', ExpenseItem::class)
+                ->where('model_type', Advance::class)
                 ->get();
 
             $advWithEPNotI = [];

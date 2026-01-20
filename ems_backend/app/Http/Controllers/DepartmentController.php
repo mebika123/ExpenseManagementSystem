@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Repositories\DepartmentRepository;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
 
 class DepartmentController extends Controller
 {
@@ -13,6 +14,17 @@ class DepartmentController extends Controller
     public function __construct(DepartmentRepository $department)
     {
         $this->department = $department;
+    }
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:deparment.view', only: ['index']),
+            new Middleware('permission:deparment.create', only: ['store']),
+            new Middleware('permission:deparment.update', only: ['update']),
+            new Middleware('permission:deparment.show', only: ['show']),
+            new Middleware('permission:deparment.delete', only: ['destroy']),
+        ];
     }
     public function index()
     {
@@ -38,8 +50,8 @@ class DepartmentController extends Controller
 
     public function update(Request $request, $id)
     {
-         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:departments,name,'.$id,
+        $data = $request->validate([
+            'name' => 'required|string|max:255|unique:departments,name,' . $id,
         ]);
         return $this->department->update($id, $data);
     }

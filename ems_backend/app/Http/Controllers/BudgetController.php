@@ -17,15 +17,19 @@ class BudgetController extends Controller
 
     public function __construct(BudgetService $budget_service)
     {
-        
+
         $this->budget_service = $budget_service;
     }
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:budget.view', only:['index']),
-            new Middleware('permission:budget.create', only:['store']),
-            new Middleware('permission:budget.update',only:['update']),
+            new Middleware('permission:budgetTimeline.view', only: ['index']),
+            new Middleware('permission:budgetTimeline.create', only: ['store']),
+            new Middleware('permission:budgetTimeline.update', only: ['update']),
+            new Middleware('permission:budgetTimeline.show', only: ['show']),
+            new Middleware('permission:budgetTimeline.delete', only: ['destroy']),
+            new Middleware('permission:budgetTimeline.delete.budgets', only: ['deleteBudgets']), //check at onces both buget and udate 
+            new Middleware('permission:budgetTimeline.status.check|budgetTimeline.status.approve', only: ['updateStatus']),
         ];
     }
 
@@ -39,9 +43,10 @@ class BudgetController extends Controller
             ->map(function ($budgetTimelines) {
                 $budgetTimelines->isEditable = $budgetTimelines->latestStatus?->first()?->status !== 'approved';
                 return $budgetTimelines;
-            });;
+            });
         return response()->json(['budgetTimelines' => $budgetTimelines]);
     }
+ 
 
     public function show($id)
     {

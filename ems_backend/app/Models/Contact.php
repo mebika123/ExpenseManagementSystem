@@ -13,7 +13,7 @@ class Contact extends Model
 
     public function employee(): HasOne
     {
-        return $this->hasOne(Employee::class);
+        return $this->hasOne(Employee::class, 'contact_id', 'id');
     }
     public function department()
     {

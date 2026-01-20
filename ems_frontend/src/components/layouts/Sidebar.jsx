@@ -1,11 +1,12 @@
-import { faAddressBook, faAngleDown, faAngleUp, faBuilding, faChartPie, faCoins, faFileInvoiceDollar, faHandHoldingDollar, faHouse, faList, faMoneyBillTransfer, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons'
+import { faAddressBook, faAngleDown, faAngleUp, faBuilding, faChartPie, faCoins, faFileInvoice, faFileInvoiceDollar, faHandHoldingDollar, faHouse, faList, faMoneyBillTransfer, faUser, faUserTie } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { can, canAny } from '../../utils/permission'
 
 const Sidebar = () => {
-    const { user } = useAuth();
+    const { user, permissions } = useAuth();
 
     const [openMenus, setOpenMenus] = useState({});
 
@@ -15,6 +16,13 @@ const Sidebar = () => {
             [menuKey]: !prev[menuKey]
         }))
     }
+    // console.log(permissions)
+    console.log(canAny([
+        'expense.view',
+        'expense.create',
+        'expense_plan.view',
+        'expense_plan.create'
+    ]))
 
     return (
         <>
@@ -23,6 +31,7 @@ const Sidebar = () => {
                     <div className="font-bold text-2xl px-3 text-shadow-md ml-12">EMS</div>
 
                 </div>
+                
                 <ul className='mt-6 px-4 flex-1 overflow-y-auto  sidebar-scroll'>
                     <li className='mb-3 '>
                         <Link to={'/dashboard'}>
@@ -33,141 +42,231 @@ const Sidebar = () => {
                         </Link>
                     </li>
 
-                    <li className='mb-3 '>
-                        <div className="text-base font-medium">
-                            {/* <div className=' text-xs  text-gray-400'>Contacts </div> */}
-                            <div className="">
-                                <ul className="  pt-2">
-                                    <li className="mb-3" >
-                                        <div className="text-base font-medium" onClick={() => toggleMenu('budget_timeline')}>
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faChartPie} />
-                                                <div>
-                                                    Budget Timeline
-                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                    {(can('budgetTimeline.create', permissions) || can('budgetTimeline.view', permissions)) &&
+                        (
+
+                            <li className='mb-3 '>
+                                <div className="text-base font-medium">
+                                    {/* <div className=' text-xs  text-gray-400'>Contacts </div> */}
+                                    <div className="">
+                                        <ul className="  pt-2">
+                                            <li className="mb-3" >
+                                                <div className="text-base font-medium" onClick={() => toggleMenu('budget_timeline')}>
+                                                    <div className="flex items-center gap-5">
+                                                        <FontAwesomeIcon icon={faChartPie} />
+                                                        <div>
+                                                            Budget Timeline
+                                                            <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {
+                                                    openMenus.budget_timeline && (
+                                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                            <li className="ml-12">
+                                                                <Link to="/budget-timelines">Timeline List</Link>
+                                                            </li>
+                                                            <li className="ml-12 mt-2">
+                                                                <Link to="/budget-timeline/new">New Timeline</Link>
+                                                            </li>
+                                                        </ul>
+
+                                                    )
+                                                }
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                        )
+
+                    }
+                    {(can('department.create', permissions) || can('department.view', permissions) || can('location.create', permissions) || can('location.view', permissions) || can('expense_category.create', permissions) || can('expense_category.view', permissions)) && (
+
+                        <li className='mb-3 '>
+                            <div className="text-lg font-medium">
+                                <div className=' text-xs mt-5  text-gray-400'>Tracker </div>
+                                <div className="">
+                                    <ul className="  pt-2">
+                                        <li className="mb-3">
+                                            <div className="text-base font-medium">
+                                                <div className="flex items-center gap-5">
+                                                    <FontAwesomeIcon icon={faBuilding} />
+                                                    <Link to={'/departments'}>
+                                                        Department
+                                                    </Link>
                                                 </div>
                                             </div>
-                                        </div>
-                                        {
-                                            openMenus.budget_timeline && (
-                                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-12">
-                                                        <Link to="/budget-timelines">Timeline List</Link>
-                                                    </li>
-                                                    <li className="ml-12 mt-2">
-                                                        <Link to="/budget-timeline/new">New Timeline</Link>
-                                                    </li>
-                                                </ul>
 
-                                            )
-                                        }
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
-                    <li className='mb-3 '>
-                        <div className="text-lg font-medium">
-                            <div className=' text-xs mt-5  text-gray-400'>Tracker </div>
-                            <div className="">
-                                <ul className="  pt-2">
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium">
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faBuilding} />
-                                                <Link to={'/departments'}>
-                                                    Department
-                                                </Link>
-                                            </div>
-                                        </div>
-
-                                    </li>
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium">
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faAddressBook} />
-                                                <Link to={'/locations'}>
-                                                    Location
-                                                </Link>
-                                            </div>
-                                        </div>
-
-                                    </li>
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium">
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faList} />
-                                                <Link to={'/expense-categories'}>
-                                                    Expense Category
-                                                </Link>
-                                            </div>
-                                        </div>
-
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
-                    <li className='mb-3 '>
-                        <div className="text-base font-medium">
-                            <div className=' text-xs  text-gray-400 mt-5'>Expense </div>
-                            <div className="">
-                                <ul className="  pt-2">
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium" onClick={() => toggleMenu('expense')}>
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faCoins} />
-                                                <div>
-                                                    Expense
-                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                        </li>
+                                        <li className="mb-3">
+                                            <div className="text-base font-medium">
+                                                <div className="flex items-center gap-5">
+                                                    <FontAwesomeIcon icon={faAddressBook} />
+                                                    <Link to={'/locations'}>
+                                                        Location
+                                                    </Link>
                                                 </div>
                                             </div>
-                                        </div>
-                                        {
-                                            openMenus.expense && (
-                                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-6">
-                                                        <Link to="/expenses">Expenses List</Link>
-                                                    </li>
-                                                    <li className="ml-6 mt-2">
-                                                        <Link to="/expense/new">New Expense</Link>
-                                                    </li>
-                                                </ul>
 
-                                            )
-                                        }
-                                    </li>
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium" onClick={() => toggleMenu('expense_plan')} >
-                                            <div className="flex items-center gap-5">
+                                        </li>
+                                        <li className="mb-3">
+                                            <div className="text-base font-medium">
+                                                <div className="flex items-center gap-5">
+                                                    <FontAwesomeIcon icon={faList} />
+                                                    <Link to={'/expense-categories'}>
+                                                        Expense Category
+                                                    </Link>
+                                                </div>
+                                            </div>
+
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    )
+
+                    }
+
+                    {/* {(can('expense.create', permissions) || can('expense.view', permissions)||can('expense_plan.create', permissions) || can('expense_plan.view', permissions)) &&
+                        (
+                            <li className='mb-3 '>
+                                <div className="text-base font-medium">
+                                    <div className=' text-xs  text-gray-400 mt-5'>Expense </div>
+                                    <div className="">
+                                        <ul className="  pt-2">
+                                            <li className="mb-3">
+                                                <div className="text-base font-medium" onClick={() => toggleMenu('expense')}>
+                                                    <div className="flex items-center gap-5">
+                                                        <FontAwesomeIcon icon={faCoins} />
+                                                        <div>
+                                                            Expense
+                                                            <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {
+                                                    openMenus.expense && (
+                                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                            <li className="ml-6">
+                                                                <Link to="/expenses">Expenses List</Link>
+                                                            </li>
+                                                            <li className="ml-6 mt-2">
+                                                                <Link to="/expense/new">New Expense</Link>
+                                                            </li>
+                                                        </ul>
+
+                                                    )
+                                                }
+                                            </li>
+                                            <li className="mb-3">
+                                                <div className="text-base font-medium" onClick={() => toggleMenu('expense_plan')} >
+                                                    <div className="flex items-center gap-5">
+                                                        <FontAwesomeIcon icon={faFileInvoiceDollar} />
+                                                        <div>
+                                                            Expense Plan
+                                                            <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {
+                                                    openMenus.expense_plan && (
+                                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                            <li className="ml-6 mt-2">
+                                                                <Link to="/expense-plan">Expense Plan List</Link>
+                                                            </li>
+                                                            <li className="ml-6">
+                                                                <Link to="/expense-plan/new">New Expense Plan</Link>
+                                                            </li>
+                                                        </ul>
+
+                                                    )
+                                                }
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+
+                        )} */}
+                    {canAny([
+                        'expense.view',
+                        'expense.create',
+                        'expense_plan.view',
+                        'expense_plan.create'
+                    ],
+                        permissions) && (
+                            <li className="mb-3">
+                                <div className="text-xs text-gray-400 mt-5">Expense</div>
+
+                                {/* Expense */}
+                                {canAny(['expense.view', 'expense.create'], permissions) && (
+                                    <div className="mt-2">
+                                        <div
+                                            className="flex items-center gap-5 cursor-pointer text-base font-medium"
+                                            onClick={() => toggleMenu('expense')}
+                                        >
+                                            <FontAwesomeIcon icon={faCoins} />
+                                            <span>
+                                                Expense
+                                                <FontAwesomeIcon
+                                                    icon={openMenus.expense ? faAngleDown : faAngleUp}
+                                                    className="ml-4 text-sm"
+                                                />
+                                            </span>
+                                        </div>
+
+                                        {openMenus.expense && (
+                                            <ul className="ml-3 mt-4 border-l text-gray-500 border-gray-400">
+                                                {can('expense.view', permissions) && (
+                                                    <li className="ml-6"> <Link to="/expenses">Expenses List</Link> </li>
+                                                )}
+                                                {can('expense.create', permissions) && (
+                                                    <li className="ml-6 mt-2"> <Link to="/expense/new">New Expense</Link> </li>
+                                                )}
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Expense Plan */}
+                                {canAny(['expense_plan.view', 'expense_plan.create'],
+                                    permissions) && (
+                                        <div className="mt-4">
+                                            <div
+                                                className="flex items-center gap-5 text-base font-medium cursor-pointer"
+                                                onClick={() => toggleMenu('expense_plan')}
+                                            >
                                                 <FontAwesomeIcon icon={faFileInvoiceDollar} />
-                                                <div>
+                                                <span>
                                                     Expense Plan
-                                                    <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
-                                                </div>
+                                                    <FontAwesomeIcon
+                                                        icon={openMenus.expense_plan ? faAngleDown : faAngleUp}
+                                                        className="ml-4 text-sm"
+                                                    />
+                                                </span>
                                             </div>
-                                        </div>
-                                        {
-                                            openMenus.expense_plan && (
-                                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-6 mt-2">
-                                                        <Link to="/expense-plan">Expense Plan List</Link>
-                                                    </li>
-                                                    <li className="ml-6">
-                                                        <Link to="/expense-plan/new">New Expense Plan</Link>
-                                                    </li>
+
+                                            {openMenus.expense_plan && (
+                                                <ul className="ml-3 mt-4 border-l text-gray-500 border-gray-400">
+                                                    {can('expense_plan.view', permissions) && (
+                                                        <li className="ml-6"> <Link to="/expense-plan">Expense Plan List</Link> </li>
+                                                    )}
+                                                    {can('expense_plan.create', permissions) && (
+                                                        <li className="ml-6 mt-2"> <Link to="/expense-plan/new">New Expense Plan</Link> </li>
+                                                    )}
                                                 </ul>
+                                            )}
+                                        </div>
+                                    )}
+                            </li>
+                        )}
 
-                                            )
-                                        }
-                                    </li>
 
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
                     <li className='mb-3 '>
                         <div className="text-base font-medium">
                             <div className=' text-xs  text-gray-400 mt-5'>Monetary </div>
@@ -202,35 +301,65 @@ const Sidebar = () => {
                             </div>
                         </div>
                     </li>
-                    <li className="mb-3">
-                        <div className="text-base font-medium" onClick={() => toggleMenu('transactions')}>
-                            <div className="flex items-center gap-5">
-                                <FontAwesomeIcon icon={faMoneyBillTransfer} />
-                                <div>
-                                    Transactions
-                                    <FontAwesomeIcon icon={openMenus.transactions ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+
+
+                    {(can('transactional_log.settle', permissions) || can('transactional_log.view', permissions)) &&
+                        (
+
+                            <li className="mb-3">
+                                <div className="text-base font-medium" onClick={() => toggleMenu('transactions')}>
+                                    <div className="flex items-center gap-5">
+                                        <FontAwesomeIcon icon={faMoneyBillTransfer} />
+                                        <div>
+                                            Transactions
+                                            <FontAwesomeIcon icon={openMenus.transactions ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                        </div>
+                                    </div>
                                 </div>
+                                {
+                                    openMenus.transactions && (
+                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                            <li className="ml-6">
+                                                <Link to="/transactional-logs">Transactional Logs</Link>
+                                            </li>
+                                            <li className="ml-6 mt-2">
+                                                <Link to="/unsettled/transactional-logs">Unsetteled Transactions</Link>
+                                            </li>
+                                            <li className="ml-6 mt-2">
+                                                <Link to="/reimbursements">Reimbursment</Link>
+                                            </li>
+                                            <li className="ml-6 mt-2">
+                                                <Link to="/advance-settlements">Advance Settelment</Link>
+                                            </li>
+                                        </ul>
+
+                                    )
+                                }
+                            </li>
+                        )}
+
+                    <li className='mb-3 '>
+                        <div className="text-base font-medium">
+                            <div className=' text-xs  text-gray-400 mt-5'>Report </div>
+                            <div className="">
+                                <ul className="  pt-2">
+                                    <li className="mb-3">
+                                        <div className="text-base font-medium">
+                                            <Link to={'/report/expense-summary'}>
+                                                <div className="flex items-center gap-5">
+                                                    <FontAwesomeIcon icon={faFileInvoice} />
+                                                    <div>
+                                                        Expense Summary
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        </div>
+
+                                    </li>
+
+                                </ul>
                             </div>
                         </div>
-                        {
-                            openMenus.transactions && (
-                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                    <li className="ml-6">
-                                        <Link to="/transactional-logs">Transactional Logs</Link>
-                                    </li>
-                                    <li className="ml-6 mt-2">
-                                        <Link to="/unsettled/transactional-logs">Unsetteled Transactions</Link>
-                                    </li>
-                                    <li className="ml-6 mt-2">
-                                        <Link to="/reimbursements">Reimbursment</Link>
-                                    </li>
-                                    <li className="ml-6 mt-2">
-                                        <Link to="/advance-settlements">Advance Settelment</Link>
-                                    </li>
-                                </ul>
-
-                            )
-                        }
                     </li>
                     <li className='mb-3 '>
                         <div className="text-base font-medium">
@@ -256,6 +385,9 @@ const Sidebar = () => {
                                                     <li className="ml-6 mt-2">
                                                         <Link to="/user/new">New Users</Link>
                                                     </li>
+                                                    <li className="ml-6 mt-2">
+                                                        <Link to="/roles">Roles</Link>
+                                                    </li>
                                                 </ul>
 
                                             )
@@ -278,10 +410,7 @@ const Sidebar = () => {
                                                         <Link to="/contact/new">New Contacts</Link>
                                                     </li>
                                                     <li className="ml-6 mt-2">
-                                                        <Link to="/users/new">Employee</Link>
-                                                    </li>
-                                                    <li className="ml-6 mt-2">
-                                                        <Link to="/users/new">Supplier</Link>
+                                                        <Link to="/contacts">Contacts</Link>
                                                     </li>
                                                 </ul>
 
@@ -296,6 +425,8 @@ const Sidebar = () => {
 
 
                 </ul>
+
+
             </aside>
         </>)
 }

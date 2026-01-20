@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExpenseCategory;
 use App\Repositories\ExpenseCategoryRepository;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Log;
 
 class ExpenseCategoryController extends Controller
@@ -15,10 +16,23 @@ class ExpenseCategoryController extends Controller
     {
         $this->expense_category_repo = $expense_category_repo;
     }
+
+        public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:expense_category.view', only: ['index']),
+            new Middleware('permission:expense_category.create', only: ['store']),
+            new Middleware('permission:expense_category.update', only: ['update']),
+            new Middleware('permission:expense_category.show', only: ['show']),
+            new Middleware('permission:expense_category.delete', only: ['destroy']),
+        ];
+    }
+    
     public function index()
     {
         return $this->expense_category_repo->all();
     }
+
 
     public function store(Request $request)
     {

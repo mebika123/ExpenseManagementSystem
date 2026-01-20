@@ -9,19 +9,18 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [permissions, setPermissions] = useState([]);
 
 
     useEffect(() => {
         const fetchUser = async () => {
-            
+
             try {
-                // const res = await axiosInstance.get('/user',{
-                //     headers: {
-                //     Authorization: `Bearer ${Cookies.get('auth_token')}`
-                // }
-                // });
-                 const res = await axiosInstance.get('/authuser');
+                
+                const res = await axiosInstance.get('/authuser');
                 setUser(res.data);
+                setPermissions(res.data.permissions);
+                // console.log(res.data.permissions);
 
             } catch (error) {
                 setUser(null);
@@ -36,20 +35,17 @@ export const AuthProvider = ({ children }) => {
 
     }, [])
 
-    const login = (userData, token) => {
+    const login = (userData, token, permissions) => {
+        console.log(permissions)
         setUser(userData);
-        localStorage.setItem('auth_token',token);
-     };
+        setPermissions(permissions || []); 
+        localStorage.setItem('auth_token', token);
+    };
 
 
     const logout = async () => {
         try {
-            // await axiosInstance.post('/logout', {}, {
-            //     headers: {
-            //         Authorization: `Bearer ${Cookies.get('auth_token')}`
-            //     }
-
-            // })
+            
             await axiosInstance.post('/logout');
         } catch (error) {
             console.error('Logout failed', error);
@@ -60,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, permissions }}>
             {children}
         </AuthContext.Provider>
     );

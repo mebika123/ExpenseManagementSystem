@@ -8,10 +8,12 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpensePlanController;
 use App\Http\Controllers\ReimbursementController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleAndPermissionController;
 use App\Http\Controllers\TransactionaLogController;
 use App\Models\Expense;
@@ -28,20 +30,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('locations', LocationController::class);
     Route::apiResource('expenseCategories', ExpenseCategoryController::class);
     Route::apiResource('contacts', ContactController::class);
-    Route::get('employee', [ContactController::class, 'showAllEmployee']);
+
+
+    Route::get('employees', [ContactController::class, 'employees']);
+    Route::get('suppliers', [ContactController::class, 'suppliers']);
 
 
     Route::apiResource('budgetTimelines', BudgetController::class);
     Route::get('budgetTimelines/{id}', [BudgetController::class, 'show']);
     Route::post('deleteBudgets', [BudgetController::class, 'deleteBudgets']);
     Route::get('{id}/budgets', [BudgetController::class, 'show_budgetTimeline_budgets']);
+    Route::get('budgetTimelines/approved', [BudgetController::class, 'showApprovedBudgetTimeline']);
     Route::post('/budgetTimline/updatedStatus', [BudgetController::class, 'updateStatus']);
 
     Route::apiResource('expenses', ExpenseController::class);
     Route::get("expense/{id}", [ExpenseController::class, 'show']);
     Route::get("expense/details/{id}", [ExpenseController::class, 'showItemsDetails']);
     Route::post('deleteExpenseItems', [ExpenseController::class, 'deleteExpenseItem']);
-    Route::apiResource('expenses', ExpenseController::class);
     Route::post('/expense/updatedStatus', [ExpenseController::class, 'updateStatus']);
     
     Route::post('/expense-plan/expense/{id}', [ExpenseController::class, 'createFromPlan']);
@@ -72,6 +77,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('roles', RoleAndPermissionController::class);
     Route::get('permissions', [RoleAndPermissionController::class, 'showAllPermission']);
+
+    Route::get('/dashboard/cards',[DashboardController::class,'getExpenseTra'] );
+    Route::get('/dashboard/bar',[DashboardController::class,'getBarData'] );
+    Route::get('/dashboard/doughnut',[DashboardController::class,'getDoughnutData'] );
+    Route::get('/dashboard/expenses',[DashboardController::class,'getExpenseTable'] );
+
+    Route::post('/expense-summary-report',[ReportController::class,'index'] );
+    Route::get('/expense-report/export/',[ReportController::class,'export'] );
 
     Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 });

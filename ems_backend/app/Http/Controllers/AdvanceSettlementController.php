@@ -4,20 +4,31 @@ namespace App\Http\Controllers;
 
 use App\Models\AdvanceSettlement;
 use App\Models\TransactionalLog;
+use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdvanceSettlementController extends Controller
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:advanceSettlement.view', only: ['index']),
+            new Middleware('permission:advanceSettlement.update', only: ['update','showUnsettled']),
+        ];
+    }
     public function index()
     {
-        $advanceSettlements = AdvanceSettlement::with(['contacts:id,code', 'advance:id,purpose',
-         'transactional_logs' => function ($q) {
-            $q->select('id', 'isSettled', 'model_id', 'model_type');
-        }])->get();
+        $advanceSettlements = AdvanceSettlement::with([
+            'contacts:id,code',
+            'advance:id,purpose',
+            'transactional_logs' => function ($q) {
+                $q->select('id', 'isSettled', 'model_id', 'model_type');
+            }
+        ])->get();
         return response()->json(['advanceSettlements' => $advanceSettlements]);
     }
- public function showUnsettled()
+    public function showUnsettled()
     {
         $advanceSettlements = AdvanceSettlement::whereHas('transactional_logs', function ($p) {
             $p->where('isSettled', false);
@@ -29,12 +40,12 @@ class AdvanceSettlementController extends Controller
     {
         $data = $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:advance_settlements,id', 
+            'ids.*' => 'integer|exists:advance_settlements,id',
         ]);
 
         return DB::transaction(function () use ($data) {
 
-            $ids = $data['ids']; 
+            $ids = $data['ids'];
 
             AdvanceSettlement::whereIn('id', $ids)
                 ->update(['settlement_date' => now()]);

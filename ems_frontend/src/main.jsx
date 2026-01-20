@@ -37,10 +37,36 @@ import AdvanceSetteled from './routes/advanceSettlement/AdvanceSetteled.jsx'
 import Reimbursement from './routes/reimbursement/Reimbursement.jsx'
 import UnsettledAdvanceSettlement from './routes/advanceSettlement/UnsettledAdvanceSettlement.jsx'
 import UnsettledReimbursement from './routes/reimbursement/UnsettledReimbursement.jsx'
+import RoleList from './routes/role/RoleList.jsx'
+import Forbidden from './routes/Forbidden.jsx'
+import {
+  Chart as ChartJS,
+  BarElement,
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import EditRole from './routes/role/EditRole.jsx'
+import Contacts from './routes/conatcts/Contacts.jsx'
+import EditContact from './routes/conatcts/EditContact.jsx'
+import ExpenseSummary from './routes/report/ExpenseSummary.jsx'
+
+ChartJS.register(
+  BarElement,
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+);
+
 
 
 const router = createBrowserRouter([
   { path: "login", element: <Login /> },
+  { path: "/403", element: <Forbidden /> },
 
   {
     path: "/",
@@ -51,30 +77,35 @@ const router = createBrowserRouter([
       { path: "/users", element: <UserList /> },
       { path: "/user/new", element: <AddUser /> },
       { path: "/user/edit/:id", element: <EditUser /> },
-      
+
       { path: "/departments", element: <Department /> },
-      
+
       { path: "/locations", element: <Location /> },
-      
+
       { path: "/expense-categories", element: <ExpenseCategory /> },
       { path: "/expenses", element: <ExpensesList /> },
       { path: "/expense/new", element: <AddExpense /> },
       { path: "/expense/edit/:id", element: <EditExpense /> },
       { path: "/expense/details/:id", element: <ExpenseDetails /> },
-      
+
       { path: "/expense-plan/new", element: <AddExpensePlan /> },
       { path: "/expense-plan/edit/:id", element: <EditExpensePlan /> },
       { path: "/expense-plan/details/:id", element: <ExpensePlanDetails /> },
       { path: "/expense-plan", element: <ExpensePlanList /> },
-      
-      
+
+
       { path: "/advance/new", element: <AddAdvance /> },
       { path: "/advance/edit/:id", element: <EditAdvance /> },
       { path: "/advances", element: <AdvanceList /> },
-      
-      { path: "/contact/new", element: <AddContact /> },
 
+      { path: "/contacts", element: <Contacts /> },
+      { path: "/contact/new", element: <AddContact /> },
+      { path: "/contact/edit/:id", element: <EditContact /> },
+
+      { path: "/roles", element: <RoleList /> },
       { path: "/role/new", element: <AddRole /> },
+      { path: "/role/edit/:id", element: <EditRole /> },
+      { path: "/role/details/:id", element: <EditRole /> },
 
       { path: "/budget-timelines", element: <BudgetList /> },
       { path: "/budget-timeline/new", element: <AddBudget /> },
@@ -83,12 +114,14 @@ const router = createBrowserRouter([
 
       { path: "/unsettled/transactional-logs", element: <UnSettledTransactions /> },
       { path: "/transactional-logs", element: <TransactionalLogs /> },
-      
+
       { path: "/advance-settlements", element: <AdvanceSetteled /> },
       { path: "/advance-settlements/unsettled", element: <UnsettledAdvanceSettlement /> },
 
       { path: "/reimbursements", element: <Reimbursement /> },
       { path: "/reimbursements/unsettled", element: <UnsettledReimbursement /> },
+
+      { path: "/report/expense-summary", element: <ExpenseSummary /> },
 
     ]
   },

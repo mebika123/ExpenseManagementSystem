@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class StoreExpenseRequest extends FormRequest
 {
@@ -21,6 +22,7 @@ class StoreExpenseRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Log::info('StoreExpenseRequest rules hit', $this->all());
         return [
             'title' => 'required|string|unique:expenses,title,' . $this->route('expense'),
             'budget_timeline_id' => 'required|exists:budget_timelines,id',
@@ -29,6 +31,7 @@ class StoreExpenseRequest extends FormRequest
             'transactional_attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
 
             'expense_items' => 'required|array|min:1',
+            'expense_items.*.id' => 'nullable|exists:expense_items,id', // <-- add this
 
             'expense_items.*.name' => 'required|string',
             'expense_items.*.description' => 'nullable|string',
@@ -46,17 +49,17 @@ class StoreExpenseRequest extends FormRequest
             'existingFiles.*' => 'integer',
         ];
     }
-     public function messages(): array
-    {
-        return[];
-        // return [
-        //     'budget.*.title.required_with' => 'This field is required',
-        //     'budget.*.amount.required_with' => 'This field is required',
-        //     'budget.*.department_id.required_with' => 'This field is required',
-        //     'budget.*.location_id.required_with' => 'This field is required',
+    //  public function messages(): array
+    // {
+    //     return[];
+    //     // return [
+    //     //     'budget.*.title.required_with' => 'This field is required',
+    //     //     'budget.*.amount.required_with' => 'This field is required',
+    //     //     'budget.*.department_id.required_with' => 'This field is required',
+    //     //     'budget.*.location_id.required_with' => 'This field is required',
 
-        //     'budget.*.amount.numeric' => 'Amount must be a number',
-        //     'budget.*.amount.min' => 'Amount must be 0 or greater',
-        // ];
-    }
+    //     //     'budget.*.amount.numeric' => 'Amount must be a number',
+    //     //     'budget.*.amount.min' => 'Amount must be 0 or greater',
+    //     // ];
+    // }
 }

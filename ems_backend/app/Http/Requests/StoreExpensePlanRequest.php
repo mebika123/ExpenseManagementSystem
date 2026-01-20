@@ -31,6 +31,8 @@ class StoreExpensePlanRequest extends FormRequest
             'transactional_attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
 
             'expense_plan_items' => 'required|array|min:1',
+            'expense_plan_items.*.id' => 'nullable|exists:expense_plan_items,id', // <-- add this
+
 
             'expense_plan_items.*.name' => 'required|string',
             'expense_plan_items.*.description' => 'nullable|string',

@@ -7,10 +7,18 @@ use App\Models\Reimbursement;
 use App\Models\TransactionalLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 
 class ReimbursementController extends Controller
 {
+     public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:reimbursement.view', only: ['index']),
+            new Middleware('permission:reimbursement.update', only: ['update','showUnsettled']),
+        ];
+    }
     public function index()
     {
         $reimbursements = Reimbursement::with([

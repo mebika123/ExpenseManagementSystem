@@ -3,16 +3,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import Modal from '../../components/ui/Modal';
 import ModalForm from '../../components/ui/form/ModalForm';
 
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import SearchBar from '../../components/ui/SearchBar';
 import Pagination from '../../components/ui/Pagination';
+import { can } from '../../utils/permission';
 
 
 const Location = () => {
+
+    const { permissions } = useAuth();
+    if (!can('department.view', permissions)) return <Navigate to="/403" replace />;
+
     // fetch location
     const [loading, setLoading] = useState(true);
     const [locations, setLocation] = useState([]);
@@ -235,8 +240,7 @@ const Location = () => {
                         )}
 
                     </table>
-                        <Pagination table={table}
-                        />
+                    <Pagination table={table}/>
                 </div>
             </div>
 

@@ -30,6 +30,7 @@ class ExpenseService
 
         return  DB::transaction(function () use ($data, $id) {
             $user = Auth::user();
+            // $contact = Conatct::findOrFail($user->id)
 
             $expenseData = [
                 'title' => $data['title'],
@@ -67,14 +68,39 @@ class ExpenseService
                 $this->status_service->create($expense, 'pending', $user->id, 'Status Created');
             }
 
-            foreach ($data['expense_items'] as $item) {
-                $expenseItemId = $item['id'] ?? null;
+            // foreach ($data['expense_items'] as $item) {
+            //     $expenseItemId = $item['id'] ?? null;
 
-                if (!$expenseItemId) {
-                    $item['expense_id'] = $expense->id;
+            //     if (!$expenseItemId) {
+            //         $item['expense_id'] = $expense->id;
+            //     }
+            //     $this->expense_item_repo->save($expenseItemId, $item);
+            // }
+
+
+            foreach ($data['expense_items'] as $item) {
+                $payload = [
+                    'name' => $item['name'],
+                    'amount' => $item['amount'],
+                    'contact_id' => $item['contact_id'],
+                    'expense_category_id' => $item['expense_category_id'],
+                    'paid_by_id' => $item['paid_by_id'],
+                    'department_id' => $item['department_id'],
+                    'location_id' => $item['location_id'],
+                    'budget_id' => $item['budget_id'] ?? null,
+                ];
+
+                if (!empty($item['id'])) {
+                    // Log::info("Updating Expense Item", $payload);
+                    $this->expense_item_repo->save($item['id'], $payload);
+                } else {
+                    $payload['expense_id'] = $expense->id;
+                    // Log::info("Creating Expense Item", $payload);
+                    $this->expense_item_repo->save(null, $payload);
                 }
-                $this->expense_item_repo->save($expenseItemId, $item);
             }
+
+
 
 
             return $expense->load('expense_items');
@@ -149,10 +175,10 @@ class ExpenseService
 
                 foreach ($expenseItems as $expenseItem) {
 
-                    $isettle =$expenseItem->paid_by_id === null;
+                    $isettle = $expenseItem->paid_by_id === null;
                     // Log::info($isettle);                    
-                    
-                    $this->transactional_log_repo->createFor($expenseItem,[
+
+                    $this->transactional_log_repo->createFor($expenseItem, [
                         'amount' => $expenseItem->amount,
                         'isSettled' => $isettle,
                         'payment_date' => Carbon::now(),

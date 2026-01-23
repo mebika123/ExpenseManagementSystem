@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../../axios';
 
-const ExpenseReportForm = ({ form, setForm }) => {
+const ExpenseReportForm = ({ form, setForm,setChildLoading }) => {
     // const [form, setForm] = useState({
     //     location_id: '',
     //     budgetTimeline_id: '',
@@ -13,6 +13,8 @@ const ExpenseReportForm = ({ form, setForm }) => {
     // })
 
     //fetch trackers
+
+    const [loading,setLoading] = useState(true);
     const [departments, setDepartment] = useState([]);
     const [locations, setLocation] = useState([]);
     const [expenseCategories, setExpenseCategories] = useState([]);
@@ -21,8 +23,10 @@ const ExpenseReportForm = ({ form, setForm }) => {
     const [budgetTimelines, setBudgetTimelines] = useState([])
 
 
+
     useEffect(() => {
         const fetchData = async () => {
+            setChildLoading(true)
             try {
                 const [
                     locationsRes,
@@ -54,6 +58,9 @@ const ExpenseReportForm = ({ form, setForm }) => {
 
             } catch (error) {
                 console.error(error);
+            }
+            finally{
+                setChildLoading(false)
             }
         };
         fetchData();

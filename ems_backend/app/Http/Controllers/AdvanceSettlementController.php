@@ -38,6 +38,7 @@ class AdvanceSettlementController extends Controller
 
     public function update(Request $request)
     {
+        
         $data = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:advance_settlements,id',

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../axios';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import SearchBar from '../../components/ui/SearchBar';
+import Pagination from '../../components/ui/Pagination';
 
 
 const UnSettledTransactions = () => {
@@ -222,6 +223,7 @@ const UnSettledTransactions = () => {
                         )}
 
                     </table>
+                    <Pagination table={table}/>
                     <div className="w-full text-end p-4">
                         <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white" onClick={handleLogs}>Settle Transactions</button>
                     </div>

@@ -67,4 +67,12 @@ class StoreUserRequest extends FormRequest
             'password' => $contactId ? 'nullable|confirmed|min:8' : 'required|confirmed|min:8',
         ];
     }
+
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        throw new \Illuminate\Validation\ValidationException($validator, response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422));
+    }
 }

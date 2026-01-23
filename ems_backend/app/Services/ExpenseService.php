@@ -27,7 +27,6 @@ class ExpenseService
 
     public function storeOrUpdateExpense($data, $id = null)
     {
-
         return  DB::transaction(function () use ($data, $id) {
             $user = Auth::user();
             // $contact = Conatct::findOrFail($user->id)
@@ -82,6 +81,7 @@ class ExpenseService
                 $payload = [
                     'name' => $item['name'],
                     'amount' => $item['amount'],
+                    'description' => $item['description'],
                     'contact_id' => $item['contact_id'],
                     'expense_category_id' => $item['expense_category_id'],
                     'paid_by_id' => $item['paid_by_id'],

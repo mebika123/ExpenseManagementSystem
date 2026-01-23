@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class StoreExpenseRequest extends FormRequest
 {
@@ -15,40 +16,100 @@ class StoreExpenseRequest extends FormRequest
         return true;
     }
 
+    // protected function prepareForValidation()
+    // {
+    //     $this->merge([
+    //         'description' => strip_tags($this->description),
+    //     ]);
+    // }
+
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
+
     public function rules(): array
     {
-        // Log::info('StoreExpenseRequest rules hit', $this->all());
+        return array_merge(
+            self::expense(['budget_timeline_id' => $this->input('budget_timeline_id')]),
+            self::expenseItem(['budget_timeline_id' => $this->input('budget_timeline_id')])
+        );
+    }
+
+    public static function expense(array $context = []): array
+    {
         return [
-            'title' => 'required|string|unique:expenses,title,' . $this->route('expense'),
+            'title' => 'required|string',
             'budget_timeline_id' => 'required|exists:budget_timelines,id',
-            'expense_plan_id' => 'nullable|exists:expense_plans,id|unique:expenses,expense_plan_id,' . $this->route('expense'),
-
+            'expense_plan_id' => 'nullable|exists:expense_plans,id',
             'transactional_attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
+            'expense_items' => 'required|array|min:1', // THIS ensures array is present
+        ];
+    }
 
-            'expense_items' => 'required|array|min:1',
-            'expense_items.*.id' => 'nullable|exists:expense_items,id', // <-- add this
-
+    public static function expenseItem(array $context = []): array
+    {
+        return [
             'expense_items.*.name' => 'required|string',
             'expense_items.*.description' => 'nullable|string',
             'expense_items.*.amount' => 'required|numeric|min:0',
-
             'expense_items.*.department_id' => 'nullable|exists:departments,id',
-            'expense_items.*.expense_plan_item_id' => 'nullable|exists:expense_plan_items,id|unique:expense_items,expense_plan_item_id,NULL,id,expense_id,' . $this->route('expense'),
+            'expense_items.*.expense_plan_item_id' => 'nullable|exists:expense_plan_items,id',
             'expense_items.*.location_id' => 'nullable|exists:locations,id',
             'expense_items.*.expense_category_id' => 'required|exists:expense_categories,id',
-            'expense_items.*.budget_id' => 'required|exists:budgets,id',
+            'expense_items.*.budget_id' => [
+                'required',
+                Rule::exists('budgets', 'id')->where(
+                    fn($q) => $q->where('budget_timeline_id', $context['budget_timeline_id'] ?? null)
+                )
+            ],
             'expense_items.*.contact_id' => 'nullable|exists:contacts,id',
             'expense_items.*.paid_by_id' => 'nullable|exists:contacts,id',
-
-            'existingFiles' => 'nullable|array',
-            'existingFiles.*' => 'integer',
+            'expense_items.*.id' => 'nullable|exists:expense_items,id',
         ];
     }
+
+
+    // public function rules(): array
+    // {
+    //     Log::info('StoreExpenseRequest rules hit', $this->all());
+    //     return [
+    //         'title' => 'required|string|unique:expenses,title,' . $this->route('expense'),
+    //         'budget_timeline_id' => 'required|exists:budget_timelines,id',
+    //         'expense_plan_id' => 'nullable|exists:expense_plans,id|unique:expenses,expense_plan_id,' . $this->route('expense'),
+
+    //         'transactional_attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf',
+
+    //         'expense_items' => 'required|array|min:1',
+    //         'expense_items.*.id' => 'nullable|exists:expense_items,id', // <-- add this
+
+    //         'expense_items.*.name' => 'required|string',
+    //         'expense_items.*.description' => 'nullable|string',
+    //         'expense_items.*.amount' => 'required|numeric|min:0',
+
+    //         'expense_items.*.department_id' => 'nullable|exists:departments,id',
+    //         'expense_items.*.expense_plan_item_id' => 'nullable|exists:expense_plan_items,id|unique:expense_items,expense_plan_item_id,NULL,id,expense_id,' . $this->route('expense'),
+    //         'expense_items.*.location_id' => 'nullable|exists:locations,id',
+    //         'expense_items.*.expense_category_id' => 'required|exists:expense_categories,id',
+    //         'expense_items.*.budget_id' => [
+    //             'required',
+    //             Rule::exists('budgets', 'id')
+    //                 ->where(
+    //                     fn($q) =>
+    //                     $q->where('budget_timeline_id', $this->input('budget_timeline_id'))
+    //                 ),
+    //         ],
+    //         'expense_items.*.contact_id' => 'nullable|exists:contacts,id',
+    //         'expense_items.*.paid_by_id' => 'nullable|exists:contacts,id',
+
+    //         'existingFiles' => 'nullable|array',
+    //         'existingFiles.*' => 'integer',
+    //     ];
+    // }
+
+
     //  public function messages(): array
     // {
     //     return[];

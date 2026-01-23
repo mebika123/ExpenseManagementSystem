@@ -18,9 +18,9 @@ class ReportController extends Controller
 
     public function __construct(ReportService $report_service)
     {
-
         $this->report_service = $report_service;
     }
+    
     public function index(Request $request)
     {
         try {

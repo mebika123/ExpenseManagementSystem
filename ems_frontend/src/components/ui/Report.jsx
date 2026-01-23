@@ -25,7 +25,7 @@ const Report = ({ data, filters }) => {
 
             //  filename from the header 
             const contentDisposition = response.headers['content-disposition'];
-            let fileName = 'expense_report.xlsx'; 
+            let fileName = 'expense_report.xlsx';
             if (contentDisposition) {
                 const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
                 if (fileNameMatch.length === 2) fileName = fileNameMatch[1];
@@ -75,7 +75,11 @@ const Report = ({ data, filters }) => {
                                             <td className="border text-sm  border-[#32B274] p-2">
                                                 <div className="flex items-center">
                                                     {/* <FontAwesomeIcon icon={faAngleDown} className='mr-5'/>  */}
-                                                    <span>{index + 1}</span>
+                                                    <span>
+                                                        {table.getState().pagination.pageIndex *
+                                                            table.getState().pagination.pageSize +
+                                                            index + 1}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="border text-sm  border-[#32B274] p-2">{expense?.title}</td>
@@ -101,7 +105,7 @@ const Report = ({ data, filters }) => {
                                                     <tbody>
                                                         {
                                                             expense?.items?.map((item, index) => (
-                                                                <tr className="bg-[#f6f3f3]">
+                                                                <tr className="bg-[#fbf9f9]">
                                                                     <td className="border text-sm  border-[#a7aba9] p-2">
                                                                         <div className="flex items-center">
                                                                             {/* <FontAwesomeIcon icon={faAngleDown} className='mr-5'/>  */}
@@ -134,7 +138,7 @@ const Report = ({ data, filters }) => {
                 <div className="border text-sm  border-[#32B274] flex items-center ">
                     <div className="border-r border-[#32B274] font-bold w-1/2 p-2"> Total Expense Sum (Rs)</div>
                     <div className="w-1/2">   {
-                                data.totalSum}</div>
+                        data.totalSum}</div>
 
                 </div>
             </div>

@@ -428,8 +428,12 @@ const ExpenseForm = ({ title, data, type, id }) => {
                     <option value="">Select Budget Timeline</option>
                     {
 
-                      budgetTimelines?.map((budgetTimeline, index) => (
-                        <option value={budgetTimeline.id}>{budgetTimeline.name}</option>
+                      budgetTimelines?.map((budgetTimeline, index) => (<>
+
+                        {!(budgetTimeline?.isEditable) &&
+                          <option value={budgetTimeline.id}>{budgetTimeline.name}</option>
+                        }
+                      </>
 
                       ))
                     }

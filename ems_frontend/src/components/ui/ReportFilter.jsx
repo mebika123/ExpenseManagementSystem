@@ -13,16 +13,24 @@ const ReportFilter = ({ onReportGenerated, setFilters }) => {
         final_date: ''
     });
 
+    const [childLoading, setChildLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+
     const handleSubmit = async () => {
+        setSubmitting(true);
+
         try {
             const res = await axiosInstance.post('/expense-summary-report', form);
 
-            onReportGenerated(res.data.report)   
+            onReportGenerated(res.data.report)
             // console.log(res.data)   
 
             setFilters(form)
         } catch (error) {
             console.error(error);
+        }
+        finally {
+            setSubmitting(false);
         }
     };
     return (
@@ -35,10 +43,19 @@ const ReportFilter = ({ onReportGenerated, setFilters }) => {
                         Filter By
                     </div>
 
-                    <ExpenseReportForm form={form} setForm={setForm} />
+                    <ExpenseReportForm form={form} setForm={setForm} setChildLoading={setChildLoading}/>
                 </div>
                 <div className="mt-5 text-end">
-                    <button type="button" className='px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white' onClick={handleSubmit}>Generate Report</button>
+                    {/* <button type="button" className='px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white' onClick={handleSubmit}>Generate Report</button> */}
+
+                    <button
+                        type="button"
+                        className='px-4 py-2 bg-[#3F3FF2] rounded-lg text-white'
+                        onClick={handleSubmit}
+                        disabled={childLoading || submitting} 
+                    >
+                        {childLoading ? "Loading..." : submitting ? "Generating..." : "Generate Report"}
+                    </button>
                 </div>
             </div>
 

@@ -26,8 +26,8 @@ const DoughnutChart = ({ doughnutData }) => {
       legend: {
         position: 'bottom', // legend at the bottom
         labels: {
-          boxWidth: 20,
-          padding: 10,
+          // boxWidth: 10,
+          // padding: 4,
           // Max width helps wrap labels into multiple rows if needed
           usePointStyle: true
         }

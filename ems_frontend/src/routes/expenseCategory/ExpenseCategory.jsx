@@ -58,7 +58,7 @@ const ExpenseCategory = () => {
                 }
             }
             setIsOpen(false)
-        } catch (err) {            
+        } catch (err) {
             setError(err.response?.data?.errors || 'Something went wrong');
         }
     }
@@ -206,7 +206,11 @@ const ExpenseCategory = () => {
 
                                 expenseCategories.map((expenseCategory, index) => (
                                     <tr className="mb-3" key={expenseCategory.id}>
-                                        <td className="py-3">{index + 1}</td>
+                                        <td className="py-3">
+                                            {table.getState().pagination.pageIndex *
+                                                table.getState().pagination.pageSize +
+                                                index + 1}
+                                        </td>
                                         <td className="py-3">{expenseCategory.name}</td>
                                         <td className="py-3">{expenseCategory.code}</td>
                                         <td className="py-3 px-2">
@@ -232,7 +236,7 @@ const ExpenseCategory = () => {
 
                     </table>
                 </div>
-                    <Pagination table={table} />
+                <Pagination table={table} />
             </div>
 
         </div>

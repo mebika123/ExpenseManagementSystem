@@ -132,7 +132,10 @@ const BudgetList = () => {
                                     return (
 
                                         <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={budgetTimeline.id}>
-                                            <td className="py-3 px-2">{index + 1}</td>
+                                            <td className="py-3 px-2"> {table.getState().pagination.pageIndex *
+                                                table.getState().pagination.pageSize +
+                                                index +
+                                                1}</td>
                                             <td className="py-3 px-2">{budgetTimeline.name}</td>
                                             <td className="py-3 px-2">{budgetTimeline.code}</td>
                                             <td className="py-3 px-2">{budgetTimeline.start_at}</td>

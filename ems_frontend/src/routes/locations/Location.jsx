@@ -210,7 +210,9 @@ const Location = () => {
                                             className="mb-3 even:bg-[#eff7f299] odd:bg-white"
                                         >
                                             <td className="py-3 px-2">
-                                                {index + 1}
+                                                {table.getState().pagination.pageIndex *
+                                                    table.getState().pagination.pageSize +
+                                                    index + 1}
                                             </td>
 
                                             <td className="py-3 px-2">{location.name}</td>
@@ -240,7 +242,7 @@ const Location = () => {
                         )}
 
                     </table>
-                    <Pagination table={table}/>
+                    <Pagination table={table} />
                 </div>
             </div>
 

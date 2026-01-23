@@ -57,7 +57,7 @@ class AdvanceController extends Controller
     public function update(StoreAdvanceRequest $request, $id)
     {
         try {
-            $advances = $this->advance_service->storeOrUpdate($request->all(), $id);
+            $advances = $this->advance_service->storeOrUpdate($request->validate(), $id);
             return response()->json([
                 'message' => 'Advance is created',
                 'advances' => $advances

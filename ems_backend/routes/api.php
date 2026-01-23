@@ -9,6 +9,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExcelImportController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpensePlanController;
@@ -16,6 +17,8 @@ use App\Http\Controllers\ReimbursementController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleAndPermissionController;
 use App\Http\Controllers\TransactionaLogController;
+use App\Imports\DepartmentImport;
+use App\Imports\ExpenseImport;
 use App\Models\Expense;
 use Illuminate\Support\Facades\Route;
 
@@ -85,6 +88,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/expense-summary-report',[ReportController::class,'index'] );
     Route::get('/expense-report/export/',[ReportController::class,'export'] );
+
+    Route::post('/import/department',[ExcelImportController::class,'importExcelDepartmentData'] )->defaults('importClass', DepartmentImport::class);;
+    Route::post('/import/expense',[ExcelImportController::class,'importExpenses'] );
+
 
     Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 });

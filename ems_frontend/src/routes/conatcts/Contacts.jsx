@@ -5,6 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { can } from '../../utils/permission'
 import { useAuth } from '../../context/AuthContext';
+import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
+import SearchBar from '../../components/ui/SearchBar';
+import Pagination from '../../components/ui/Pagination';
 
 const Contacts = () => {
 
@@ -41,15 +44,56 @@ const Contacts = () => {
     }
   };
 
+  //search and pagination
+
+  const safeContacts = contacts ?? [];
+
+
+  const columnHelper = createColumnHelper();
+
+  const columns = [
+    columnHelper.accessor("code", { header: "Code" }),
+    columnHelper.accessor("name", { header: "Name" }),
+    columnHelper.accessor("email", { header: "Email" }),
+    columnHelper.accessor("phone_no", { header: "Contact No" }),
+    columnHelper.accessor("contact_type", { header: "Contact Type" }),
+    columnHelper.accessor(row => row.employee?.code, { header: "Type Code" }),
+  ];
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const table = useReactTable({
+    data: safeContacts,
+    columns,
+    state: { globalFilter, pagination },
+    onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
+
 
   return (<>
     <div className="w-full p-8 flex justify-center items-center mt-8">
 
-      <div className="w-4/5 bg-white rounded-md p-7  text-center">
+      <div className="w-full bg-white rounded-md p-7  text-center">
 
         <h2 className="text-4xl font-bold  mb-8 ">Contact List </h2>
-        <div className="flex justify-end ml-10">
-          <a href='/user/new' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" >Add New</a>
+        <div className="flex justify-end ml-10 gap-3">
+          <SearchBar
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+          />
+
+          {
+            can('contact.create', permissions) &&
+
+            <Link to={'/contact/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+          }
 
         </div>
 
@@ -61,23 +105,32 @@ const Contacts = () => {
                 <th className="py-3">Code</th>
                 <th className="py-3">Name</th>
                 <th className="py-3">Email</th>
-                <th className="py-3">Contact</th>
+                <th className="py-3">Contact No</th>
                 <th className="py-3">Type</th>
                 <th className="py-3">Type Code</th>
                 <th className="py-3">Action</th>
               </tr>
             </thead>
-            <tbody>
 
-              {loading ? (
+            {loading ? (
+              <tbody>
+
                 <tr>
                   <td colSpan='4' className="text-xl font-semibold mt-5 w-full">Loading...</td>
                 </tr>
-              ) : (
+              </tbody>
+            ) : (<tbody>
 
-                contacts?.map((contact, index) => (
+              {table.getRowModel().rows.map((row, index) => {
+                const contact = row.original;
+                return (
+
                   <tr className="mb-3 border-b even:bg-[#dce0e1] odd:bg-white">
-                    <td className="py-3">{index + 1}</td>
+                    <td className="py-3">
+                       {table.getState().pagination.pageIndex *
+                          table.getState().pagination.pageSize +
+                          index +1}
+                    </td>
                     <td className="py-3">{contact?.code || '-'}</td>
                     <td className="py-3">{contact?.name || '-'}</td>
                     <td className="py-3">{contact.email}</td>
@@ -110,14 +163,16 @@ const Contacts = () => {
                       </div>
                     </td>
                   </tr>
-                ))
-
-
-              )}
+                )
+              })}
             </tbody>
+
+
+            )}
 
           </table>
         </div>
+        <Pagination table={table}/>
       </div>
     </div>
   </>)

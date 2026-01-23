@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Repositories\DepartmentRepository;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Validation\ValidationException;
 
 class DepartmentController extends Controller
 {
@@ -33,9 +34,24 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255|unique:departments,name',
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255|unique:departments,name',
+            ]);
+        } catch (ValidationException $e) {
+            // If request expects JSON (React/Axios), return errors
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            // Default behavior (redirect back for web)
+            throw $e;
+        }
+
+
         $latest = Department::latest('id')->first();
         $nextId = $latest ? $latest->id + 1 : 1;
         $code =  'DEP' . str_pad($nextId, 4, '0', STR_PAD_LEFT);

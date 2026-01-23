@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../axios';
 import { Link, Navigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faFileImport, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import SearchBar from '../../components/ui/SearchBar';
 import { can } from '../../utils/permission';
 import { useAuth } from '../../context/AuthContext';
 import Pagination from '../../components/ui/Pagination';
+import Modal from '../../components/ui/Modal';
+import ImportFileForm from '../../components/ui/form/ImportFileForm';
 
 const ExpensesList = () => {
 
     const { permissions } = useAuth();
-    console.log(permissions)
+    // console.log(permissions)
 
     if (!can('expense.view', permissions)) return <Navigate to="/403" replace />;
 
@@ -85,7 +87,19 @@ const ExpensesList = () => {
         getPaginationRowModel: getPaginationRowModel(),
     });
 
-    return (
+    const [isOpenImport, setIsOpenImport] = useState(false);
+
+    const openImport = () => {
+        setIsOpenImport(true);
+    };
+
+    return (<>
+
+        <Modal isOpen={isOpenImport}
+            title={"Upload Excel File"}
+            onClose={() => setIsOpenImport(false)}>
+            <ImportFileForm onClose={() => setIsOpenImport(false)} type={'expense'}/>
+        </Modal>
         <div className="w-full p-8 flex justify-center items-center mt-8">
             <div className="w-full bg-white rounded-md p-7  text-center">
 
@@ -99,8 +113,12 @@ const ExpensesList = () => {
                     {
                         can('expense.create', permissions) &&
 
-                        <Link to={'/expenses/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+                        <Link to={'/expense/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
                     }
+
+                    <button type='button' className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end" onClick={openImport} >
+                        <FontAwesomeIcon icon={faFileImport} className='text-lg' />
+                    </button>
 
                 </div>
 
@@ -133,7 +151,11 @@ const ExpensesList = () => {
                                     return (
 
                                         <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={expense.id}>
-                                            <td className="py-3 px-2">{index + 1}</td>
+                                            <td className="py-3 px-2">
+                                                {table.getState().pagination.pageIndex *
+                                                    table.getState().pagination.pageSize +
+                                                    index + 1}
+                                            </td>
                                             <td className="py-3 px-2">{expense.title}</td>
                                             <td className="py-3 px-2">{expense.code}</td>
                                             <td className="py-3 px-2">{expense.budget_timeline.code}</td>
@@ -182,7 +204,11 @@ const ExpensesList = () => {
                 </div>
             </div>
 
-        </div>)
+        </div>
+
+    </>
+
+    )
 }
 
 export default ExpensesList

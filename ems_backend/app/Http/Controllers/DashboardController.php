@@ -191,6 +191,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $canViewAll = $user->hasPermissionTo('dashboard.view.all');
         $canViewBudget = $user->hasPermissionTo('budgetTimeline.view');
+
         return Cache::rememberForever("dashboard.doughnut.{$user->id}", function () use ($canViewAll, $canViewBudget, $user) {
             $expenses = Expense::with(['expense_items', 'latestStatus'])->get()
                 ->map(function ($expense) use ($user, $canViewAll) {
@@ -244,7 +245,7 @@ class DashboardController extends Controller
         $canViewAll = $user->hasPermissionTo('dashboard.view.all');
 
         return Cache::rememberForever("dashboard.expensestbl.{$user->id}", function () use ($canViewAll, $user) {
-            $expensestblQuery = Expense::with('budgetTimeline:id,code', 'createdBy:id,code', 'latestStatus')
+            $expensestblQuery = Expense::with('budgetTimeline:id,code', 'createdBy:id,email', 'latestStatus')
                 ->orderBy('created_at', 'desc');
 
             if (!$canViewAll) {

@@ -28,4 +28,11 @@ class StoreAdvanceRequest extends FormRequest
             'amount' => 'required|numeric|min:1',
         ];
     }
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        throw new \Illuminate\Validation\ValidationException($validator, response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422));
+    }
 }

@@ -58,10 +58,10 @@ const Home = () => {
               amount={cards.find(c => c.type === "Advance")?.total_amount || 0} />
             <DashboardCard
               title={'Total Advance Settled'}
-              amount={cards.find(c => c.type ==="Advance Settlement")?.total_amount || 0} />
+              amount={cards.find(c => c.type === "Advance Settlement")?.total_amount || 0} />
             <DashboardCard
               title={'Total Reimbursement'}
-              amount={cards.find(c => c.type ==="Reimbursement")?.total_amount || 0} />
+              amount={cards.find(c => c.type === "Reimbursement")?.total_amount || 0} />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 mt-9 lg:gap-2P xl:gap-10">
             <div className="lg:col-span-2  p-7 rounded-xl shadow-sm shadow-indigo-500/50">
@@ -82,7 +82,7 @@ const Home = () => {
               <div className="text-start font-semibold text-xl">Recent Expense</div>
               <Link to={'/expenses'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">See All</Link>
             </div>
-            <div className="">
+            <div className="w-full mt-3 overflow-x-auto">
               <table className="w-full min-w-[700] border border-gray-500 rounded-xl">
                 <thead>
                   <tr className="mb-3 border-b">
@@ -104,7 +104,7 @@ const Home = () => {
                         <td className="py-3 px-2">{expense.title}</td>
                         <td className="py-3 px-2">{expense.code}</td>
                         <td className="py-3 px-2">{expense.budget_timeline.code}</td>
-                        <td className="py-3 px-2">{expense?.created_by?.code}</td>
+                        <td className="py-3 px-2">{expense?.created_by?.email}</td>
                         <td className="py-3 px-2">
                           <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
                                                  ${expense.latest_status[0].status === 'pending'

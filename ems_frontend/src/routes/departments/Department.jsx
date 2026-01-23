@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faFileImport, faPen, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import Modal from '../../components/ui/Modal';
 import ModalForm from '../../components/ui/form/ModalForm';
 import { can } from '../../utils/permission';
 import Pagination from '../../components/ui/Pagination';
+import ImportFileForm from '../../components/ui/form/ImportFileForm';
 
 
 const Department = () => {
@@ -41,6 +42,11 @@ const Department = () => {
         setEditingId(department.id);
         setError({});
         setIsOpen(true);
+    };
+    const [isOpenImport, setIsOpenImport] = useState(false);
+
+    const openImport = () => {
+        setIsOpenImport(true);
     };
 
     const navigate = useNavigate();
@@ -163,15 +169,23 @@ const Department = () => {
                     submitText={editingId ? "Update" : "Save"}
                 />
             </Modal>
+            <Modal isOpen={isOpenImport}
+                title={"Upload Excel File"}
+                onClose={() => setIsOpenImport(false)}>
+                <ImportFileForm onClose={() => setIsOpenImport(false)} type={'department'} />
+            </Modal>
 
-            <div className="w-4/5 bg-white rounded-md p-7  text-center">
+            <div className="w-full bg-white rounded-md p-7  text-center">
 
                 <h2 className="text-4xl font-bold  mb-8 ">Department List </h2>
                 <div className="flex justify-end gap-3  items-center ml-10">
                     <SearchBar
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter} />
-                    <a className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</a>
+                    <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</button>
+                    <button type='button' className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end" onClick={openImport} >
+                        <FontAwesomeIcon icon={faFileImport} className='text-lg' />
+                    </button>
                 </div>
 
                 <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)]">
@@ -197,7 +211,11 @@ const Department = () => {
                                     const department = row.original;
                                     return (
                                         <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={department.id}>
-                                            <td className="py-3 px-2">{index + 1}</td>
+                                            <td className="py-3 px-2">
+                                                {table.getState().pagination.pageIndex *
+                                                    table.getState().pagination.pageSize +
+                                                    index + 1}
+                                            </td>
                                             <td className="py-3 px-2">{department.name}</td>
                                             <td className="py-3 px-2">{department.code}</td>
                                             <td className="py-3 px-2">
@@ -220,7 +238,7 @@ const Department = () => {
 
                     </table>
 
-                    <Pagination table={table}/>
+                    <Pagination table={table} />
                 </div>
             </div>
 

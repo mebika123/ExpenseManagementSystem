@@ -3,12 +3,13 @@
 namespace App\Observers;
 
 use App\Models\BudgetTimeline;
+use App\Models\Statuses;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
 class BudgetTimelineObserver
 {
-    public function saved(BudgetTimeline $budgetTimeline)
+    public function saved(Statuses $statuses)
     {
         $this->clearBudgetCache();
     }

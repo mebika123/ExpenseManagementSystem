@@ -70,10 +70,10 @@ const RoleList = () => {
         }
     }
 
-    const [isOpen,setIsOpen] = useState(false)
-    const [id,setId] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    const [id, setId] = useState(false)
 
-    const openDetail=(id)=>{
+    const openDetail = (id) => {
         setIsOpen(true);
         setId(id);
 
@@ -126,13 +126,17 @@ const RoleList = () => {
                                         return (
 
                                             <tr className="mb-3 even:bg-[#eff7f299] odd:bg-white" key={role.id}>
-                                                <td className="py-3 px-2">{index + 1}</td>
+                                                <td className="py-3 px-2">
+                                                    {table.getState().pagination.pageIndex *
+                                                        table.getState().pagination.pageSize +
+                                                        index + 1}
+                                                </td>
                                                 <td className="py-3 px-2">{role.name}</td>
                                                 <td className="py-3 px-2">
                                                     <div className="flex gap-4 items-center justify-center">
-                                                            <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#3F51B6]" onClick={()=>openDetail(role.id)}>
-                                                                <FontAwesomeIcon icon={faEye} />
-                                                            </div>
+                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#3F51B6]" onClick={() => openDetail(role.id)}>
+                                                            <FontAwesomeIcon icon={faEye} />
+                                                        </div>
                                                         <div className="flex gap-4 items-center justify-center">
                                                             <Link to={`/role/edit/${role.id}`}>
                                                                 <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]">
@@ -142,7 +146,7 @@ const RoleList = () => {
 
                                                             </Link>
                                                             <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF3641]" onClick={() => handleDelete(role.id)}>
-                                                                <FontAwesomeIcon icon={faTrashCan}  />
+                                                                <FontAwesomeIcon icon={faTrashCan} />
 
                                                             </div>
                                                         </div>

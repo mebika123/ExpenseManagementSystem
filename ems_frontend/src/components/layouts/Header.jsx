@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const Header = () => {
   const { user, logout } = useAuth();
   return (<>
-    <div className="w-6/7 shadow-sm p-4 fixed top-0 w- bg-white py-4 px-3">
+    <div className="w-6/7 shadow-sm fixed top-0 w- bg-white py-2 px-3">
 
       <div className="text-end mr-4 flex items-center justify-end">
         <div className="p-3 flex items-center gap-3">
@@ -20,7 +20,7 @@ const Header = () => {
         <div
           onClick={logout}
           className="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer
-             bg-blue-50 text-[#3F3FF2] hover:bg-blue-100
+             bg-blue-50 text-[#3F3FF2] hover:bg-blue-100 p-2
              transition-all duration-200"
           title="Logout"
         >

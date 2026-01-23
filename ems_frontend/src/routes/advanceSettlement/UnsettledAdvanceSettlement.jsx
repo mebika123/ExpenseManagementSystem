@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../axios';
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import SearchBar from '../../components/ui/SearchBar';
+import Pagination from '../../components/ui/Pagination';
 
 const UnsettledAdvanceSettlement = () => {
 
@@ -157,7 +158,11 @@ const UnsettledAdvanceSettlement = () => {
                           <input type="checkbox" value={transaction.id} onChange={handleChange}
                             checked={selectedTransaction.includes(transaction.id)} />
                         </td>
-                        <td className="py-3 px-2">{index + 1}</td>
+                        <td className="py-3 px-2"> 
+                          {table.getState().pagination.pageIndex *
+                          table.getState().pagination.pageSize +
+                          index +1}
+                          </td>
 
                         <td className="py-3 px-2">
                           {transaction?.contacts?.code}
@@ -189,6 +194,7 @@ const UnsettledAdvanceSettlement = () => {
             )}
 
           </table>
+          <Pagination table={table}/>
           <div className="w-full text-end p-4">
             <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white" onClick={handleLogs}>Settle Transactions</button>
           </div>

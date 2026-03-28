@@ -18,11 +18,6 @@ const BudgetList = () => {
         return <div>Loading...</div>; // or spinner
     }
 
-    if (!can('budgetTimeline.view', permissions)) return <Navigate to="/403" replace />;
-
-
-    // const [loading, setLoading] = useState(true);
-
     const [budgetTimelines, setBudgetTimelines] = useState()
     useEffect(() => {
         const fetchBudgetTimeline = async () => {
@@ -34,7 +29,7 @@ const BudgetList = () => {
                 console.log(error)
             }
             finally {
-                // setLoading(false)
+                    // setLoading(false)
             }
         }
         fetchBudgetTimeline();

@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axios';
+import UserForm from '../../components/ui/form/UserForm';
 
 const AddUser = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
+
+    const isAdminOrSuperAdmin = user?.roles?.some(role =>
+        ['admin', 'superadmin'].includes(role))
+    const [createContact, setCreateContact] = useState(true);
+
+
 
     const [form, setForm] = useState({
         name: '',
@@ -87,13 +94,29 @@ const AddUser = () => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
+    const handleCheckboxChange = (e) => {
+        const checked = e.target.checked;
+        setCreateContact(checked);
+        setForm({ ...form, create_contact: checked });
+
+        if (!checked) {
+            setForm(prev => ({
+                ...prev,
+                phone_no: '',
+                pan_no: '',
+                department_id: '',
+                location_id: '',
+                contact_type: ''
+            }));
+        }
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const res = await axiosInstance.post("/users", form);
-            // if (res.data) {
-
-            // }
+            if (res.data) {
+                navigate('/users');
+            }
         } catch (err) {
             const errors = err.response?.data?.errors || {};
             setFormError({
@@ -120,6 +143,20 @@ const AddUser = () => {
                 <h2 className="text-4xl font-bold  mb-8 ">New User </h2>
                 <div className="flex justify-center items-center">
                     <form onSubmit={handleSubmit} className="w-3/4">
+                        {/* {isAdminOrSuperAdmin && (
+                            <div className="mb-2 w-full flex items-center gap-2 rounded-md">
+                                <input
+                                    type="checkbox"
+                                    id="createContact"
+                                    checked={createContact}
+                                    onChange={handleCheckboxChange}
+                                    className="w-4 h-4"
+                                />
+                                <label htmlFor="createContact" className="font-medium">
+                                    Create Contact With User
+                                </label>
+                            </div>
+                        )} */}
                         <div className="mb-6 w-full">
                             <input type="text" className="w-full p-2 rounded-md border border-[#D1D1D1]" name='name' placeholder='name' value={form.name} onChange={handleChange} />
                             <p className="text-red-500">
@@ -242,6 +279,9 @@ const AddUser = () => {
         </div >
     </>
     )
+
+    // return <UserForm />;
+
 }
 
 export default AddUser

@@ -26,7 +26,7 @@ const AddBudget = () => {
     //     return <div>Loading...</div>; // or spinner
     // }
 
-    if (!can('budgetTimeline.create', permissions)) return <Navigate to="/403" replace />;
+    // if (!can('budgetTimeline.create', permissions)) return <Navigate to="/403" replace />;
 
     const [departments, setDepartment] = useState([]);
     useEffect(() => {

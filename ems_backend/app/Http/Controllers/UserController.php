@@ -83,7 +83,9 @@ class UserController extends Controller
             'code' => $code,
             'email' => $user->email,
             'roles' => $user->getRoleNames(),
-            'permissions' => $user->getAllPermissions()->pluck('name'),
+            'permissions' => $user->hasRole('superadmin')
+                ? ['*']
+                : $user->getAllPermissions()->pluck('name')
         ]);
     }
 }

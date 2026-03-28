@@ -90,24 +90,6 @@ class ExpenseController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
-
-    // public function update($id, StoreExpenseRequest $request)
-    // {
-    //     $files = $request->file('attachments');
-    //     $data = $request->validated();
-    //     $data['attachments'] = $files;
-
-    //     try {
-    //         $expense = $this->expense_service->storeOrUpdateExpense($data, $id);
-    //         return response()->json([
-    //             'message' => 'Your Expense has been updated successfully!',
-    //             'expense' => $expense->load('expense_items', 'transactionalAttachments')
-    //         ], 200);
-    //     } catch (Exception $e) {
-
-    //         return response()->json(['message' => $e->getMessage()]);
-    //     }
-    // }
     public function update($id, StoreExpenseRequest $request)
     {
         $files = $request->file('attachments');

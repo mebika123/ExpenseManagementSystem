@@ -142,15 +142,13 @@ class TransactionalService
     //     });
     // }
 
-    public function transactional_settlement($data)
-    {
+    public function transactional_settlement($data){
         return DB::transaction(function () use ($data) {
             $transactionsByContact = TransactionalLog::whereIn('id', $data['ids'])
                 ->whereNotNull('contact_id')
                 ->where('isSettled', false)
                 ->get()
                 ->groupBy('contact_id');
-                
                 foreach ($transactionsByContact as $contactId => $transactions) {
                     $totalReimbursement = 0;
                     
@@ -159,7 +157,6 @@ class TransactionalService
                     
                     $expenses = $transactions->where('model_type', ExpenseItem::class)
                     ->sortBy('payment_date');
-                    // Log::info($expenses);
 
                 $uncoveredExpenses = $expenses->filter(fn($e) => empty($e->model->expensePlanItem));
 
@@ -169,7 +166,6 @@ class TransactionalService
                     $advance = $advanceTransaction->model;
                     $advanceAmount = $advanceTransaction->amount;
                     $expensePlanId = $advance->expense_plan_id;
-
                     $totalSum = 0;
 
                     if ($expensePlanId) {
@@ -184,19 +180,16 @@ class TransactionalService
                         }
                     } else {
                         $nextAdvanceDate = $allAdvances[$index + 1]->model->payment_date ?? null;
-
                         $expensesToSettle = $uncoveredExpenses->filter(function ($expense) use ($advance, $nextAdvanceDate) {
                             $date = $expense->payment_date;
                             return !$expense->isSettled && $date >= $advance->payment_date && (!$nextAdvanceDate || $date < $nextAdvanceDate);
                         });
-
                         foreach ($expensesToSettle as $expense) {
                             $totalSum += $expense->amount;
                             $expense->isSettled = true;
                             $expense->save();
                             $uncoveredExpenses = $uncoveredExpenses->filter(fn($e) => $e->id !== $expense->id);
-                        }
-                    }
+                        }}
 
                     if ($advanceAmount > $totalSum) {
                         $settlement = AdvanceSettlement::create([
@@ -208,9 +201,7 @@ class TransactionalService
 
                         $this->transactional_repo->createFor($settlement, [
                             'amount' => $settlement->amount,
-                            // 'payment_date' => now(),
                             'contact_id' => $contactId,
-                            // 'isSettled' => true
                         ]);
                     } elseif ($advanceAmount < $totalSum) {
                         $totalReimbursement += $totalSum - $advanceAmount;
@@ -219,31 +210,22 @@ class TransactionalService
                     $advanceTransaction->isSettled = true;
                     $advanceTransaction->save();
                 }
-
                 $totalReimbursement += $uncoveredExpenses->sum('amount');
-
                 if ($totalReimbursement > 0) {
                     $reimbursement = Reimbursement::create([
                         'amount' => $totalReimbursement,
                         'contact_id' => $contactId,
-                        // 'settlement_date' => now()
-
                     ]);
 
                     $this->transactional_repo->createFor($reimbursement, [
                         'amount' => $reimbursement->amount,
                         'payment_date' => now(),
                         'contact_id' => $contactId,
-                        // 'isSettled' => true
-
                     ]);
 
                     foreach ($uncoveredExpenses as $expense) {
                         $expense->isSettled = true;
                         $expense->save();
-                    }
-                }
-            }
-        });
+                    }}}});
     }
 }

@@ -4,8 +4,11 @@ import React, { useEffect, useState } from 'react'
 import axiosInstance from '../../axios';
 import { Link, useNavigate } from 'react-router-dom';
 import CommentModal from './CommentModal';
+import { useAuth } from '../../context/AuthContext';
+import { can } from '../../utils/permission';
 
 const ModalAdvanceDetails = ({ isOpenDetail, id, onCloseDetail }) => {
+    const { permissions } = useAuth();
     if (!isOpenDetail) return null;
 
     const [advance, setAdvance] = useState([]);
@@ -76,20 +79,22 @@ const ModalAdvanceDetails = ({ isOpenDetail, id, onCloseDetail }) => {
                 {
                     advance?.latest_status?.[0]?.status !== 'approved' &&
                     <div className="mb-6 w-full  gap-2 flex justify-end">
-                        {
+                        {can('advance.status.check', permissions) && (
+
                             advance?.latest_status?.[0]?.status == 'pending' &&
                             <>
                                 <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
                                 <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
                             </>
-                        }
-                        {
+                        )}
+
+                        {can('advance.status.approve', permissions) && (
                             advance?.latest_status?.[0]?.status == 'checked' &&
                             <>
                                 <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approve</button>
                                 <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
                             </>
-                        }
+                        )}
 
                         {
                             advance?.latest_status?.[0]?.status == 'rejected' &&
@@ -100,10 +105,7 @@ const ModalAdvanceDetails = ({ isOpenDetail, id, onCloseDetail }) => {
                     </div>
 
                 }
-                {/* <div className="flex justify-end ml-10">
-                    <Link to={`/advance/edit/${id}`} className="px-4 w-24 text-center py-2 bg-[#32b274]  rounded-lg text-white ">Edit</Link>
 
-                </div> */}
                 <div className="flex justify-center items-center">
                     <div className="w-5/6">
 

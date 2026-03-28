@@ -7,9 +7,13 @@ import Pagination from '../../components/ui/Pagination';
 import Modal from '../../components/ui/Modal';
 import ModalForm from '../../components/ui/form/ModalForm';
 import { faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { can } from '../../utils/permission';
+import { useAuth } from '../../context/AuthContext';
 
 
 const ExpenseCategory = () => {
+    const { permissions } = useAuth();
+
     // modal
     const [isOpen, setIsOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -136,32 +140,6 @@ const ExpenseCategory = () => {
 
     return (
         <div className="w-full p-8 flex justify-center items-center mt-8">
-            {/* {isOpen && (
-                <div className="h-screen w-screen fixed bg-[#000000b8] top-0 left-0 flex justify-center items-center">
-                    <div className="bg-white p-5 w-1/3 rounded-md text-center">
-                        <div className="text-end"><FontAwesomeIcon icon={faXmark} onClick={closeModal} /></div>
-                        <h2 className="text-2xl font-bold  mb-8 ">New Expense Category </h2>
-                        <div className="flex justify-center items-center">
-                            <form className="w-3/4" onSubmit={handleSubmit}>
-                                <div className="mb-6 w-full">
-                                    <input type="text" className="w-full p-2 rounded-md border border-[#989898]" name='title' value={form.title} onChange={handleChange} placeholder='Category Name' />
-                                    <p className="text-red-500">
-                                        {
-                                            formError.title[0]
-                                        }
-                                    </p>
-                                </div>
-                                <div className="mb-6 w-full">
-                                    <input type="submit" className="px-4 py-2 bg-[#3F3FF2]  rounded-lg text-white w-1/3" />
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            )} */}
             <Modal isOpen={isOpen}
                 title={editingId ? "Edit Expense Category" : "New Expense Category"}
                 onClose={() => setIsOpen(false)}>
@@ -215,16 +193,22 @@ const ExpenseCategory = () => {
                                         <td className="py-3">{expenseCategory.code}</td>
                                         <td className="py-3 px-2">
                                             <div className="flex gap-4 items-center justify-center">
-                                                <FontAwesomeIcon
-                                                    icon={faPen}
-                                                    onClick={() => openEdit(expenseCategory)}
-                                                    className="text-[#29903B]"
-                                                />
-                                                <FontAwesomeIcon
-                                                    icon={faTrashCan}
-                                                    onClick={() => handleDelete(expenseCategory.id)}
-                                                    className="text-[#FF0133]"
-                                                />
+                                                {can('expense_category.update', permissions) &&
+                                                    <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]" onClick={() => openEdit(expenseCategory)}
+                                                    >
+                                                        <FontAwesomeIcon
+                                                            icon={faPen}
+                                                        />
+                                                    </div>
+                                                }
+                                                {can('expense_category.delete', permissions) &&
+                                                    <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF0133]" onClick={() => handleDelete(expenseCategory.id)}
+                                                    >
+                                                        <FontAwesomeIcon
+                                                            icon={faTrashCan}
+                                                        />
+                                                    </div>
+                                                }
                                             </div>
                                         </td>
                                     </tr>

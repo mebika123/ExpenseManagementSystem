@@ -16,15 +16,15 @@ class AdvanceController extends Controller
     {
         $this->advance_service = $advance_service;
     }
-        public static function middleware(): array
+    public static function middleware(): array
     {
         return [
-            new Middleware('permission:advance.view', only:['index']),
-            new Middleware('permission:advance.create', only:['store']),
-            new Middleware('permission:advance.update',only:['update']),
-            new Middleware('permission:advance.show',only:['show']),
-            new Middleware('permission:advance.delete',only:['destroy']),
-            new Middleware('permission:advance.status.check|advance.status.approve',only:['updateStatus']),
+            new Middleware('permission:advance.view', only: ['index']),
+            new Middleware('permission:advance.create', only: ['store']),
+            new Middleware('permission:advance.update', only: ['update']),
+            new Middleware('permission:advance.show', only: ['show']),
+            new Middleware('permission:advance.delete', only: ['destroy']),
+            new Middleware('permission:advance.status.check|advance.status.approve', only: ['updateStatus']),
         ];
     }
 
@@ -45,7 +45,7 @@ class AdvanceController extends Controller
     public function store(StoreAdvanceRequest $request)
     {
         try {
-            $advances = $this->advance_service->storeOrUpdate($request->validate());
+            $advances = $this->advance_service->storeOrUpdate($request->validated());
             return response()->json([
                 'message' => 'Advance is created',
                 'advances' => $advances
@@ -92,8 +92,8 @@ class AdvanceController extends Controller
     {
         $validated = $request->validate([
             'advance_id' => 'required|integer|exists:advances,id',
-            'status'     => 'required|string',
-            'comment'    => 'required|string',
+            'status' => 'required|string',
+            'comment' => 'required|string',
         ]);
 
         try {

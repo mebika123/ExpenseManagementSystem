@@ -15,7 +15,6 @@ import ImportFileForm from '../../components/ui/form/ImportFileForm';
 
 const Department = () => {
     const { permissions } = useAuth();
-    if (!can('department.view', permissions)) return <Navigate to="/403" replace />;
 
     // modal
     const [isOpen, setIsOpen] = useState(false);
@@ -182,10 +181,14 @@ const Department = () => {
                     <SearchBar
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter} />
-                    <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</button>
-                    <button type='button' className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end" onClick={openImport} >
-                        <FontAwesomeIcon icon={faFileImport} className='text-lg' />
-                    </button>
+                    {can('department.create', permissions) && (<>
+                        <>
+                            <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</button>
+                            <button type='button' className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end" onClick={openImport} >
+                                <FontAwesomeIcon icon={faFileImport} className='text-lg' />
+                            </button>
+                        </>
+                    </>)}
                 </div>
 
                 <div className="w-full mt-3 overflow-x-auto rounded-lg shadow-[0px_1px_4px_rgba(0,0,0,0.16)]">
@@ -220,10 +223,18 @@ const Department = () => {
                                             <td className="py-3 px-2">{department.code}</td>
                                             <td className="py-3 px-2">
                                                 <div className="flex gap-4 items-center justify-center">
-                                                    <FontAwesomeIcon icon={faPen} className='text-[#29903B]'
-                                                        onClick={() => openEdit(department)} />
-                                                    <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(department.id)}
-                                                        className='text-[#FF0133]' />
+                                                    {can('department.update', permissions) &&
+                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]" onClick={() => openEdit(department)}
+                                                        >
+                                                            <FontAwesomeIcon icon={faPen} />
+                                                        </div>
+                                                    }
+                                                    {can('department.delete', permissions) &&
+                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF0133]" onClick={() => handleDelete(department.id)}
+                                                        >
+                                                            <FontAwesomeIcon icon={faTrashCan} />
+                                                        </div>
+                                                    }
                                                 </div>
                                             </td>
                                         </tr>

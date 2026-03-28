@@ -55,9 +55,9 @@ class StoreExpenseRequest extends FormRequest
             'expense_items.*.name' => 'required|string',
             'expense_items.*.description' => 'nullable|string',
             'expense_items.*.amount' => 'required|numeric|min:0',
-            'expense_items.*.department_id' => 'nullable|exists:departments,id',
+            'expense_items.*.department_id' => 'required|exists:departments,id',
             'expense_items.*.expense_plan_item_id' => 'nullable|exists:expense_plan_items,id',
-            'expense_items.*.location_id' => 'nullable|exists:locations,id',
+            'expense_items.*.location_id' => 'required|exists:locations,id',
             'expense_items.*.expense_category_id' => 'required|exists:expense_categories,id',
             'expense_items.*.budget_id' => [
                 'required',
@@ -110,17 +110,40 @@ class StoreExpenseRequest extends FormRequest
     // }
 
 
-    //  public function messages(): array
-    // {
-    //     return[];
-    //     // return [
-    //     //     'budget.*.title.required_with' => 'This field is required',
-    //     //     'budget.*.amount.required_with' => 'This field is required',
-    //     //     'budget.*.department_id.required_with' => 'This field is required',
-    //     //     'budget.*.location_id.required_with' => 'This field is required',
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'The expense title is required',
+            'title.string' => 'The expense title must be valid text',
+            'budget_timeline_id.required' => 'Budget timeline is required',
+            'budget_timeline_id.exists' => 'The selected budget timeline does not exist',
+            'expense_plan_id.exists' => 'The selected expense plan does not exist',
+            'transactional_attachments.*.file' => 'Each attachment must be a valid file',
+            'transactional_attachments.*.max' => 'Each attachment must not exceed 5MB',
+            'transactional_attachments.*.mimes' => 'Attachments must be jpg, jpeg, png, or pdf files',
+            'expense_items.required' => 'At least one expense item is required',
+            'expense_items.array' => 'Expense items must be a valid list',
+            'expense_items.min' => 'At least one expense item is required',
 
-    //     //     'budget.*.amount.numeric' => 'Amount must be a number',
-    //     //     'budget.*.amount.min' => 'Amount must be 0 or greater',
-    //     // ];
-    // }
+            // Expense items messages
+            'expense_items.*.name.required' => 'Item name is required',
+            'expense_items.*.name.string' => 'Item name must be valid text',
+            'expense_items.*.description.string' => 'Item description must be valid text',
+            'expense_items.*.amount.required' => 'Item amount is required',
+            'expense_items.*.amount.numeric' => 'Item amount must be a number',
+            'expense_items.*.amount.min' => 'Item amount must be 0 or greater',
+            'expense_items.*.department_id.exists' => 'The selected department does not exist',
+            'expense_items.*.department_id.required' => 'Department is required',
+            'expense_items.*.expense_plan_item_id.exists' => 'The selected expense plan item does not exist',
+            'expense_items.*.location_id.exists' => 'The selected location does not exist',
+            'expense_items.*.location_id.required' => 'Location is required',
+            'expense_items.*.expense_category_id.required' => 'Expense category is required',
+            'expense_items.*.expense_category_id.exists' => 'The selected expense category does not exist',
+            'expense_items.*.budget_id.required' => 'Budget is required',
+            'expense_items.*.budget_id.exists' => 'The selected budget does not exist or does not belong to this budget timeline',
+            'expense_items.*.contact_id.exists' => 'The selected contact does not exist',
+            'expense_items.*.paid_by_id.exists' => 'The selected payer does not exist',
+            'expense_items.*.id.exists' => 'The selected expense item does not exist',
+        ];
+    }
 }

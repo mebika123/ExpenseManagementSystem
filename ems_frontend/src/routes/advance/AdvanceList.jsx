@@ -6,9 +6,13 @@ import axiosInstance from '../../axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faL, faPen, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import ModalAdvanceDetails from '../../components/ui/ModalAdvanceDetails';
+import { can } from '../../utils/permission';
+import { useAuth } from '../../context/AuthContext';
+import Pagination from '../../components/ui/Pagination';
 
 
 const AdvanceList = () => {
+  const { permissions } = useAuth();
   const [advances, setAdvances] = useState([])
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -93,7 +97,9 @@ const AdvanceList = () => {
             globalFilter={globalFilter}
             setGlobalFilter={setGlobalFilter}
           />
-          <Link to={'/advance/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+          {can('advance.create', permissions) && (
+            <Link to={'/advance/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+          )}
 
         </div>
 
@@ -154,22 +160,33 @@ const AdvanceList = () => {
 
                       <td className="py-3 px-2">
                         <div className="flex gap-4 items-center justify-center">
-                          <FontAwesomeIcon icon={faEye} onClick={() => openViewModal(advance.id)} />
+                          {can('advance.show', permissions) && (
+                            <div className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end" onClick={() => openViewModal(advance.id)}>
+                              <FontAwesomeIcon icon={faEye} />
+                            </div>
+                          )}
 
                           {advance?.isEditable &&
                             <div className="flex gap-4 items-center justify-center">
-                              <Link to={`/advance/edit/${advance.id}`}>
-                                <FontAwesomeIcon
-                                  icon={faPen}
-                                  className="text-[#29903B]"
-                                />
-                              </Link>
-                              <FontAwesomeIcon
-                                icon={faTrashCan}
-                                onClick={() => handleDelete(advance.id)}
-                                className="text-[#FF0133]"
-                              />
-                            </div>}
+                              {can('advance.edit', permissions) && (
+                                <Link to={`/advance/edit/${advance.id}`}>
+                                  <div className="p-2 bg-[#32B274]  rounded-lg text-white text-end">
+                                    <FontAwesomeIcon
+                                      icon={faPen}
+                                    />
+                                  </div>
+                                </Link>
+                              )}
+                              {can('advance.delete', permissions) && (
+                                <div className="p-2 bg-[#FF0133]  rounded-lg text-white text-end" onClick={() => handleDelete(advance.id)}
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faTrashCan}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          }
 
                         </div>
                       </td>
@@ -184,6 +201,7 @@ const AdvanceList = () => {
 
           </table>
         </div>
+        <Pagination table={table} />
       </div>
 
     </div>)

@@ -26,11 +26,8 @@ class ExpenseService
     ) {}
 
     public function storeOrUpdateExpense($data, $id = null)
-    {
-        return  DB::transaction(function () use ($data, $id) {
+    {       return  DB::transaction(function () use ($data, $id) {
             $user = Auth::user();
-            // $contact = Conatct::findOrFail($user->id)
-
             $expenseData = [
                 'title' => $data['title'],
                 'budget_timeline_id' => $data['budget_timeline_id'],
@@ -58,25 +55,8 @@ class ExpenseService
                     $expense->transactionalAttachments()->create([
                         'path' => $storedName,
                         'filename' => $originalName
-                    ]);
-                }
-            }
-
-
-            if (!$id) {
-                $this->status_service->create($expense, 'pending', $user->id, 'Status Created');
-            }
-
-            // foreach ($data['expense_items'] as $item) {
-            //     $expenseItemId = $item['id'] ?? null;
-
-            //     if (!$expenseItemId) {
-            //         $item['expense_id'] = $expense->id;
-            //     }
-            //     $this->expense_item_repo->save($expenseItemId, $item);
-            // }
-
-
+                    ]);}}
+            if (!$id) {$this->status_service->create($expense, 'pending', $user->id, 'Status Created');}
             foreach ($data['expense_items'] as $item) {
                 $payload = [
                     'name' => $item['name'],
@@ -89,20 +69,13 @@ class ExpenseService
                     'location_id' => $item['location_id'],
                     'budget_id' => $item['budget_id'] ?? null,
                 ];
-
                 if (!empty($item['id'])) {
-                    // Log::info("Updating Expense Item", $payload);
                     $this->expense_item_repo->save($item['id'], $payload);
                 } else {
                     $payload['expense_id'] = $expense->id;
-                    // Log::info("Creating Expense Item", $payload);
                     $this->expense_item_repo->save(null, $payload);
                 }
             }
-
-
-
-
             return $expense->load('expense_items');
         });
     }
@@ -120,7 +93,6 @@ class ExpenseService
                 $item->delete();
             });;
             $expenseToDelete->transactionalAttachments()->each(function ($file) {
-                // Storage::delete($file->path);
                 Storage::disk('public')->delete($file->path);
                 $file->delete();
             });
@@ -128,34 +100,6 @@ class ExpenseService
         });
     }
 
-
-    // public function updateStatus(Expense $expense, string $userId, string $status, ?string $comment = null)
-    // public function updateStatus($data)
-    // {
-
-    //     return DB::transaction(function () use ($data) {
-    //         $userId = Auth::user()->id;
-    //         $expense = Expense::findOrFail($data->expense_id);
-    //         $status = $data->status;
-    //         $comment = $data->comment ?? null;
-    //         logger('Before status create');
-
-    //         $res = $this->status_service->changeStatus($expense, $status, $userId, $comment);
-    //         logger('After status create', ['res' => $res]);
-
-    //         if ($status == 'approved') {
-    //             $expenseItems = ExpenseItem::where('expense_id', $expense->id)->get();
-    //             foreach ($expenseItems as $expenseItem) {
-    //                 $this->transactional_log_repo->createFor($expenseItem, [
-    //                     'amount' => $expenseItem->amount,
-    //                     'payment_date' => $expenseItem->created_at,
-    //                     'contact_id' => $expenseItem->paid_by
-    //                 ]);
-    //             }
-    //         }
-    //         return $res;
-    //     });
-    // }
 
     public function updateStatus(array $data)
     {
@@ -176,7 +120,6 @@ class ExpenseService
                 foreach ($expenseItems as $expenseItem) {
 
                     $isettle = $expenseItem->paid_by_id === null;
-                    // Log::info($isettle);                    
 
                     $this->transactional_log_repo->createFor($expenseItem, [
                         'amount' => $expenseItem->amount,
@@ -187,17 +130,13 @@ class ExpenseService
                 }
             }
 
-
             return $res;
         });
     }
-
-
     public function createExpenseFromExpensePlan($id)
     {
         return DB::transaction(function () use ($id) {
             $expensePlan = ExpensePlan::with('expense_plan_items', 'transactionalAttachments')->find($id);
-            //  $this->storeOrUpdateExpense($expensePlan);
             $expensePlan;
         });
     }

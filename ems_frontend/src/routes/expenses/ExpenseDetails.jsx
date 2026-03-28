@@ -3,9 +3,13 @@ import AttachmentList from '../../components/ui/AttachmentList'
 import { Link, useParams } from 'react-router-dom'
 import axiosInstance from '../../axios'
 import CommentModal from '../../components/ui/CommentModal'
+import { can, canAny } from '../../utils/permission'
+import { useAuth } from '../../context/AuthContext'
 
 const ExpenseDetails = () => {
     const { id } = useParams()
+    const { permissions } = useAuth();
+
     const [expense, setExpense] = useState({});
 
     useEffect(() => {
@@ -63,25 +67,26 @@ const ExpenseDetails = () => {
             <div className="w-full p-8 flex justify-center items-center mt-8">
                 <div className="w-full bg-white rounded-md p-7  text-center">
                     <h2 className="text-4xl font-bold  mb-8 ">Expense Details</h2>
+                    {canAny(['expense.status.check', 'expense.status.approve'], permissions) && (
 
-                    {
+
                         expense.latest_status?.[0]?.status !== 'approved' &&
 
                         <div className="mb-6 w-full  gap-2 flex justify-end">
-                            {
+                            {can('expense.status.check', permissions) && (
                                 expense?.latest_status?.[0]?.status == 'pending' &&
                                 <>
                                     <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
                                     <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
                                 </>
-                            }
-                            {
+                            )}
+                            {can('expense.status.approve', permissions) && (
                                 expense?.latest_status?.[0]?.status == 'checked' &&
                                 <>
                                     <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approved</button>
                                     <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
                                 </>
-                            }
+                            )}
 
                             {
                                 expense?.latest_status?.status == 'rejected' &&
@@ -90,7 +95,9 @@ const ExpenseDetails = () => {
                             }
 
                         </div>
-                    }
+
+                    )}
+
                     {/* <div className="flex justify-end ml-10">
                         <Link to={`/expense/edit/${id}`} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Edit</Link>
                     </div> */}

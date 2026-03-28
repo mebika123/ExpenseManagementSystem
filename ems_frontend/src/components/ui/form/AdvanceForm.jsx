@@ -39,7 +39,7 @@ const AdvanceForm = ({ id, title, data }) => {
     useEffect(() => {
         const fetchcontact = async () => {
             const res = await axiosInstance.get('/contacts')
-            setContacts(res.data)
+            setContacts(res.data.contacts)
         }
         fetchcontact()
     }, [])
@@ -62,7 +62,7 @@ const AdvanceForm = ({ id, title, data }) => {
     const selectedPlan = expensePlans.find(
         (plan) => plan.id === Number(form.expense_plan_id)
     );
-    const {navigate} = useNavigate();
+    const { navigate } = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

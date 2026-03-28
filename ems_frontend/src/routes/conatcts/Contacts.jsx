@@ -11,7 +11,8 @@ import Pagination from '../../components/ui/Pagination';
 
 const Contacts = () => {
 
-  const { permissions, loading } = useAuth();
+  const { permissions } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [contacts, setContacts] = useState();
   useEffect(() => {
     const fetchContacts = async () => {
@@ -125,11 +126,11 @@ const Contacts = () => {
                 const contact = row.original;
                 return (
 
-                  <tr className="mb-3 border-b even:bg-[#dce0e1] odd:bg-white">
+                  <tr className="mb-3 even:bg-[#dce0e1] odd:bg-white">
                     <td className="py-3">
-                       {table.getState().pagination.pageIndex *
-                          table.getState().pagination.pageSize +
-                          index +1}
+                      {table.getState().pagination.pageIndex *
+                        table.getState().pagination.pageSize +
+                        index + 1}
                     </td>
                     <td className="py-3">{contact?.code || '-'}</td>
                     <td className="py-3">{contact?.name || '-'}</td>
@@ -172,7 +173,7 @@ const Contacts = () => {
 
           </table>
         </div>
-        <Pagination table={table}/>
+        <Pagination table={table} />
       </div>
     </div>
   </>)

@@ -28,7 +28,9 @@ class RoleAndPermissionController extends Controller
     }
     public function index()
     {
-        $roles = Role::whereNotIn('name', ['superadmin', 'admin'])->get();
+        $authUser = auth()->user();
+
+        $authUser->hasRole('superadmin') ? $roles = Role::all() : $roles = Role::whereNotIn('name', ['superadmin', 'admin'])->get();
         return response()->json(['roles' => $roles]);
     }
     public function showAllPermission()

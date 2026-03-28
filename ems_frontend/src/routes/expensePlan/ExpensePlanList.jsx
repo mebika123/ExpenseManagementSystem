@@ -13,9 +13,7 @@ const ExpensePlanList = () => {
 
 
     const { permissions } = useAuth();
-    // console.log(permissions)
 
-    if (!can('expense_plan.view', permissions)) return <Navigate to="/403" replace />;
     const [expensesPlans, setExpensesPlan] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -146,14 +144,29 @@ const ExpensePlanList = () => {
                                                     }`} >{expense.latest_status[0].status}</span></td>
                                             <td className="py-3 px-2 w-2/7">
                                                 <div className="flex gap-4 items-center justify-center">
-                                                    <Link to={`/expense-plan/details/${expense.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
+                                                    {can('expense_plan.view', permissions) &&
+                                                        <Link to={`/expense-plan/details/${expense.id}`} >
+                                                            <div className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end">
+                                                                <FontAwesomeIcon icon={faEye} />
+                                                            </div>
+                                                        </Link>
+                                                    }
                                                     {expense?.isEditable &&
                                                         <div className="flex gap-4 items-center justify-center">
-                                                            <Link to={`/expense-plan/edit/${expense.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
-                                                            <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(expense.id)} className='text-[#FF0133]' />
+                                                            {can('expense_plan.edit', permissions) &&
+                                                                <Link to={`/expense-plan/edit/${expense.id}`}>
+                                                                    <div className="p-2 bg-[#32B274]  rounded-lg text-white text-end">
+                                                                        <FontAwesomeIcon icon={faPen} />
+                                                                    </div>
+                                                                </Link>
+                                                            }
+                                                            {can('expense_plan.delete', permissions) &&
+                                                                <div className="p-2 bg-[#f72e2e]  rounded-lg text-white text-end" onClick={() => handleDelete(expense.id)} >
+                                                                    <FontAwesomeIcon icon={faTrashCan} />
+                                                                </div>
+                                                            }
                                                         </div>
                                                     }
-
                                                 </div>
                                             </td>
                                         </tr>

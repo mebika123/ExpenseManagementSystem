@@ -4,8 +4,10 @@ import axiosInstance from '../../axios';
 import SearchBar from '../../components/ui/SearchBar';
 import Pagination from '../../components/ui/Pagination';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const AdvanceSetteled = () => {
+  const { permissions } = useAuth()
   const [advanceSettlements, setAdvanceSettlements] = useState([]);
   const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -69,8 +71,10 @@ const AdvanceSetteled = () => {
             globalFilter={globalFilter}
             setGlobalFilter={setGlobalFilter}
           />
-          <Link to={'/advance-settlements/unsettled'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Settle</Link>
+          {can('advanceSettlement.update', permissions) && (
 
+            <Link to={'/advance-settlements/unsettled'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Settle</Link>
+          )}
 
 
         </div>

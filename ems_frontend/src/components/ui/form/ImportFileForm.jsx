@@ -1,4 +1,4 @@
-import { faImages } from '@fortawesome/free-solid-svg-icons'
+import { faFile, faFileExcel, faImages } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useRef, useState } from 'react'
 import AttachmentList from '../AttachmentList';
@@ -72,8 +72,8 @@ const ImportFileForm = ({ onClose, type }) => {
                                 ref={hiddenFileInput}
                                 onChange={handleFileChange}
                                 accept=".xlsx,.xls,.csv" />
-                            <FontAwesomeIcon icon={faImages} className='text-5xl text-gray-800' />
-                            <div className="">Choose Images</div>
+                            <FontAwesomeIcon icon={faFileExcel} className='text-5xl text-gray-800' />
+                            <div className="">Choose File</div>
 
                         </div>
 

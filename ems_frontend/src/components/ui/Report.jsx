@@ -76,9 +76,7 @@ const Report = ({ data, filters }) => {
                                                 <div className="flex items-center">
                                                     {/* <FontAwesomeIcon icon={faAngleDown} className='mr-5'/>  */}
                                                     <span>
-                                                        {table.getState().pagination.pageIndex *
-                                                            table.getState().pagination.pageSize +
-                                                            index + 1}
+                                                        {index + 1}
                                                     </span>
                                                 </div>
                                             </td>
@@ -136,15 +134,13 @@ const Report = ({ data, filters }) => {
                 </div>
 
                 <div className="border text-sm  border-[#32B274] flex items-center ">
-                    <div className="border-r border-[#32B274] font-bold w-1/2 p-2"> Total Expense Sum (Rs)</div>
-                    <div className="w-1/2">   {
-                        data.totalSum}</div>
+                    <div className="border-r border-[#32B274] font-bold w-1/2 p-2 bg-[#32B274] text-white"> Total Expense Sum (Rs)</div>
+                    <div className="w-1/2 font-bold text-center">{data.totalSum}</div>
 
                 </div>
             </div>
 
-        </div>
-    )
+        </div>)
 }
 
 export default Report

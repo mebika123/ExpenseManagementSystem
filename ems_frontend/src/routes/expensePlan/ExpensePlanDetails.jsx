@@ -84,20 +84,20 @@ const ExpensePlanDetails = () => {
                     {
                         expensePlan.latest_status?.[0]?.status !== 'approved' &&
                         <div className="mb-6 w-full  gap-2 flex justify-end">
-                            {
+                            {can('expense.status.check', permissions) && (
                                 expensePlan?.latest_status?.[0]?.status == 'pending' &&
                                 <>
                                     <button type='button' className="px-4 py-2 bg-[#38bf80]  rounded-lg text-white w-28" onClick={() => changeStatus('checked')}>Checked</button>
                                     <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
                                 </>
-                            }
-                            {
+                            )}
+                            {can('expense.status.approve', permissions) && (
                                 expensePlan?.latest_status?.[0]?.status == 'checked' &&
                                 <>
                                     <button type='button' className="px-4 py-2 bg-[#408cb5]  rounded-lg text-white w-28" onClick={() => changeStatus('approved')}>Approved</button>
                                     <button type='button' className="px-4 py-2 bg-[#f72e2e]  rounded-lg text-white w-28" onClick={() => changeStatus('rejected')}>Reject</button>
                                 </>
-                            }
+                            )}
 
                             {
                                 expensePlan?.latest_status?.[0]?.status == 'rejected' &&

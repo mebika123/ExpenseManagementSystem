@@ -10,12 +10,9 @@ import SearchBar from '../../components/ui/SearchBar';
 import Pagination from '../../components/ui/Pagination';
 
 const UserList = () => {
-    const { permissions, loading } = useAuth();
+    const { permissions } = useAuth();
 
-    if (!can('user.view', permissions)) return <Navigate to="/403" replace />;
-
-
-    // const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [contactUser, setContactUser] = useState();
     useEffect(() => {
         const fetchContactUsers = async () => {
@@ -122,7 +119,7 @@ const UserList = () => {
                                 {table.getRowModel().rows.map((row, index) => {
                                     const user = row.original;
                                     return (
-                                        <tr className="mb-3 border-b even:bg-[#dce0e1] odd:bg-white">
+                                        <tr className="mb-3 even:bg-[#dce0e1] odd:bg-white">
                                             <td className="py-3">
                                                 {table.getState().pagination.pageIndex *
                                                     table.getState().pagination.pageSize +

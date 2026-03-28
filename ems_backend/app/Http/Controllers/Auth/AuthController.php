@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
@@ -38,8 +39,8 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            $userData['id']= $user->id;
-            $userData['email']= $user->email;
+            $userData['id'] = $user->id;
+            $userData['email'] = $user->email;
 
 
             $token = $user->createToken('api-token')->plainTextToken;
@@ -51,7 +52,10 @@ class AuthController extends Controller
                 'user' => $userData,
                 'token' => $token,
                 // 'roles' => $user->getRoleNames(),
-                'permissions' => $user->getAllPermissions()->pluck('name'),
+                'permissions' => $user->hasRole('superadmin')
+                    ? ['*']
+                    : $user->getAllPermissions()->pluck('name')
+
             ]);
         }
 
@@ -63,6 +67,12 @@ class AuthController extends Controller
         if (!$request->user()) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
+        $userId = $request->user()->id;
+        Cache::forget("dashboard.expenseTra.$userId");
+        Cache::forget("dashboard.barData.$userId");
+        Cache::forget("dashboard.doughnut.$userId");
+        Cache::forget("dashboard.expensestbl.$userId");
+
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged Out'], 200);
     }

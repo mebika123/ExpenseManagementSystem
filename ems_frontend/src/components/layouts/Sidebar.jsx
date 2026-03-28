@@ -16,13 +16,7 @@ const Sidebar = () => {
             [menuKey]: !prev[menuKey]
         }))
     }
-    // console.log(permissions)
-    console.log(canAny([
-        'expense.view',
-        'expense.create',
-        'expense_plan.view',
-        'expense_plan.create'
-    ]))
+
 
     return (
         <>
@@ -31,7 +25,7 @@ const Sidebar = () => {
                     <div className="font-bold text-2xl px-3 text-shadow-md ml-12">EMS</div>
 
                 </div>
-                
+
                 <ul className='mt-6 px-4 flex-1 overflow-y-auto  sidebar-scroll'>
                     <li className='mb-3 '>
                         <Link to={'/dashboard'}>
@@ -131,68 +125,7 @@ const Sidebar = () => {
 
                     }
 
-                    {/* {(can('expense.create', permissions) || can('expense.view', permissions)||can('expense_plan.create', permissions) || can('expense_plan.view', permissions)) &&
-                        (
-                            <li className='mb-3 '>
-                                <div className="text-base font-medium">
-                                    <div className=' text-xs  text-gray-400 mt-5'>Expense </div>
-                                    <div className="">
-                                        <ul className="  pt-2">
-                                            <li className="mb-3">
-                                                <div className="text-base font-medium" onClick={() => toggleMenu('expense')}>
-                                                    <div className="flex items-center gap-5">
-                                                        <FontAwesomeIcon icon={faCoins} />
-                                                        <div>
-                                                            Expense
-                                                            <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {
-                                                    openMenus.expense && (
-                                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                            <li className="ml-6">
-                                                                <Link to="/expenses">Expenses List</Link>
-                                                            </li>
-                                                            <li className="ml-6 mt-2">
-                                                                <Link to="/expense/new">New Expense</Link>
-                                                            </li>
-                                                        </ul>
 
-                                                    )
-                                                }
-                                            </li>
-                                            <li className="mb-3">
-                                                <div className="text-base font-medium" onClick={() => toggleMenu('expense_plan')} >
-                                                    <div className="flex items-center gap-5">
-                                                        <FontAwesomeIcon icon={faFileInvoiceDollar} />
-                                                        <div>
-                                                            Expense Plan
-                                                            <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {
-                                                    openMenus.expense_plan && (
-                                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                            <li className="ml-6 mt-2">
-                                                                <Link to="/expense-plan">Expense Plan List</Link>
-                                                            </li>
-                                                            <li className="ml-6">
-                                                                <Link to="/expense-plan/new">New Expense Plan</Link>
-                                                            </li>
-                                                        </ul>
-
-                                                    )
-                                                }
-                                            </li>
-
-                                        </ul>
-                                    </div>
-                                </div>
-                            </li>
-
-                        )} */}
                     {canAny([
                         'expense.view',
                         'expense.create',
@@ -266,162 +199,194 @@ const Sidebar = () => {
                             </li>
                         )}
 
+                    {canAny(['advance.view', 'advance.create', 'reimbursement.view', 'advanceSettlement.view', 'transactional_log.view', 'transactional_log.unsettled.view'], permissions) && (
+                        <li className='mb-3 '>
+                            <div className="text-base font-medium">
+                                <div className=' text-xs  text-gray-400 mt-5'>Monetary </div>
+                                <div className="">
+                                    <ul className="  pt-2">
+                                        {canAny(['advance.view', 'advance.create'], permissions) && (
 
-                    <li className='mb-3 '>
-                        <div className="text-base font-medium">
-                            <div className=' text-xs  text-gray-400 mt-5'>Monetary </div>
-                            <div className="">
-                                <ul className="  pt-2">
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium" onClick={() => toggleMenu('advance')}>
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faHandHoldingDollar} />
-                                                <div>
-                                                    Advances
-                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {
-                                            openMenus.advance && (
-                                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-6">
-                                                        <Link to="/advances">Advance List</Link>
-                                                    </li>
-                                                    <li className="ml-6 mt-2">
-                                                        <Link to="/advance/new">New Advance</Link>
-                                                    </li>
-                                                </ul>
-
-                                            )
-                                        }
-                                    </li>
-
-                                </ul>
-                            </div>
-                        </div>
-                    </li>
-
-
-                    {(can('transactional_log.settle', permissions) || can('transactional_log.view', permissions)) &&
-                        (
-
-                            <li className="mb-3">
-                                <div className="text-base font-medium" onClick={() => toggleMenu('transactions')}>
-                                    <div className="flex items-center gap-5">
-                                        <FontAwesomeIcon icon={faMoneyBillTransfer} />
-                                        <div>
-                                            Transactions
-                                            <FontAwesomeIcon icon={openMenus.transactions ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
-                                        </div>
-                                    </div>
-                                </div>
-                                {
-                                    openMenus.transactions && (
-                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                            <li className="ml-6">
-                                                <Link to="/transactional-logs">Transactional Logs</Link>
-                                            </li>
-                                            <li className="ml-6 mt-2">
-                                                <Link to="/unsettled/transactional-logs">Unsetteled Transactions</Link>
-                                            </li>
-                                            <li className="ml-6 mt-2">
-                                                <Link to="/reimbursements">Reimbursment</Link>
-                                            </li>
-                                            <li className="ml-6 mt-2">
-                                                <Link to="/advance-settlements">Advance Settelment</Link>
-                                            </li>
-                                        </ul>
-
-                                    )
-                                }
-                            </li>
-                        )}
-
-                    <li className='mb-3 '>
-                        <div className="text-base font-medium">
-                            <div className=' text-xs  text-gray-400 mt-5'>Report </div>
-                            <div className="">
-                                <ul className="  pt-2">
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium">
-                                            <Link to={'/report/expense-summary'}>
-                                                <div className="flex items-center gap-5">
-                                                    <FontAwesomeIcon icon={faFileInvoice} />
-                                                    <div>
-                                                        Expense Summary
+                                            <li className="mb-3">
+                                                <div className="text-base font-medium" onClick={() => toggleMenu('advance')}>
+                                                    <div className="flex items-center gap-5">
+                                                        <FontAwesomeIcon icon={faHandHoldingDollar} />
+                                                        <div>
+                                                            Advances
+                                                            <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </Link>
-                                        </div>
+                                                {
+                                                    openMenus.advance && (
+                                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                            {can('advance.view', permissions) && (
+                                                                <li className="ml-6">
+                                                                    <Link to="/advances">Advance List</Link>
+                                                                </li>
+                                                            )}
+                                                            {can('advance.create', permissions) && (
+                                                                <li className="ml-6 mt-2">
+                                                                    <Link to="/advance/new">New Advance</Link>
+                                                                </li>
+                                                            )}
 
-                                    </li>
+                                                        </ul>
 
-                                </ul>
+                                                    )
+                                                }
+                                            </li>
+                                        )}
+                                        {canAny(['reimbursement.view', 'advanceSettlement.view', 'transactional_log.view', 'transactional_log.unsettled.view'], permissions) && (
+
+                                            <li className="mb-3">
+                                                <div className="text-base font-medium" onClick={() => toggleMenu('transactions')}>
+                                                    <div className="flex items-center gap-5">
+                                                        <FontAwesomeIcon icon={faMoneyBillTransfer} />
+                                                        <div>
+                                                            Transactions
+                                                            <FontAwesomeIcon icon={openMenus.transactions ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {
+                                                    openMenus.transactions && (
+                                                        <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                            {can('transactional_log.view', permissions) && (
+                                                                <li className="ml-6">
+                                                                    <Link to="/transactional-logs">Transactional Logs</Link>
+                                                                </li>
+                                                            )}
+                                                            {can('transactional_log.unsettled.view', permissions) && (
+                                                                <li className="ml-6 mt-2">
+                                                                    <Link to="/unsettled/transactional-logs">Unsetteled Transactions</Link>
+                                                                </li>
+                                                            )}
+                                                            {can('reimbursement.view', permissions) && (
+                                                                <li className="ml-6 mt-2">
+                                                                    <Link to="/reimbursements">Reimbursment</Link>
+                                                                </li>
+                                                            )}
+                                                            {can('advanceSettlement.view', permissions) && (
+                                                                <li className="ml-6 mt-2">
+                                                                    <Link to="/advance-settlements">Advance Settelment</Link>
+                                                                </li>
+                                                            )}
+                                                        </ul>
+
+                                                    )
+                                                }
+                                            </li>
+                                        )}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                    <li className='mb-3 '>
-                        <div className="text-base font-medium">
-                            <div className=' text-xs  text-gray-400 mt-5'>Contacts </div>
-                            <div className="">
-                                <ul className="  pt-2">
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium" onClick={() => toggleMenu('user')} >
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faUser} />
-                                                <div>
-                                                    Users
-                                                    <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                        </li>
+                    )}
+
+
+
+                    {canAny(['expense_summary.view'], permissions) && (
+
+                        <li className='mb-3 '>
+                            <div className="text-base font-medium">
+                                <div className=' text-xs  text-gray-400 mt-5'>Report </div>
+                                <div className="">
+                                    <ul className="  pt-2">
+                                        {can('expense_summary.view', permissions) && (
+                                            <li className="mb-3">
+                                                <div className="text-base font-medium">
+                                                    <Link to={'/report/expense-summary'}>
+                                                        <div className="flex items-center gap-5">
+                                                            <FontAwesomeIcon icon={faFileInvoice} />
+                                                            <div>
+                                                                Expense Summary
+                                                            </div>
+                                                        </div>
+                                                    </Link>
+                                                </div>
+
+                                            </li>
+                                        )}
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    )}
+
+                    {canAny(['user.view', 'role.view', 'contact.view'], permissions) && (
+                        <li className='mb-3 '>
+                            <div className="text-base font-medium">
+                                <div className=' text-xs  text-gray-400 mt-5'>Contacts </div>
+                                <div className="">
+                                    <ul className="  pt-2">
+                                        <li className="mb-3">
+                                            <div className="text-base font-medium" onClick={() => toggleMenu('user')} >
+                                                <div className="flex items-center gap-5">
+                                                    <FontAwesomeIcon icon={faUser} />
+                                                    <div>
+                                                        Users
+                                                        <FontAwesomeIcon icon={openMenus.user ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        {
-                                            openMenus.user && (
-                                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-6">
-                                                        <Link to="/users">Users</Link>
-                                                    </li>
-                                                    <li className="ml-6 mt-2">
-                                                        <Link to="/user/new">New Users</Link>
-                                                    </li>
-                                                    <li className="ml-6 mt-2">
-                                                        <Link to="/roles">Roles</Link>
-                                                    </li>
-                                                </ul>
+                                            {
+                                                openMenus.user && (
+                                                    <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                        {can('user.view', permissions) && (
+                                                            <li className="ml-6">
+                                                                <Link to="/users">Users</Link>
+                                                            </li>
+                                                        )}
+                                                        {can('user.create', permissions) && (
+                                                            <li className="ml-6 mt-2">
+                                                                <Link to="/user/new">New Users</Link>
+                                                            </li>
+                                                        )}
+                                                        {can('role.view', permissions) && (
+                                                            <li className="ml-6 mt-2">
+                                                                <Link to="/roles">Roles</Link>
+                                                            </li>
+                                                        )}
+                                                    </ul>
 
-                                            )
-                                        }
-                                    </li>
-                                    <li className="mb-3">
-                                        <div className="text-base font-medium" onClick={() => toggleMenu('contacts')}>
-                                            <div className="flex items-center gap-5">
-                                                <FontAwesomeIcon icon={faAddressBook} />
-                                                <div>
-                                                    Contacts
-                                                    <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                )
+                                            }
+                                        </li>
+                                        <li className="mb-3">
+                                            <div className="text-base font-medium" onClick={() => toggleMenu('contacts')}>
+                                                <div className="flex items-center gap-5">
+                                                    <FontAwesomeIcon icon={faAddressBook} />
+                                                    <div>
+                                                        Contacts
+                                                        <FontAwesomeIcon icon={openMenus.contacts ? faAngleDown : faAngleUp} className='ml-4 text-sm' />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        {
-                                            openMenus.contacts && (
-                                                <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
-                                                    <li className="ml-6">
-                                                        <Link to="/contact/new">New Contacts</Link>
-                                                    </li>
-                                                    <li className="ml-6 mt-2">
-                                                        <Link to="/contacts">Contacts</Link>
-                                                    </li>
-                                                </ul>
+                                            {
+                                                openMenus.contacts && (
+                                                    <ul className="ml-3 mt-4 border-l font-base text-gray-500 border-gray-400 mb-5">
+                                                        {can('contact.create', permissions) && (
+                                                            <li className="ml-6">
+                                                                <Link to="/contact/new">New Contacts</Link>
+                                                            </li>
+                                                        )}
+                                                        {can('contact.view', permissions) && (
+                                                            <li className="ml-6 mt-2">
+                                                                <Link to="/contacts">Contacts</Link>
+                                                            </li>
+                                                        )}
+                                                    </ul>
 
-                                            )
-                                        }
-                                    </li>
+                                                )
+                                            }
+                                        </li>
 
-                                </ul>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    </li>
+                        </li>
+                    )}
 
 
                 </ul>

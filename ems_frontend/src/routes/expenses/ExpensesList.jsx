@@ -16,7 +16,7 @@ const ExpensesList = () => {
     const { permissions } = useAuth();
     // console.log(permissions)
 
-    if (!can('expense.view', permissions)) return <Navigate to="/403" replace />;
+    // if (!can('expense.view', permissions)) return <Navigate to="/403" replace />;
 
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -98,7 +98,7 @@ const ExpensesList = () => {
         <Modal isOpen={isOpenImport}
             title={"Upload Excel File"}
             onClose={() => setIsOpenImport(false)}>
-            <ImportFileForm onClose={() => setIsOpenImport(false)} type={'expense'}/>
+            <ImportFileForm onClose={() => setIsOpenImport(false)} type={'expense'} />
         </Modal>
         <div className="w-full p-8 flex justify-center items-center mt-8">
             <div className="w-full bg-white rounded-md p-7  text-center">
@@ -112,13 +112,14 @@ const ExpensesList = () => {
 
                     {
                         can('expense.create', permissions) &&
-
-                        <Link to={'/expense/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+                        <>
+                            <Link to={'/expense/new'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Add New</Link>
+                            <button type='button' className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end" onClick={openImport} >
+                                <FontAwesomeIcon icon={faFileImport} className='text-lg' />
+                            </button>
+                        </>
                     }
 
-                    <button type='button' className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end" onClick={openImport} >
-                        <FontAwesomeIcon icon={faFileImport} className='text-lg' />
-                    </button>
 
                 </div>
 
@@ -175,14 +176,29 @@ const ExpensesList = () => {
                                             </td>
                                             <td className="py-3 px-2 w-2/7">
                                                 <div className="flex gap-4 items-center justify-center">
-                                                    <Link to={`/expense/details/${expense.id}`} ><FontAwesomeIcon icon={faEye} /></Link>
+                                                    {can('expense.view', permissions) &&
+                                                        <Link to={`/expense/details/${expense.id}`} >
+                                                            <div className="p-2 bg-[#3F3FF2]  rounded-lg text-white text-end">
+                                                                <FontAwesomeIcon icon={faEye} />
+                                                            </div>
+                                                        </Link>
+                                                    }
                                                     {expense?.isEditable == true &&
-
                                                         <div className="flex gap-4 items-center justify-center">
-                                                            <Link to={`/expense/edit/${expense.id}`}><FontAwesomeIcon icon={faPen} className='text-[#29903B]' /></Link>
-                                                            <FontAwesomeIcon icon={faTrashCan} onClick={() => handleDelete(expense.id, expense.latest_status[0].status)} className='text-[#FF0133]' />
-                                                        </div>
+                                                            {can('expense.update', permissions) &&
+                                                                <Link to={`/expense/edit/${expense.id}`}>
+                                                                    <div className="p-2 bg-[#32B274]  rounded-lg text-white text-end">
+                                                                        <FontAwesomeIcon icon={faPen} />
+                                                                    </div>
+                                                                </Link>
+                                                            }
+                                                            {can('expense.delete', permissions) &&
+                                                                <div className="p-2 bg-[#FF0133]  rounded-lg text-white text-end" onClick={() => handleDelete(expense.id, expense.latest_status[0].status)} >
+                                                                    <FontAwesomeIcon icon={faTrashCan} />
+                                                                </div>
+                                                            }
 
+                                                        </div>
                                                     }
 
                                                 </div>

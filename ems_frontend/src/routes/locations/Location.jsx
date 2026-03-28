@@ -16,7 +16,6 @@ import { can } from '../../utils/permission';
 const Location = () => {
 
     const { permissions } = useAuth();
-    if (!can('department.view', permissions)) return <Navigate to="/403" replace />;
 
     // fetch location
     const [loading, setLoading] = useState(true);
@@ -176,7 +175,9 @@ const Location = () => {
                         globalFilter={globalFilter}
                         setGlobalFilter={setGlobalFilter}
                     />
-                    <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</button>
+                    {can('location.create', permissions) &&
+                        <button type='button' className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end" onClick={openAdd}>Add New</button>
+                    }
 
                 </div>
 
@@ -220,16 +221,18 @@ const Location = () => {
 
                                             <td className="py-3 px-2">
                                                 <div className="flex gap-4 items-center justify-center">
-                                                    <FontAwesomeIcon
-                                                        icon={faPen}
-                                                        onClick={() => openEdit(location)}
-                                                        className="text-[#29903B]"
-                                                    />
-                                                    <FontAwesomeIcon
-                                                        icon={faTrashCan}
-                                                        onClick={() => handleDelete(location.id)}
-                                                        className="text-[#FF0133]"
-                                                    />
+                                                    {can('location.update', permissions) &&
+                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#32B274]" onClick={() => openEdit(location)}
+                                                        >
+                                                            <FontAwesomeIcon icon={faPen} />
+                                                        </div>
+                                                    }
+                                                    {can('location.delete', permissions) &&
+                                                        <div className="h-9 w-9 justify-center flex items-center text-white rounded-sm bg-[#FF0133]" onClick={() => handleDelete(location.id)}
+                                                        >
+                                                            <FontAwesomeIcon icon={faTrashCan} />
+                                                        </div>
+                                                    }
                                                 </div>
                                             </td>
                                         </tr>

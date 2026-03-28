@@ -614,141 +614,198 @@ const ExpenseForm = ({ title, data, type, id }) => {
                               onChange={(e) => handleItemChange(index, 'name', e.target.value)}
                             />
                           </div>
-                          {formError[`expense_items.${index}.name`] && (
-                            <span className="text-red-500">
-                              {formError[`expense_items.${index}.name`][0]}
+                          {formError[`${itemsKey}.${index}.name`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.name`][0]}
                             </span>
                           )}
 
                         </div>
 
+                        <div className="">
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">Amount <span className="text-red-600">*</span></label>
-                          <input
-                            type="text"
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.amount}
-                            onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
-                          />
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">Amount <span className="text-red-600">*</span></label>
+                            <input
+                              type="text"
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.amount}
+                              onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
+                            />
+                          </div>
+                          {formError[`${itemsKey}.${index}.amount`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.amount`][0]}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">
-                            Description
-                          </label>
-                          <textarea row='2'
-                            name='description'
-                            type="text"
-                            className="flex-1 rounded-sm border p-2 border-[#989898]"
-                            // value={row.description ??''}
-                            value={row.description && row.description !== 'null' ? row.description : ''}
-                            placeholder='Description'
-                            onChange={(e) =>
-                              handleItemChange(index, 'description', e.target.value)
-                            }></textarea>
+                        <div className="">
+
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">
+                              Description
+                            </label>
+                            <textarea row='2'
+                              name='description'
+                              type="text"
+                              className="flex-1 rounded-sm border p-2 border-[#989898]"
+                              // value={row.description ??''}
+                              value={row.description && row.description !== 'null' ? row.description : ''}
+                              placeholder='Description'
+                              onChange={(e) =>
+                                handleItemChange(index, 'description', e.target.value)
+                              }></textarea>
+                          </div>
+                          {formError[`${itemsKey}.${index}.description`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.description`][0]}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">Contact</label>
-                          <select
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.contact_id}
-                            onChange={(e) =>
-                              handleItemChange(index, 'contact_id', e.target.value)
-                            }
-                          >
-                            <option value="">Select contact</option>
-                            {contacts?.map(c => (
-                              <option key={c.id} value={c.id}>{c.name}</option>
-                            ))}
-                          </select>
+                        <div className="">
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">Contact</label>
+                            <select
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.contact_id}
+                              onChange={(e) =>
+                                handleItemChange(index, 'contact_id', e.target.value)
+                              }
+                            >
+                              <option value="">Select contact</option>
+                              {contacts?.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                              ))}
+                            </select>
+                            {formError[`${itemsKey}.${index}.contact_id`] && (
+                              <span className="text-red-500 text-sm block mt-1">
+                                {formError[`${itemsKey}.${index}.contact_id`][0]}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">
-                            Location <span className="text-red-600">*</span>
-                          </label>
-                          <select
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.location_id}
-                            onChange={(e) =>
-                              handleItemChange(index, 'location_id', e.target.value)
-                            }
-                          >
-                            <option value="">Select location</option>
-                            {locations.map(l => (
-                              <option key={l.id} value={l.id}>{l.name}</option>
-                            ))}
-                          </select>
+                        <div className="">
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">
+                              Location <span className="text-red-600">*</span>
+                            </label>
+                            <select
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.location_id}
+                              onChange={(e) =>
+                                handleItemChange(index, 'location_id', e.target.value)
+                              }
+                            >
+                              <option value="">Select location</option>
+                              {locations.map(l => (
+                                <option key={l.id} value={l.id}>{l.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {formError[`${itemsKey}.${index}.location_id`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.location_id`][0]}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">Department<span className="text-red-600">*</span></label>
-                          <select
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.department_id}
-                            onChange={(e) =>
-                              handleItemChange(index, 'department_id', e.target.value)
-                            }
-                          >
-                            <option value="">Select department</option>
-                            {departments.map(d => (
-                              <option key={d.id} value={d.id}>{d.name}</option>
-                            ))}
-                          </select>
+                        <div className="">
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">Department<span className="text-red-600">*</span></label>
+                            <select
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.department_id}
+                              onChange={(e) =>
+                                handleItemChange(index, 'department_id', e.target.value)
+                              }
+                            >
+                              <option value="">Select department</option>
+                              {departments.map(d => (
+                                <option key={d.id} value={d.id}>{d.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {formError[`${itemsKey}.${index}.department_id`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.department_id`][0]}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">
-                            Budget <span className="text-red-600">*</span>
-                          </label>
-                          <select
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.budget_id}
-                            onChange={(e) =>
-                              handleItemChange(index, 'budget_id', e.target.value)
-                            }
-                          >
-                            <option value="">Select budget</option>
-                            {budgets.map(b => (
-                              <option key={b.id} value={b.id}>{b.title}</option>
-                            ))}
-                          </select>
+                        <div className="">
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">
+                              Budget <span className="text-red-600">*</span>
+                            </label>
+                            <select
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.budget_id}
+                              onChange={(e) =>
+                                handleItemChange(index, 'budget_id', e.target.value)
+                              }
+                            >
+                              <option value="">Select budget</option>
+                              {budgets.map(b => (
+                                <option key={b.id} value={b.id}>{b.title}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {formError[`${itemsKey}.${index}.budget_id`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.budget_id`][0]}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">Expense Category<span className="text-red-600">*</span></label>
-                          <select
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.expense_category_id}
-                            onChange={(e) =>
-                              handleItemChange(index, 'expense_category_id', e.target.value)
-                            }
-                          >
-                            <option value="">Select category</option>
-                            {expenseCategories.map(c => (
-                              <option key={c.id} value={c.id}>{c.name}</option>
-                            ))}
-                          </select>
+                        <div className="">
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">Expense Category<span className="text-red-600">*</span></label>
+                            <select
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.expense_category_id}
+                              onChange={(e) =>
+                                handleItemChange(index, 'expense_category_id', e.target.value)
+                              }
+                            >
+                              <option value="">Select category</option>
+                              {expenseCategories.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {formError[`${itemsKey}.${index}.expense_category_id`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.expense_category_id`][0]}
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <label className="w-30">
-                            Paid By <span className="text-red-600">*</span>
-                          </label>
-                          <select
-                            className="flex-1 p-2 border rounded-sm border-[#989898]"
-                            value={row.paid_by_id}
-                            onChange={(e) =>
-                              handleItemChange(index, 'paid_by_id', e.target.value)
-                            }
-                          >
-                            <option value="">Company</option>
-                            {contacts?.map(e => (
-                              <option key={e.id} value={e.id}>{e.name}</option>
-                            ))}
-                          </select>
+                        <div className="">
+                          <div className="flex items-center gap-2">
+                            <label className="w-30">
+                              Paid By <span className="text-red-600">*</span>
+                            </label>
+                            <select
+                              className="flex-1 p-2 border rounded-sm border-[#989898]"
+                              value={row.paid_by_id}
+                              onChange={(e) =>
+                                handleItemChange(index, 'paid_by_id', e.target.value)
+                              }
+                            >
+                              <option value="">Company</option>
+                              {contacts?.map(e => (
+                                <option key={e.id} value={e.id}>{e.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          {formError[`${itemsKey}.${index}.paid_by_id`] && (
+                            <span className="text-red-500 text-sm block mt-1">
+                              {formError[`${itemsKey}.${index}.paid_by_id`][0]}
+                            </span>
+                          )}
                         </div>
 
                       </div>
@@ -799,6 +856,11 @@ const ExpenseForm = ({ title, data, type, id }) => {
                 removeExistingFile={removeExistingFile}
                 removeNewFile={removeImage}
               />
+              {formError.attachments && (
+                <span className="text-red-500 text-sm block mt-1">
+                  {formError.attachments[0]}
+                </span>
+              )}
 
             </div>
             <div className="mb-6 w-full">

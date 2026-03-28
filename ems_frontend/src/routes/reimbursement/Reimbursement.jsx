@@ -4,9 +4,11 @@ import axiosInstance from '../../axios';
 import SearchBar from '../../components/ui/SearchBar';
 import Pagination from '../../components/ui/Pagination';
 import { Link } from 'react-router-dom';
+import { can } from '../../utils/permission';
+import { useAuth } from '../../context/AuthContext';
 
 const Reimbursement = () => {
-
+  const { permissions } = useAuth()
   const [reimbursements, setReimbursements] = useState([]);
   const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -69,8 +71,9 @@ const Reimbursement = () => {
             globalFilter={globalFilter}
             setGlobalFilter={setGlobalFilter}
           />
-          <Link to={'/reimbursements/unsettled'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Settle</Link>
-
+          {can('reimbursement.update', permissions) && (
+            <Link to={'/reimbursements/unsettled'} className="px-4 py-2 bg-[#32b274]  rounded-lg text-white text-end">Settle</Link>
+          )}
 
 
         </div>
